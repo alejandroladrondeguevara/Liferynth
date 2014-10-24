@@ -1,0 +1,389 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <title>Liferynth.js</title>
+    <script src="js/babylon.js"></script>
+    <script src="js/hand.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        if (BABYLON.Engine.isSupported()) {
+
+			var WallState = { NonExisting:0, Alive:1, Dead:2 }
+
+		    var canvas = document.getElementById("renderCanvas");
+            var engine = new BABYLON.Engine(canvas, true);
+            var scene = new BABYLON.Scene(engine);
+			var imported = new BABYLON.Scene(engine);
+
+			var meshPlayer, collidingBox,turnLeft=false,turnRight=false,forward=false,backwards=false;
+
+			const rows = 20;
+			const cols = 10;
+			const alturaSuelo = -3;
+			const anchuraMuro = 4;
+			const alturaMuro = anchuraMuro;
+			const profundidadMuro = 0.75;
+			const scaleMuro = new BABYLON.Vector3(profundidadMuro,alturaMuro,anchuraMuro*1.18725);
+
+
+			function CreateMatrix(rows,cols) {
+			  var arr = [];
+
+			  for (var i=0;i<rows;i++) {
+				 arr[i] = []; //Vacío
+				 for (var j=0;j<cols;j++) {
+					arr[i][j] = 0;
+				 }
+			  }
+
+			  return arr;
+			}
+
+
+			function CreaMuro(){
+				var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
+
+				var FrontMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
+				FrontMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
+				FrontMaterial.diffuseTexture.wAng += Math.PI*0.5;
+
+				var BackMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
+				BackMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
+				BackMaterial.diffuseTexture.wAng += Math.PI*0.5;
+
+				var LeftMaterial = new BABYLON.StandardMaterial("cubeLeft", scene);
+				LeftMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
+				LeftMaterial.diffuseTexture.wAng += Math.PI;
+
+				var RightMaterial = new BABYLON.StandardMaterial("cubeLeft", scene);
+				RightMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
+
+				var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
+				cubeMultiMat.subMaterials.push(FrontMaterial);
+				cubeMultiMat.subMaterials.push(BackMaterial);
+				cubeMultiMat.subMaterials.push(LeftMaterial);
+				cubeMultiMat.subMaterials.push(RightMaterial);
+
+				box.subMeshes = [];
+				box.subMeshes.push(new BABYLON.SubMesh(2, 0,  4,  0, 6, box));  //Detrás
+				box.subMeshes.push(new BABYLON.SubMesh(3, 4,  4,  6, 6, box));	//Delante
+				box.subMeshes.push(new BABYLON.SubMesh(0, 8,  4, 12, 6, box));	//Derecha
+				box.subMeshes.push(new BABYLON.SubMesh(1, 12, 4, 18, 6, box));	//Izquierda
+				box.subMeshes.push(new BABYLON.SubMesh(2, 16, 4, 24, 6, box));	//Arriba
+				box.subMeshes.push(new BABYLON.SubMesh(3, 20, 4, 30, 6, box));	//Abajo
+
+
+				box.material = cubeMultiMat;
+				box.checkCollisions = true;
+				box.scaling = scaleMuro;
+				return box;
+			}
+
+			function PositionsMatrix(rows,cols){
+				var even = true;
+				var positionMatrix = CreateMatrix(rows,cols);
+
+				const zIni = 2 + anchuraMuro* (cols/2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
+				const xIni = - anchuraMuro* (rows/2);
+				const yIni = alturaSuelo+alturaMuro/2;
+				var zAct = zIni;
+
+				for (var i = 0; i< (rows-1); i++){
+
+					var xAct = xIni;
+					if (!even) xAct -= 2; //Filas pares horizontales, impares verticales
+
+					for(var j= 0; j< cols; j++){
+						positionMatrix[i][j] =  new BABYLON.Vector3(xAct, yIni, zAct);
+						xAct += anchuraMuro;
+					}
+					even = !even;
+					zAct -= 2;
+
+				}
+				return positionMatrix;
+			}
+
+			function DibujaMuros(walls,rows,cols){
+				var even  = true;
+				var count = 0;
+				var paintedWalls = [];
+				for (var i = 0; i < (rows-1);i++){
+
+					if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
+					else cols++;
+
+					for (var j = 0; j < cols; j++){
+						if(walls[i][j] == WallState.Alive){
+							var auxWall = CreaMuro();
+							auxWall.position = posMatrix[i][j];
+							if(even) auxWall.rotation.y = 0.5*Math.PI;
+							paintedWalls[count]=auxWall;
+							count++;
+						}
+					}
+					even=!even;
+				}
+				return paintedWalls;
+			}
+
+
+			var posMatrix = PositionsMatrix(rows,cols);
+			var walls = CreateMatrix(rows,cols);
+			for (var i = 0; i < (rows-1);i++){
+				for (var j = 0; j < cols;j++){
+					if(Math.floor(Math.random()*10) <= 3)
+					//if( ((i+j)*7)%3 == 0)
+						walls[i][j] = WallState.Alive;
+				}
+			}
+			DibujaMuros(walls,rows,cols);
+
+
+
+			//Luces
+
+				//var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(0, 100, 100), scene);
+
+				//Direccional
+				var light0 = new BABYLON.DirectionalLight("Dir0", new BABYLON.Vector3(-0.5, -0.4, 0.5), scene);
+				light0.diffuse = new BABYLON.Color3(1, 1, 1);
+				light0.specular = new BABYLON.Color3(1, 1, 1);
+				light0.position = new BABYLON.Vector3(20, 40, 20);
+
+				var light1 = new BABYLON.DirectionalLight("Dir1", new BABYLON.Vector3(0.3, -0.4, -0.3), scene);
+				light1.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
+				light1.specular = new BABYLON.Color3(1, 1, 1);
+
+				//Hemisférica
+				//var light1 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
+				//light1.diffuse = new BABYLON.Color3(1, 1, 1);
+				//light1.specular = new BABYLON.Color3(1, 1, 1);
+				//light1.groundColor = new BABYLON.Color3(0, 0, 0);
+
+				//Spot
+				/*
+				var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(0, 30, 14), new BABYLON.Vector3(0, -1, 0), 2.2, 2, scene);
+				light2.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
+				light2.specular = new BABYLON.Color3(1, 1, 1);
+				*/
+
+
+			//Jugador
+
+				meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
+				collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
+				meshPlayer.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
+				collidingBox.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
+				meshPlayer.position.y = -1;
+				collidingBox.position.y = -2;
+				collidingBox.checkCollisions = true;
+				meshPlayer.applyGravity = true;
+				collidingBox.applyGravity = true;
+				//collidingBox.ellipsoid = new BABYLON.Vector3(0.1, 3, 0.1);
+
+			// Cámara
+			/*
+				var cameraArcRotative;
+				camera = new BABYLON.ArcRotateCamera("CameraRotate", -Math.PI/2, Math.PI/2.2, 12, new BABYLON.Vector3(0, 3, 0), scene);
+				camera.wheelPrecision = 15;
+				camera.lowerRadiusLimit = 0.0001;
+				camera.upperRadiusLimit = 22;
+				scene.activeCamera = camera;
+				camera.attachControl(canvas);
+				camera.keysUp = [];
+				camera.keysDown = [];
+				camera.keysLeft = [];
+				camera.keysRight = [];
+				camera.checkCollisions=true;
+*/
+				var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, -1, -5), scene);
+				camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
+				camera.maxCameraSpeed = 20;
+				camera.checkCollisions = true;
+				camera.applyGravity = true;
+				camera.radius = -3.5;
+				camera.heightOffset = 1;
+				//camera.ellipsoid = new BABYLON.Vector3(0.5, 1, 0.5);
+				camera.keysUp = [];
+				camera.keysDown = [];
+				camera.keysLeft = [];
+				camera.keysRight = [];
+				scene.activeCamera = camera;
+		/*
+				var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, -0.5, -2), scene);
+				//camera.speed = 0.18; //Adecuada
+				camera.speed = 0.3;
+				camera.attachControl(canvas);
+
+				//camera.keysUp.push(90); // Z
+				camera.keysDown.push(83); // S
+				camera.keysLeft.push(65); // A
+				camera.keysRight.push(69); // E
+		*/
+
+            // Material
+
+				var invisible = new BABYLON.StandardMaterial("default", scene);
+				invisible.alpha = 0.1;
+
+
+			// Ground
+
+				var plane = BABYLON.Mesh.CreatePlane("Ground", 1000, scene);
+				plane.rotation.x = Math.PI / 2;
+				plane.position.y = -3;
+
+            // Collisions
+
+				scene.collisionsEnabled = true;
+				scene.gravity = new BABYLON.Vector3(0, -9, 0);
+
+				plane.checkCollisions = true;
+
+
+			// Shadows
+
+				var shadowGenerator = new BABYLON.ShadowGenerator(2048, light0);
+				shadowGenerator.useVarianceShadowMap = true;
+				/*
+				for (var i = 0; i < (rows-1);i++){
+					for (var j = 0; j < cols;j++){
+						if(walls[i][j] = WallState.Alive)
+							shadowGenerator.getShadowMap().renderList.push(walls[i][j]);
+					}
+				}
+				*/
+				var auxi=0; var auxj=0;
+				while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=cols-1) {auxi=0;auxj++;} else auxi++;}
+				/*shadowGenerator.getShadowMap().renderList.push(walls[auxi][auxj]);*/
+				plane.receiveShadows = true;
+
+
+
+
+
+			window.addEventListener("keydown", function (evt) {
+
+				if (!scene)
+					return;
+
+				//console.log(evt.keyCode);
+
+				if (evt.keyCode == 32) {
+
+				}
+				//Key LEFT
+				if (evt.keyCode == 37) {
+					turnLeft = true;
+					turnRight = false;
+				}
+
+				//Key RIGHT
+				if (evt.keyCode == 39) {
+					turnLeft = false;
+					turnRight = true;
+				}
+				//Key UP
+				if (evt.keyCode == 38) {
+					forward = true;
+					backwards = false;
+
+				}
+				//Key BACK
+				if (evt.keyCode == 40) {
+					backwards = true;
+					forward = false;
+				}
+
+			});
+
+			window.addEventListener("keyup", function (evt) {
+
+				if (evt.keyCode == 37 || evt.keyCode == 39) {
+					turnLeft = false;
+					turnRight = false;
+				}
+
+				if (evt.keyCode == 38 || evt.keyCode == 40) {
+					forward = false;
+					backwards = false;
+				}
+			});
+
+
+
+			var speed = 0.25;
+			var backSpeed = -0.125;
+			var gravity = new BABYLON.Vector3(0, -9, 0);
+
+			//BeforeREnder
+			scene.registerBeforeRender(function(){
+				if(scene.isReady() && meshPlayer) {
+					if (turnLeft) {
+						collidingBox.rotation.y -= 0.08;
+					} else if (turnRight) {
+						collidingBox.rotation.y += 0.08;
+					}
+					var vel,velZ,velX;
+					if(forward){
+						velZ = Math.cos(collidingBox.rotation.y)*speed;
+						velX = Math.sin(collidingBox.rotation.y)*speed;
+						vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
+						collidingBox.moveWithCollisions(vel);
+					}
+					else
+						if(backwards){
+							velZ = Math.cos(collidingBox.rotation.y)*backSpeed;
+							velX = Math.sin(collidingBox.rotation.y)*backSpeed;
+							vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
+							collidingBox.moveWithCollisions(vel);
+						}
+
+					meshPlayer.position = collidingBox.position;
+					meshPlayer.rotation = collidingBox.rotation;
+				}
+
+			});
+
+            // Render loop
+            var renderLoop = function () {
+                // Start new frame
+                engine.beginFrame();
+
+                scene.render();
+				//camera.target.x = parseFloat(meshPlayer.position.x);
+				//camera.target.z = parseFloat(meshPlayer.position.z);
+
+                // Present
+                engine.endFrame();
+
+
+                // Register new frame
+                BABYLON.Tools.QueueNewFrame(renderLoop);
+            };
+
+
+            BABYLON.Tools.QueueNewFrame(renderLoop);
+        }
+
+    </script>
+</body>
+</html>
