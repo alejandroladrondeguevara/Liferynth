@@ -37,11 +37,11 @@
 			const rows = 20;
 			const cols = 10;
 			const alturaSuelo = -3;
+			const margen = 1.01;
 			const anchuraMuro = 4;
 			const alturaMuro = anchuraMuro;
 			const profundidadMuro = 0.75;
-			const scaleMuro = new BABYLON.Vector3(profundidadMuro,alturaMuro,anchuraMuro*1.18725);
-
+			const scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro * 1.18725);
 
 			function CreateMatrix(rows,cols) {
 			  var arr = [];
@@ -96,6 +96,25 @@
 				return box;
 			}
 
+			function RandomWallMatrix() {
+			    var randomWallMatrix = [];
+			    var c = cols;
+			    for (var i = 0; i < (rows-1);i++){
+			        randomWallMatrix[i] = [];
+			        var even = (i % 2 == 0);
+			        if (even) c--; //Las filas pares son muros horizontales, hay una columna menos
+			        else c++;
+
+			        for (var j = 0; j < c; j++){
+			            if (Math.floor(Math.random() * 10) <= 3)
+			                //if( ((i+j)*7)%3 == 0)
+			                randomWallMatrix[i][j] = WallState.Alive;
+			            else randomWallMatrix[i][j] = WallState.NonExisting;
+			        }
+			    }
+			    return randomWallMatrix;
+			}
+
 			function PositionsMatrix(rows,cols){
 				var even = true;
 				var positionMatrix = CreateMatrix(rows,cols);
@@ -121,43 +140,73 @@
 				return positionMatrix;
 			}
 
-			function DibujaMuros(walls,rows,cols){
-				var even  = true;
-				var count = 0;
+			function PaintWalls(walls,rows,cols){ //Devuelve un array de nodos Array tipo "objeto muro, fila, columna"
 				var paintedWalls = [];
 				for (var i = 0; i < (rows-1);i++){
-
-					if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
+				    paintedWalls[i] = [];
+				    var even = (i % 2 == 0);
+				    if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
 					else cols++;
 
 					for (var j = 0; j < cols; j++){
 						if(walls[i][j] == WallState.Alive){
-							var auxWall = CreaMuro();
-							auxWall.position = posMatrix[i][j];
-							if(even) auxWall.rotation.y = 0.5*Math.PI;
-							paintedWalls[count]=auxWall;
-							count++;
+						    paintedWalls[i][j] = CreaMuro();
+							paintedWalls[i][j].position = posMatrix[i][j];
+							if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
 						}
 					}
-					even=!even;
 				}
 				return paintedWalls;
 			}
 
+			function HideWall(row, col) {
+			    if (walls[row][col] == WallState.Alive) { //Si está vivo
+			        walls[row][col] = WallState.Dead;
+			        paintedWalls[row][col].position.y -= alturaMuro*margen;
+			        paintedWalls[row][col].checkCollisions = false;
+			        paintedWalls[row][col].visibility = false;
+			    }
+			}
+
+			function ShowWall(row, col) {
+			    if (walls[row][col] == WallState.Dead) { //Si está muerto, resucitamos
+			        walls[row][col] = WallState.Alive;
+			        paintedWalls[row][col].position.y += alturaMuro * margen;
+			        paintedWalls[row][col].checkCollisions = true;
+			        paintedWalls[row][col].visibility = true;
+			    }
+			}
+
+			function cambiaMuros() {
+                var c = cols
+			    for (var i = 0; i < (rows - 1); i++){
+			        var even = ((i % 2) == 0);
+			        if (even) c--;
+			        else c++;
+			        for (var j = 0; j < c; j++) {  
+			            if (walls[i][j] == WallState.Alive){
+			                if (Math.floor(Math.random() * 10) <= 5)
+			                    HideWall(i, j);
+			            } else if (walls[i][j] == WallState.Dead) {
+			                if (Math.floor(Math.random() * 10) <= 3)
+			                    ShowWall(i, j);
+			            } else if (walls[i][j] == WallState.NonExisting) {
+			                if (Math.floor(Math.random() * 10) <= 1) {
+			                    paintedWalls[i][j] = CreaMuro();
+			                    paintedWalls[i][j].position = posMatrix[i][j];
+			                    walls[i][j] = WallState.Alive;
+			                    if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
+			                }
+			            }
+			        }
+			    }
+			}
 
 			var posMatrix = PositionsMatrix(rows,cols);
-			var walls = CreateMatrix(rows,cols);
-			for (var i = 0; i < (rows-1);i++){
-				for (var j = 0; j < cols;j++){
-					if(Math.floor(Math.random()*10) <= 3)
-					//if( ((i+j)*7)%3 == 0)
-						walls[i][j] = WallState.Alive;
-				}
-			}
-			DibujaMuros(walls,rows,cols);
+			var walls = RandomWallMatrix();
+			var paintedWalls = PaintWalls(walls,rows,cols);
 
-
-
+			window.setInterval(cambiaMuros, 2000);
 			//Luces
 
 				//var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(0, 100, 100), scene);
@@ -271,8 +320,7 @@
 					}
 				}
 				*/
-				var auxi=0; var auxj=0;
-				while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=cols-1) {auxi=0;auxj++;} else auxi++;}
+				//while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=cols-1) {auxi=0;auxj++;} else auxi++;}
 				/*shadowGenerator.getShadowMap().renderList.push(walls[auxi][auxj]);*/
 				plane.receiveShadows = true;
 
@@ -311,6 +359,18 @@
 				if (evt.keyCode == 40) {
 					backwards = true;
 					forward = false;
+				}
+                //Key Control
+				if(evt.keyCode == 17){
+				    for (var i = 0; i < rows-1; i++)
+				        for (var j = 0; j < cols-1;j++)
+			                HideWall(i,j);
+				}
+			    //Key Shift
+				if (evt.keyCode == 16) {
+				    for (var i = 0; i < rows - 1; i++)
+				        for (var j = 0; j < cols - 2; j++)
+				            ShowWall(i, j);
 				}
 
 			});
