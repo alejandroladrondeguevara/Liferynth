@@ -36,7 +36,7 @@
 
 			const rows = 20;
 			const cols = 10;
-			const alturaSuelo = -3;
+			const alturaSuelo = 0;
 			const margen = 1.01;
 			const anchuraMuro = 4;
 			const alturaMuro = anchuraMuro;
@@ -241,8 +241,8 @@
 				collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
 				meshPlayer.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
 				collidingBox.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
-				meshPlayer.position.y = -1;
-				collidingBox.position.y = -2;
+				meshPlayer.position.y = alturaSuelo+ (meshPlayer.scaling.y/2);
+				collidingBox.position.y = meshPlayer.position.y;
 				collidingBox.checkCollisions = true;
 				meshPlayer.applyGravity = true;
 				collidingBox.applyGravity = true;
@@ -266,10 +266,10 @@
 				var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, -1, -5), scene);
 				camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
 				camera.maxCameraSpeed = 20;
-				camera.checkCollisions = true;
+				camera.checkCollisions = false;
 				camera.applyGravity = true;
 				camera.radius = -3.5;
-				camera.heightOffset = 1;
+				camera.heightOffset = 1.5;
 				//camera.ellipsoid = new BABYLON.Vector3(0.5, 1, 0.5);
 				camera.keysUp = [];
 				camera.keysDown = [];
@@ -298,7 +298,7 @@
 
 				var plane = BABYLON.Mesh.CreatePlane("Ground", 1000, scene);
 				plane.rotation.x = Math.PI / 2;
-				plane.position.y = -3;
+				plane.position.y = alturaSuelo;
 
             // Collisions
 
@@ -390,17 +390,17 @@
 
 
 
-			var speed = 0.25;
-			var backSpeed = -0.125;
+			var speed = 0.08;
+			var backSpeed = -0.04;
 			var gravity = new BABYLON.Vector3(0, -9, 0);
 
 			//BeforeREnder
 			scene.registerBeforeRender(function(){
 				if(scene.isReady() && meshPlayer) {
 					if (turnLeft) {
-						collidingBox.rotation.y -= 0.08;
+						collidingBox.rotation.y -= 0.05;
 					} else if (turnRight) {
-						collidingBox.rotation.y += 0.08;
+						collidingBox.rotation.y += 0.05;
 					}
 					var vel,velZ,velX;
 					if(forward){
