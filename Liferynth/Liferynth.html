@@ -38,10 +38,10 @@
 			const cols = 10;
 			const alturaSuelo = 0;
 			const margen = 1.01;
-			const anchuraMuro = 4;
-			const alturaMuro = anchuraMuro;
+			const anchuraMuro = 6;
+			const alturaMuro = 4;
 			const profundidadMuro = 0.75;
-			const scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro * 1.18725);
+			const scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro);
 
 			function CreateMatrix(rows,cols) {
 			  var arr = [];
@@ -119,7 +119,7 @@
 				var even = true;
 				var positionMatrix = CreateMatrix(rows,cols);
 
-				const zIni = 2 + anchuraMuro* (cols/2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
+				const zIni = (anchuraMuro/2) + anchuraMuro* (cols/2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
 				const xIni = - anchuraMuro* (rows/2);
 				const yIni = alturaSuelo+alturaMuro/2;
 				var zAct = zIni;
@@ -127,14 +127,14 @@
 				for (var i = 0; i< (rows-1); i++){
 
 					var xAct = xIni;
-					if (!even) xAct -= 2; //Filas pares horizontales, impares verticales
+					if (!even) xAct -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
 
 					for(var j= 0; j< cols; j++){
 						positionMatrix[i][j] =  new BABYLON.Vector3(xAct, yIni, zAct);
 						xAct += anchuraMuro;
 					}
 					even = !even;
-					zAct -= 2;
+					zAct -= (anchuraMuro/2);
 
 				}
 				return positionMatrix;
@@ -251,6 +251,7 @@
 			                    paintedWalls[i][j].position = posMatrix[i][j];
 			                    walls[i][j] = WallState.Alive;
 			                    AnimateWall(i, j);
+			                    ShowAnimation(i, j);
 			                    if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
 			                }
 			            }
@@ -266,11 +267,26 @@
 			AnimateWalls();
 
 			window.setInterval(cambiaMuros, 2000);
+
+            //Jugador
+
+			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
+			    collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
+			    meshPlayer.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
+			    collidingBox.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
+			    meshPlayer.position.y = alturaSuelo + (meshPlayer.scaling.y / 2);
+			    collidingBox.position.y = meshPlayer.position.y;
+			    collidingBox.checkCollisions = true;
+			    meshPlayer.applyGravity = true;
+			    collidingBox.applyGravity = true;
+                //collidingBox.ellipsoid = new BABYLON.Vector3(0.1, 3, 0.1);
+
 			//Luces
 
 				//var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(0, 100, 100), scene);
 
-				//Direccional
+                 //Direccional
+                /*
 				var light0 = new BABYLON.DirectionalLight("Dir0", new BABYLON.Vector3(-0.5, -0.4, 0.5), scene);
 				light0.diffuse = new BABYLON.Color3(1, 1, 1);
 				light0.specular = new BABYLON.Color3(1, 1, 1);
@@ -279,33 +295,29 @@
 				var light1 = new BABYLON.DirectionalLight("Dir1", new BABYLON.Vector3(0.3, -0.4, -0.3), scene);
 				light1.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
 				light1.specular = new BABYLON.Color3(1, 1, 1);
-
+                */
 				//Hemisférica
-				//var light1 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
-				//light1.diffuse = new BABYLON.Color3(1, 1, 1);
-				//light1.specular = new BABYLON.Color3(1, 1, 1);
-				//light1.groundColor = new BABYLON.Color3(0, 0, 0);
+				var light1 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
+				light1.diffuse = new BABYLON.Color3(0.2, 0.2, 0.2);
+				light1.specular = new BABYLON.Color3(0.4, 0.4, 0.4);
+				light1.groundColor = new BABYLON.Color3(0, 0, 0);
 
 				//Spot
-				/*
-				var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(0, 30, 14), new BABYLON.Vector3(0, -1, 0), 2.2, 2, scene);
+			/*	
+			    var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margen, meshPlayer.position.z),
+                    new BABYLON.Vector3(meshPlayer.rotation.x, -0.01, meshPlayer.rotation.z), 2.2, 2, scene);
 				light2.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
 				light2.specular = new BABYLON.Color3(1, 1, 1);
-				*/
+            */
+			    var angFlashlight = -0.4;
+			    var flashlight = new BABYLON.SpotLight("Flashlight", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margen, meshPlayer.position.z),
+                    new BABYLON.Vector3(Math.sin(meshPlayer.rotation.y), angFlashlight, Math.cos(meshPlayer.rotation.y)), 3, 3, scene);
+			        //new BABYLON.Vector3(-0.5, -0.2, 0.4), 3, 3, scene);
+				flashlight.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
+				flashlight.specular = new BABYLON.Color3(0.7, 0.7, 0.7);
+				flashlight.range = 300;
+				
 
-
-			//Jugador
-
-				meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
-				collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
-				meshPlayer.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
-				collidingBox.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
-				meshPlayer.position.y = alturaSuelo+ (meshPlayer.scaling.y/2);
-				collidingBox.position.y = meshPlayer.position.y;
-				collidingBox.checkCollisions = true;
-				meshPlayer.applyGravity = true;
-				collidingBox.applyGravity = true;
-				//collidingBox.ellipsoid = new BABYLON.Vector3(0.1, 3, 0.1);
 
 			// Cámara
 			/*
@@ -369,9 +381,9 @@
 
 			// Shadows
 
-				var shadowGenerator = new BABYLON.ShadowGenerator(2048, light0);
+				/*var shadowGenerator = new BABYLON.ShadowGenerator(2048, light2);
 				shadowGenerator.useVarianceShadowMap = true;
-				/*
+
 				for (var i = 0; i < (rows-1);i++){
 					for (var j = 0; j < cols;j++){
 						if(walls[i][j] = WallState.Alive)
@@ -481,6 +493,8 @@
 
 					meshPlayer.position = collidingBox.position;
 					meshPlayer.rotation = collidingBox.rotation;
+					flashlight.position = collidingBox.position;
+					flashlight.direction = new BABYLON.Vector3(Math.sin(collidingBox.rotation.y), angFlashlight, Math.cos(collidingBox.rotation.y))
 				}
 
 			});
