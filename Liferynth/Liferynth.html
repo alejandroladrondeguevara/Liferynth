@@ -30,18 +30,29 @@
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
-			var imported = new BABYLON.Scene(engine);
+            var imported = new BABYLON.Scene(engine);
 
 			var meshPlayer, collidingBox,turnLeft=false,turnRight=false,forward=false,backwards=false;
 
 			const rows = 20;
 			const cols = 10;
 			const alturaSuelo = 0;
+
 			const margen = 1.01;
+
+			const alturaPlayer = 1.75;
+			const anchuraPlayer = 0.5;
+			const longitudPlayer = 0.5;
+
 			const anchuraMuro = 6;
 			const alturaMuro = 4;
 			const profundidadMuro = 0.75;
 			const scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro);
+
+			const gravity = new BABYLON.Vector3(0, -9, 0);
+
+			const speed = 0.14;
+			const backSpeed = -0.07;
 
 			function CreateMatrix(rows,cols) {
 			  var arr = [];
@@ -269,17 +280,16 @@
 			window.setInterval(cambiaMuros, 2000);
 
             //Jugador
-
 			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
 			    collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
-			    meshPlayer.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
-			    collidingBox.scaling = new BABYLON.Vector3(0.5, 1.75, 0.5);
+			    meshPlayer.scaling = new BABYLON.Vector3(anchuraPlayer, alturaPlayer, longitudPlayer);
+			    collidingBox.scaling = new BABYLON.Vector3(anchuraPlayer, alturaPlayer, longitudPlayer);
 			    meshPlayer.position.y = alturaSuelo + (meshPlayer.scaling.y / 2);
 			    collidingBox.position.y = meshPlayer.position.y;
 			    collidingBox.checkCollisions = true;
-			    meshPlayer.applyGravity = true;
 			    collidingBox.applyGravity = true;
-                //collidingBox.ellipsoid = new BABYLON.Vector3(0.1, 3, 0.1);
+			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, alturaPlayer/4, 0.5);
+
 
 			//Luces
 
@@ -374,7 +384,7 @@
             // Collisions
 
 				scene.collisionsEnabled = true;
-				scene.gravity = new BABYLON.Vector3(0, -9, 0);
+				scene.gravity = gravity;
 
 				plane.checkCollisions = true;
 
@@ -459,14 +469,6 @@
 				}
 			});
 
-
-
-			//var speed = 0.08;
-            //var backSpeed = -0.04;
-			var speed = 0.14;
-			var backSpeed = -0.07;
-
-			var gravity = new BABYLON.Vector3(0, -9, 0);
 
 			//BeforeREnder
 			scene.registerBeforeRender(function(){
