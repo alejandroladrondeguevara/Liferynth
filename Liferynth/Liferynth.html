@@ -33,7 +33,7 @@
             var imported = new BABYLON.Scene(engine);
 
 			var meshPlayer, collidingBox,turnLeft=false,turnRight=false,forward=false,backwards=false;
-
+			var saltando = false;
 			const rows = 20;
 			const cols = 10;
 			const alturaSuelo = 0;
@@ -217,8 +217,16 @@
 			        value: alturaSuelo + alturaPlayer / 2
 			    });
 			    keys.push({
+			        frame: 55,
+			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight*(3/4)
+			    });
+			    keys.push({
 			        frame: 100,
 			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight
+			    });
+			    keys.push({
+			        frame: 140,
+			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight*(3/4)
 			    });
 			    keys.push({
 			        frame: 200,
@@ -306,10 +314,14 @@
 
 			function Land() {
 			    LandAnimation();
+			    window.setTimeout(function () { saltando = false; }, jumpTime * 1000);
 			}
 			function Jump() {
-			    JumpAnimation();
-			    window.setTimeout(Land, jumpTime*1000);
+			    if (!saltando) {
+			        saltando = true;
+			        JumpAnimation();
+			        window.setTimeout(Land, jumpTime * 1000);
+			    }
 			}
 
 
