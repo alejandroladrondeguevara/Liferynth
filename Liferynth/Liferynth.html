@@ -37,6 +37,7 @@
 			const rows = 20;
 			const cols = 10;
 			const alturaSuelo = 0;
+			const planeSize = 500;
 
 			const margen = 1.01;
 
@@ -477,10 +478,14 @@
 
 
 			// Ground
-
-				var plane = BABYLON.Mesh.CreatePlane("Ground", 1000, scene);
+				var plane = BABYLON.Mesh.CreatePlane("Ground", planeSize, scene);
+				var materialPlane = new BABYLON.StandardMaterial("Baldosa", scene);
+				materialPlane.diffuseTexture = new BABYLON.Texture("images/Baldosa.png", scene);
+				materialPlane.diffuseTexture.uScale = (planeSize * 7) / 10;
+				materialPlane.diffuseTexture.vScale = (planeSize * 7) / 10;
 				plane.rotation.x = Math.PI / 2;
 				plane.position.y = alturaSuelo;
+				plane.material = materialPlane;
 
             // Collisions
 
