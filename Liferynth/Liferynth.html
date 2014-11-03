@@ -54,6 +54,10 @@
 			const speed = 0.14;
 			const backSpeed = -0.07;
 
+            //Variables del salto: Altura del salto, tiempo de vuelo
+			const jumpHeight = 1.5;
+            const jumpTime = 0.3;
+
 			function CreateMatrix(rows,cols) {
 			  var arr = [];
 
@@ -201,6 +205,35 @@
 			    paintedWalls[r][c].animations.push(animationBox);
 			}
 
+			function AnimatePlayer() {
+			    var string1 = "animation Player";
+			    var animationBox = new BABYLON.Animation(string1, "position.y", 100/jumpTime,
+                    BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+			    // An array with all animation keys
+			    var keys = [];
+
+			    keys.push({
+			        frame: 0,
+			        value: alturaSuelo + alturaPlayer / 2
+			    });
+			    keys.push({
+			        frame: 100,
+			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight
+			    });
+			    keys.push({
+			        frame: 200,
+			        value: alturaSuelo + alturaPlayer / 2
+			    });
+			    animationBox.setKeys(keys);
+			    collidingBox.animations.push(animationBox);
+			}
+			function JumpAnimation() {
+			    scene.beginAnimation(collidingBox, 0, 100, false);
+			}
+			function LandAnimation() {
+			    scene.beginAnimation(collidingBox, 100, 200, false);
+			}
+
 			function AnimateWalls() {
 			    var c = cols;
 			    for (var i = 0; i < (rows - 1) ; i++) {
@@ -220,6 +253,7 @@
 			function ShowAnimation(r, c) {
 			    scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
 			}
+
 
 			function HideWall(row, col) {
 			    if (walls[row][col] == WallState.Alive) { //Si está vivo
@@ -243,7 +277,7 @@
 
 
 
-			function cambiaMuros() {
+			function CambiaMuros() {
                 var c = cols
 			    for (var i = 0; i < (rows - 1); i++){
 			        var even = ((i % 2) == 0);
@@ -270,6 +304,14 @@
 			    }
 			}
 
+			function Land() {
+			    LandAnimation();
+			}
+			function Jump() {
+			    JumpAnimation();
+			    window.setTimeout(Land, jumpTime*1000);
+			}
+
 
 
 			var posMatrix = PositionsMatrix(rows,cols);
@@ -277,7 +319,7 @@
 			var paintedWalls = PaintWalls(walls, rows, cols);
 			AnimateWalls();
 
-			window.setInterval(cambiaMuros, 2000);
+			window.setInterval(CambiaMuros, 4000);
 
             //Jugador
 			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
@@ -289,7 +331,7 @@
 			    collidingBox.checkCollisions = true;
 			    collidingBox.applyGravity = true;
 			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, alturaPlayer/4, 0.5);
-
+			    AnimatePlayer();
 
 			//Luces
 
@@ -443,15 +485,13 @@
 				}
                 //Key Control
 				if(evt.keyCode == 17){
-				    for (var i = 0; i < rows-1; i++)
-				        for (var j = 0; j < cols-1;j++)
-			                HideWall(i,j);
 				}
 			    //Key Shift
 				if (evt.keyCode == 16) {
-				    for (var i = 0; i < rows - 1; i++)
-				        for (var j = 0; j < cols - 2; j++)
-				            ShowWall(i, j);
+				}
+			    //Key Space
+				if (evt.keyCode == 32) {
+				    Jump();
 				}
 
 			});
@@ -507,8 +547,6 @@
                 engine.beginFrame();
 
                 scene.render();
-				//camera.target.x = parseFloat(meshPlayer.position.x);
-				//camera.target.z = parseFloat(meshPlayer.position.z);
 
                 // Present
                 engine.endFrame();
