@@ -33,7 +33,7 @@
             var imported = new BABYLON.Scene(engine);
 
 			var meshPlayer, collidingBox,turnLeft=false,turnRight=false,forward=false,backwards=false;
-			var saltando = false;
+			var jumping = false; var crouching =false;
 			const rows = 20;
 			const cols = 10;
 			const alturaSuelo = 0;
@@ -43,6 +43,7 @@
 			const alturaPlayer = 1.75;
 			const anchuraPlayer = 0.5;
 			const longitudPlayer = 0.5;
+			const ellipsoidPlayer = new BABYLON.Vector3(0.5, alturaPlayer / 4, 0.5);
 
 			const anchuraMuro = 6;
 			const alturaMuro = 4;
@@ -206,12 +207,14 @@
 			}
 
 			function AnimatePlayer() {
-			    var string1 = "animation Player";
-			    var animationBox = new BABYLON.Animation(string1, "position.y", 100/jumpTime,
+			    var string1 = "Player position";
+			    var animationPosition = new BABYLON.Animation(string1, "position.y", 100/jumpTime,
                     BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 			    // An array with all animation keys
 			    var keys = [];
 
+			    // 0-100 Animación salto
+                // 100-200 Animación aterrizaje
 			    keys.push({
 			        frame: 0,
 			        value: alturaSuelo + alturaPlayer / 2
@@ -232,14 +235,57 @@
 			        frame: 200,
 			        value: alturaSuelo + alturaPlayer / 2
 			    });
-			    animationBox.setKeys(keys);
-			    collidingBox.animations.push(animationBox);
+			    keys.push({
+			        frame: 250,
+			        value: alturaSuelo + alturaPlayer / 3
+			    });
+			    keys.push({
+			        frame: 300,
+			        value: alturaSuelo + alturaPlayer / 2
+			    });
+
+			    animationPosition.setKeys(keys);
+
+			    // An array with all animation keys
+			    var keys2 = [];
+			    var string2 = "Player scaling";
+			    var animationCrouch = new BABYLON.Animation(string2, "scaling.y", 100/jumpTime,
+                    BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+			    // 200-250 Animación agacharse
+			    // 250-300 Animación levantarse
+			    keys2.push({
+			        frame: 200,
+			        value: alturaPlayer
+			    });
+			    keys2.push({
+			        frame: 250,
+			        value: alturaPlayer * (2/3)
+			    });
+			    keys2.push({
+			        frame: 300,
+			        value: alturaPlayer
+			    });
+			    animationCrouch.setKeys(keys2);
+
+			    collidingBox.animations.push(animationPosition);
+			    collidingBox.animations.push(animationCrouch);
+			    
+
 			}
 			function JumpAnimation() {
 			    scene.beginAnimation(collidingBox, 0, 100, false);
 			}
 			function LandAnimation() {
 			    scene.beginAnimation(collidingBox, 100, 200, false);
+			}
+			function CrouchAnimation() {
+			    scene.beginAnimation(collidingBox, 200, 250, false);
+			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, (alturaPlayer*(2/3))/ 4, 0.5);
+			}
+			function StandUpAnimation() {
+			    crouching = false;
+			    scene.beginAnimation(collidingBox, 250, 300, false);
+			    collidingBox.ellipsoid = ellipsoidPlayer;
 			}
 
 			function AnimateWalls() {
@@ -314,11 +360,11 @@
 
 			function Land() {
 			    LandAnimation();
-			    window.setTimeout(function () { saltando = false; }, jumpTime * 1000);
+			    window.setTimeout(function () { jumping = false; }, jumpTime * 1000);
 			}
 			function Jump() {
-			    if (!saltando) {
-			        saltando = true;
+			    if (!jumping) {
+			        jumping = true;
 			        JumpAnimation();
 			        window.setTimeout(Land, jumpTime * 1000);
 			    }
@@ -342,8 +388,9 @@
 			    collidingBox.position.y = meshPlayer.position.y;
 			    collidingBox.checkCollisions = true;
 			    collidingBox.applyGravity = true;
-			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, alturaPlayer/4, 0.5);
+			    collidingBox.ellipsoid = ellipsoidPlayer;
 			    AnimatePlayer();
+			    collidingBox.showBoundingBox=true;
 
 			//Luces
 
@@ -496,7 +543,11 @@
 					forward = false;
 				}
                 //Key Control
-				if(evt.keyCode == 17){
+				if (evt.keyCode == 17) {
+				    if (!crouching) {
+				        CrouchAnimation();
+				        crouching = true;
+				    }
 				}
 			    //Key Shift
 				if (evt.keyCode == 16) {
@@ -518,6 +569,10 @@
 				if (evt.keyCode == 38 || evt.keyCode == 40) {
 					forward = false;
 					backwards = false;
+				}
+				if (evt.keyCode == 17) {
+				    StandUpAnimation();
+
 				}
 			});
 
@@ -547,6 +602,7 @@
 
 					meshPlayer.position = collidingBox.position;
 					meshPlayer.rotation = collidingBox.rotation;
+					meshPlayer.scaling = collidingBox.scaling;
 					flashlight.position = collidingBox.position;
 					flashlight.direction = new BABYLON.Vector3(Math.sin(collidingBox.rotation.y), angFlashlight, Math.cos(collidingBox.rotation.y))
 				}
