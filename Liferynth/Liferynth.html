@@ -80,32 +80,34 @@
 				var FrontMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
 				FrontMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
 				FrontMaterial.diffuseTexture.wAng += Math.PI*0.5;
-
-				var BackMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
+			    /*
+				var BackMaterial = new BABYLON.StandardMaterial("cubeBack", scene);
 				BackMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
 				BackMaterial.diffuseTexture.wAng += Math.PI*0.5;
 
 				var LeftMaterial = new BABYLON.StandardMaterial("cubeLeft", scene);
 				LeftMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
-				LeftMaterial.diffuseTexture.wAng += Math.PI;
+				LeftMaterial.diffuseTexture.wAng += Math.PI*0.5;
 
-				var RightMaterial = new BABYLON.StandardMaterial("cubeLeft", scene);
+				var RightMaterial = new BABYLON.StandardMaterial("cubeRight", scene);
 				RightMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
-
+*/
 				var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
 				cubeMultiMat.subMaterials.push(FrontMaterial);
-				cubeMultiMat.subMaterials.push(BackMaterial);
-				cubeMultiMat.subMaterials.push(LeftMaterial);
-				cubeMultiMat.subMaterials.push(RightMaterial);
 
+				/*cubeMultiMat.subMaterials.push(BackMaterial);
+				cubeMultiMat.subMaterials.push(LeftMaterial);
+				cubeMultiMat.subMaterials.push(RightMaterial);*/
+                /*
 				box.subMeshes = [];
 				box.subMeshes.push(new BABYLON.SubMesh(2, 0,  4,  0, 6, box));  //Detrás
 				box.subMeshes.push(new BABYLON.SubMesh(3, 4,  4,  6, 6, box));	//Delante
 				box.subMeshes.push(new BABYLON.SubMesh(0, 8,  4, 12, 6, box));	//Derecha
 				box.subMeshes.push(new BABYLON.SubMesh(1, 12, 4, 18, 6, box));	//Izquierda
+ 
 				box.subMeshes.push(new BABYLON.SubMesh(2, 16, 4, 24, 6, box));	//Arriba
 				box.subMeshes.push(new BABYLON.SubMesh(3, 20, 4, 30, 6, box));	//Abajo
-
+                */
 
 				box.material = cubeMultiMat;
 				box.checkCollisions = true;
@@ -312,8 +314,7 @@
 
 			function HideWall(row, col) {
 			    if (walls[row][col] == WallState.Alive) { //Si está vivo
-			        walls[row][col] = WallState.Dead;
-			        paintedWalls[row][col].position.y -= alturaMuro*margen;
+			        walls[row][col] = WallState.Dead;			        
 			        paintedWalls[row][col].checkCollisions = false;
 			        //paintedWalls[row][col].visibility = false;
 			        HideAnimation(row,col);
@@ -323,7 +324,6 @@
 			function ShowWall(row, col) {
 			    if (walls[row][col] == WallState.Dead) { //Si está muerto, resucitamos
 			        walls[row][col] = WallState.Alive;
-			        paintedWalls[row][col].position.y += alturaMuro * margen;
 			        paintedWalls[row][col].checkCollisions = true;
 			        //paintedWalls[row][col].visibility = true;
 			        ShowAnimation(row,col);
@@ -362,13 +362,6 @@
 			function Land() {
 			    LandAnimation();
 			    window.setTimeout(function () { jumping = false; }, jumpTime * 1000);
-			}
-			function Jump() {
-			    if (!jumping) {
-			        jumping = true;
-			        JumpAnimation();
-			        window.setTimeout(Land, jumpTime * 1000);
-			    }
 			}
 
 
@@ -480,9 +473,15 @@
 			// Ground
 				var plane = BABYLON.Mesh.CreatePlane("Ground", planeSize, scene);
 				var materialPlane = new BABYLON.StandardMaterial("Baldosa", scene);
-				materialPlane.diffuseTexture = new BABYLON.Texture("images/Baldosa.png", scene);
-				materialPlane.diffuseTexture.uScale = (planeSize * 7) / 10;
-				materialPlane.diffuseTexture.vScale = (planeSize * 7) / 10;
+				materialPlane.diffuseTexture = new BABYLON.Texture("images/BaldosaReplicada.png", scene);
+            /*
+                //Única baldosa 				
+                    materialPlane.diffuseTexture.uScale = (planeSize * 4) / 10;
+				    materialPlane.diffuseTexture.vScale = (planeSize * 4) / 10;
+            */
+                //Múltiples baldosas
+				    materialPlane.diffuseTexture.uScale = planeSize / 7.5;
+				    materialPlane.diffuseTexture.vScale = planeSize / 7.5;
 				plane.rotation.x = Math.PI / 2;
 				plane.position.y = alturaSuelo;
 				plane.material = materialPlane;
@@ -549,7 +548,7 @@
 				}
                 //Key Control
 				if (evt.keyCode == 17) {
-				    if (!crouching) {
+				    if (!crouching && !jumping) {
 				        CrouchAnimation();
 				        crouching = true;
 				    }
@@ -559,7 +558,11 @@
 				}
 			    //Key Space
 				if (evt.keyCode == 32) {
-				    Jump();
+				    if (!jumping && !crouching) {
+				        jumping = true;
+				        JumpAnimation();
+				        window.setTimeout(Land, jumpTime * 1000);
+				    }
 				}
 
 			});
@@ -577,7 +580,6 @@
 				}
 				if (evt.keyCode == 17) {
 				    StandUpAnimation();
-
 				}
 			});
 
