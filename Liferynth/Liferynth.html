@@ -78,8 +78,11 @@
 				var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
 
 				var FrontMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
-				FrontMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
-				FrontMaterial.diffuseTexture.wAng += Math.PI*0.5;
+				FrontMaterial.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", scene);
+				FrontMaterial.diffuseTexture.wAng += Math.PI * 0.5;
+
+				FrontMaterial.diffuseTexture.uScale = 1;
+				FrontMaterial.diffuseTexture.vScale = 1;
 			    /*
 				var BackMaterial = new BABYLON.StandardMaterial("cubeBack", scene);
 				BackMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
@@ -442,10 +445,10 @@
 				var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, -1, -5), scene);
 				camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
 				camera.maxCameraSpeed = 20;
-				camera.checkCollisions = false;
+				camera.checkCollisions = true;
 				camera.applyGravity = true;
 				camera.radius = -3.5;
-				camera.heightOffset = 1.5;
+				camera.heightOffset = 0.5;
 				//camera.ellipsoid = new BABYLON.Vector3(0.5, 1, 0.5);
 				camera.keysUp = [];
 				camera.keysDown = [];

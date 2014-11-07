@@ -68,6 +68,9 @@
     <Content Include="images\Baldosa.png" />
     <Content Include="images\Baldosa2.png" />
     <Content Include="images\BaldosaReplicada.png" />
+    <Content Include="images\MetalWall.png" />
+    <Content Include="images\MetalWallReplica.png" />
+    <Content Include="images\MetalWallReplica2.png" />
     <Content Include="images\MuroFront.png" />
     <Content Include="images\MuroLat.png" />
     <Content Include="js\babylon.js" />
