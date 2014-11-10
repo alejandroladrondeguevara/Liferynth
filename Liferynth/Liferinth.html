@@ -709,7 +709,7 @@
                 engine.beginFrame();
 
                 scene.render();
-
+				window.document.title = BABYLON.Tools.GetFps().toFixed() + " fps";
                 // Present
                 engine.endFrame();
 
