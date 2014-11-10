@@ -65,6 +65,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="images\backgroundImage.jpg" />
     <Content Include="images\Baldosa.png" />
     <Content Include="images\Baldosa2.png" />
     <Content Include="images\BaldosaReplicada.png" />
@@ -75,7 +76,9 @@
     <Content Include="images\MuroLat.png" />
     <Content Include="js\babylon.js" />
     <Content Include="js\hand.js" />
-    <Content Include="Liferynth.html" />
+    <Content Include="Liferinth.html" />
+    <Content Include="menu\LiferinthMenu.html" />
+    <Content Include="menu\LiferinthSettingsMenu.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
