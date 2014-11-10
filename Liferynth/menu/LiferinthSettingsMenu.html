@@ -217,31 +217,42 @@
 				rows = getUrlVars()["R"];
 				colums = getUrlVars()["Co"];		
 			
-				gpu.style.color = getUrlVars()["G"];		
-				cpu.style.color = getUrlVars()["C"];
+				if(speed!="undefined"){
 				
-				if(speed=="l"){
-					document.querySelector("#radio_speed_low").checked=true;
-				}else if(speed=="n"){
+					gpu.style.color = getUrlVars()["G"];		
+					cpu.style.color = getUrlVars()["C"];
+					
+					if(speed=="l"){
+						document.querySelector("#radio_speed_low").checked=true;
+					}else if(speed=="n"){
+						document.querySelector("#radio_speed_normal").checked=true;
+					}else if(speed=="h"){
+						document.querySelector("#radio_speed_high").checked=true;
+					}
+					
+					if(rows=="f"){
+						document.querySelector("#radio_rows_few").checked=true;
+					}else if(rows=="n"){
+						document.querySelector("#radio_rows_normal").checked=true;
+					}else if(rows=="m"){
+						document.querySelector("#radio_rows_many").checked=true;
+					}
+					
+					if(colums=="f"){
+						document.querySelector("#radio_colums_few").checked=true;
+					}else if(colums=="n"){
+						document.querySelector("#radio_colums_normal").checked=true;
+					}else if(colums=="m"){
+						document.querySelector("#radio_colums_many").checked=true;
+					}
+					
+				}else{
+				
+					gpu.style.color = "green";		
+					cpu.style.color = "green";
 					document.querySelector("#radio_speed_normal").checked=true;
-				}else if(speed=="h"){
-					document.querySelector("#radio_speed_high").checked=true;
-				}
-				
-				if(rows=="f"){
-					document.querySelector("#radio_rows_few").checked=true;
-				}else if(rows=="n"){
 					document.querySelector("#radio_rows_normal").checked=true;
-				}else if(rows=="m"){
-					document.querySelector("#radio_rows_many").checked=true;
-				}
-				
-				if(colums=="f"){
-					document.querySelector("#radio_colums_few").checked=true;
-				}else if(colums=="n"){
 					document.querySelector("#radio_colums_normal").checked=true;
-				}else if(colums=="m"){
-					document.querySelector("#radio_colums_many").checked=true;
 				}				
 			}			
 		}	
