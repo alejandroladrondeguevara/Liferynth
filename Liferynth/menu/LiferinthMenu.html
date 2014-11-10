@@ -1,0 +1,310 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Liferinth</title>
+	<script src="jQuery.js"></script>
+    <style>
+    * 
+	{
+        margin: 0;
+        padding: 0;
+        outline: none;   
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    body 
+	{
+        color: rgb(0,0,0);
+        -webkit-font-smoothing: antialiased;
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 20px;
+        font-weight: 400;
+        height: auto !important;
+        height: 100%;
+        min-height: 100%;
+        text-rendering: optimizeLegibility;
+    }
+
+    div.wrapper 
+	{
+        margin: 20px auto;
+		<!--width: 350px;-->
+		width: 400px;
+    }
+
+    nav.vertical 
+	{
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(0,0,0,.15);
+        overflow: hidden;
+        text-align: center;
+    }
+
+      nav.vertical > ul,
+      nav.vertical > ul > li > div > ul
+	  {
+        list-style-type: none;
+      }
+
+        nav.vertical > ul > li,
+        nav.vertical > ul > li > div > ul > li
+		{
+          display: block;
+        }
+		
+		 nav.vertical > ul > li > a 
+		 {
+            background-color: rgb(0,0,0);
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.1), 0 1px 1px rgba(0,0,0,.1);
+            color: rgb(255,255,255);
+            display: block;
+            font-weight: 500;
+            height: 50px;
+            letter-spacing: .5rem;
+            line-height: 50px;
+            text-shadow: 0 1px 1px rgba(0,0,0,.1);
+            text-transform: uppercase;
+            transition: all .1s ease;
+            text-decoration: none;           
+            font-size: 1.1rem;
+          }
+		
+          nav.vertical > ul > li > a:hover 
+		  {
+             <!--background-color: rgb(255,255,255);-->
+             border-bottom: 1px solid rgba(0,0,0,.1);
+             <!--color: rgb(0,0,0);-->
+			 color: rgb(0,0,0);
+             cursor: pointer;
+            }
+				
+                nav.vertical > ul > li >  div > ul > li > input[type=checkbox] + label,
+                nav.vertical > ul > li > div > ul > li > a
+				{
+                    <!--background-color: rgb(255,255,255);-->
+                     border-bottom: 1px solid rgba(0,0,0,.05);
+                     color: rgb(0,0,0);
+                     display: block;
+                     font-size: 1.1rem;
+                     padding: 10px 0;
+                     text-decoration: none;
+                     transition: all 0.15s linear;
+                     cursor: pointer;
+                }
+           
+                nav.vertical > ul > li >  div > ul > li:hover > input[type=checkbox] + label,
+                nav.vertical > ul > li > div > ul > li:hover > a
+				{
+                    background-color: rgb(0,0,0);
+                    color: rgb(255,255,255);
+                    padding: 10px 0 10px 50px;
+                }  
+			   
+                    nav.vertical > ul > li > div > ul > li > input[type=checkbox]
+					{
+                      display: none;
+                      visibility: hidden;
+                    }                 
+                   
+				    nav.vertical > ul > li >  div > ul > li > input[type=checkbox]:checked + label
+					{
+						<!--background-color: rgb(255,255,255);-->
+						color: rgb(0,0,0);
+					}  
+					
+					nav.vertical > ul > li >  div > ul > li > input[type=checkbox]:hover + label
+					{
+						background-color: rgb(0,0,0);
+						color: rgb(255,255,255);
+					}
+                         
+    </style>   
+        <script>
+		//-------------------------- El siguiente código detecta cuándo se ha hecho la primera visita a la página ---------------
+		var firstLoad;
+		
+		// First Time Visit Processing
+		// copyright 10th January 2006, Stephen Chapman
+		// permission to use this Javascript on your web page is granted
+		// provided that all of the below code in this script (including this
+		// comment) is used without any alteration
+		function rC(nam) {
+			var tC = document.cookie.split('; ');
+			for (var i = tC.length - 1; i >= 0; i--) {
+				var x = tC[i].split('=');
+				if (nam == x[0]) return unescape(x[1]);
+			}
+			return '~';
+		}
+
+		function wC(nam, val) {
+			document.cookie = nam + '=' + escape(val);
+		}
+
+		function lC(nam, pg) {
+			var val = rC(nam);
+			if (val.indexOf('~' + pg + '~') != -1) return false;
+			val += pg + '~';
+			wC(nam, val);
+			return true;
+		}
+
+		function firstTime(cN) {
+			return lC('pWrD4jBo', cN);
+		}
+
+		function thisPage() {
+			var page = location.href.substring(location.href.lastIndexOf('\/') + 1);
+			pos = page.indexOf('.');
+			if (pos > -1) {
+				page = page.substr(0, pos);
+			}
+			return page;
+		}
+		//----------------------------------------------------------------------------------------------------
+		/** Obtiene las variables que se pasan como parámetros en la URL **/
+		function getUrlVars() {
+			var vars = {};
+			var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+				vars[key] = value;
+			});
+			return vars;
+		}
+		//-----------------------------------------------------------------------------------------------------
+		/** Setting variables**/
+		var cpu, gpu, speed, rows, columns;
+		
+		// Example code to call it - you may modify this as required
+		function start() {
+			if (firstTime(thisPage())) {
+				// This code only runs for first visit
+				firstLoad = true;
+			}else {
+				firstLoad = false;				
+				cpu = getUrlVars()["C"];
+				gpu = getUrlVars()["G"];
+				speed = getUrlVars()["S"];
+				rows = getUrlVars()["R"];
+				columns = getUrlVars()["Co"];				
+			}
+		}		
+		//--------------------------------------------------------------------	
+		function page_settings_menu()
+		{
+			/**
+			_parent - URL is loaded into the parent frame
+			_self - URL replaces the current page
+			_top - URL replaces any framesets that may be loaded
+			**/
+			//window.open("./LiferinthSettingsMenu.html", "_self");	
+			
+			var url = "./LiferinthSettingsMenu.html?";
+			
+			if(firstLoad==true){	
+					
+				url = url + "firstLoad=" + firstLoad;
+				//window.location.href = url;
+				window.open(url, "_self");	
+			}else{
+				url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
+				//window.location.href = url;
+				window.open(url, "_self");
+			}			
+		}
+		
+		//http://caniuse.com/#search=localstorage
+		// Run function on load, could also run on dom ready
+		function load() {
+			// Check if localStorage is available (IE8+) and make sure that the visited flag is not already set.
+			if(typeof window.localStorage !== "undefined" && !localStorage.getItem('visited')) {
+				 // Set visited flag in local storage
+				 firstLoad = true;  
+			}else
+			{
+				firstLoad = false;  
+			}
+		}
+		//-----------------------------------------------------------------------
+		function playGame()
+		{			
+			var url = "../Liferinth.html?";
+			
+			if(firstLoad==true){	
+					
+				url = url + "firstLoad=" + firstLoad;
+				//window.location.href = url;
+				window.open(url, "_self");	
+			}else{
+				url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
+				//window.location.href = url;
+				window.open(url, "_self");
+			}			
+		}
+		//----------------------------------------------------------------------
+        </script>
+</head>
+<body onload="start()" background="../images/backgroundImage.jpg">
+    <div class="wrapper">
+        <nav class="vertical">
+            <ul>
+                <li>
+                    <a>Liferinth</a>
+                    <div>
+                        <ul>
+                            <li>
+                                <a onClick="playGame()">Play</a>
+                            </li>
+                            <li>
+                                <input type="checkbox" id="settings" onclick="page_settings_menu()" />
+                                <label for="settings">Settings</label>
+                            </li>
+                            <li>
+                                <a>About</a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/alejandroladrondeguevara/Liferynth" target="_blank">GitHub</a>
+                            </li>
+                            <li>
+                                <a>Contact</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a>BabylonJS</a>
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="http://www.babylonjs.com/" target="_blank">Page</a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/BabylonJS" target="_blank">GitHub</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a>WebCL</a>
+                    <div>
+                        <ul>
+                            <li>
+                                <a href="http://es.wikipedia.org/wiki/WebCL" target="_blank">About</a>
+                            </li>
+                            <li>
+                                <a href="https://www.khronos.org/webcl/" target="_blank">Khronos</a>
+                            </li>
+                            <li>
+                                <a href="http://webcl.nokiaresearch.com/" target="_blank">Nokia Standard</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>
