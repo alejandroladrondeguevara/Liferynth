@@ -21,7 +21,7 @@
     </style>
 	<script>
 		/** Global variables **/
-		var cpu,gpu,speedSetting,rows,colums;
+		var cpu,gpu,speedSetting,rowsSettings,columsSettings;
 		//----------------------------------------------------------------------------------------------------
 		/** Obtiene las variables que se pasan como parámetros en la URL **/
 		function getUrlVars() {
@@ -38,15 +38,15 @@
 			cpu = getUrlVars()["C"];
 			gpu = getUrlVars()["G"];
 			speedSetting = getUrlVars()["S"];
-			rows = getUrlVars()["R"];
-			columns = getUrlVars()["Co"];
+			rowsSettings = getUrlVars()["R"];
+			columsSettings = getUrlVars()["Co"];
 			
 			/**
 			Values
 				cpu:				"green","red"
 				gpu:				"green","red"
 				speedSetting: 		"l"(Low),"n"(Normal),"h"(high)
-				rows:  				"f"(Few),"n"(Normal),"m"(many)
+				rowsSettings:  		"f"(Few),"n"(Normal),"m"(many)
 				columns:			"f"(Few),"n"(Normal),"m"(many)
 			**/
 			if(cpu == "undefined" )
@@ -54,8 +54,8 @@
 				cpu = "green";
 				gpu = "green";
 				speedSetting = "n"; 	//Normal
-				rows = "n";		//Normal
-				columns = "n";	//Normal
+				rowsSettings = "n";		//Normal
+				columsSettings = "n";	//Normal
 			}
 		}
 		
