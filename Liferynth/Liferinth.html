@@ -21,7 +21,7 @@
     </style>
 	<script>
 		/** Global variables **/
-		var cpu,gpu,speedSetting,rowsSettings,columsSettings;
+		var cpu,gpu,speedSetting,rowsSettings,columnsSettings;
 		//----------------------------------------------------------------------------------------------------
 		/** Obtiene las variables que se pasan como parámetros en la URL **/
 		function getUrlVars() {
@@ -39,7 +39,7 @@
 			gpu = getUrlVars()["G"];
 			speedSetting = getUrlVars()["S"];
 			rowsSettings = getUrlVars()["R"];
-			columsSettings = getUrlVars()["Co"];
+			columnsSettings = getUrlVars()["Co"];
 			
 			/**
 			Values
@@ -55,7 +55,7 @@
 				gpu = "green";
 				speedSetting = "n"; 	//Normal
 				rowsSettings = "n";		//Normal
-				columsSettings = "n";	//Normal
+				columnsSettings = "n";	//Normal
 			}
 		}
 		
@@ -66,7 +66,9 @@
     <script>
         if (BABYLON.Engine.isSupported()) {
 
-			var WallState = { NonExisting:0, Alive:1, Dead:2 }
+            var WallState = { NonExisting: 0, Alive: 1, Dead: 2 }
+
+			loadSettings();
 
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
@@ -74,9 +76,48 @@
             var imported = new BABYLON.Scene(engine);
 
 			var meshPlayer, collidingBox,turnLeft=false,turnRight=false,forward=false,backwards=false;
-			var jumping = false; var crouching =false;
-			var rows = 30;
-			var cols = 15;
+			var jumping = false; var crouching = false;
+
+			var rows;
+			switch (rowsSettings) {
+			    case "m":
+			        rows = 30;
+			        break;
+			    case "n":
+			        rows = 20;
+			        break;
+			    case "f":
+			        rows = 10;
+			        break;
+			    default: break;
+			}
+			var cols;
+			switch (columnsSettings) {
+			    case "m":
+			        cols = 30;
+			        break;
+			    case "n":
+			        cols = 20;
+			        break;
+			    case "f":
+			        cols = 10;
+			        break;
+			    default: break;
+			}
+			var timeChange;
+			switch (speedSetting) {
+			    case "h":
+			        timeChange = 2;
+			        break;
+			    case "n":
+			        timeChange = 4;
+			        break;
+			    case "l":
+			        timeChange = 8;
+			        break;
+			    default: break;
+			}
+
 			var alturaSuelo = 0;
 			var planeSize = 500;
 
@@ -421,7 +462,7 @@
 			var paintedWalls = PaintWalls(walls, rows, cols);
 			AnimateWalls();
 
-			window.setInterval(CambiaMuros, 4000);
+			window.setInterval(CambiaMuros, timeChange*1000);
 
             //Jugador
 			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
