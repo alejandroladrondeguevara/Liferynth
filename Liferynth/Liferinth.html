@@ -268,7 +268,7 @@
 			    for (var i = 0; i < (lastRow) ; i++) 
                     if((i%2)==1){
                         walls[i][0] = WallState.PermaWall; 
-                        walls[i][cols] = WallState.PermaWall; 
+                        walls[i][cols-1] = WallState.PermaWall; 
                     }
 			    for (var j = 0; j < (cols - 1) ; j++) {
 			        walls[0][j] = WallState.PermaWall;
