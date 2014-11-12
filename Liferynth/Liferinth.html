@@ -66,7 +66,14 @@
     <script>
         if (BABYLON.Engine.isSupported()) {
 
-            var WallState = { NonExisting: 0, Alive: 1, Dead: 2 }
+            /*Estado del muro: 
+                0 : No hay muro creado
+                1 : Muro activo
+                2 : Muro no visible
+                3 : Muro permanente (no bajará el muro nunca)
+                4 : Hueco permanente (no habrá muro en esa posición)
+            */
+            var WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4}
 
 			loadSettings();
 
@@ -93,6 +100,7 @@
 			        rows = 20;
 			        break;
 			}
+			var lastRow = rows-2; //Por cómo está hecha la matriz, esta es la última fila de la matriz de muros
 			var cols;
 			switch (columnsSettings) {
 			    case "m":
@@ -215,7 +223,7 @@
 			function RandomWallMatrix() {
 			    var randomWallMatrix = [];
 			    var c = cols;
-			    for (var i = 0; i < (rows-1);i++){
+			    for (var i = 0; i < (lastRow+1);i++){
 			        randomWallMatrix[i] = [];
 			        var even = (i % 2 == 0);
 			        if (even) c--; //Las filas pares son muros horizontales, hay una columna menos
@@ -240,7 +248,7 @@
 				var yIni = alturaSuelo+alturaMuro/2;
 				var zAct = zIni;
 
-				for (var i = 0; i< (rows-1); i++){
+				for (var i = 0; i< (lastRow+1); i++){
 
 					var xAct = xIni;
 					if (!even) xAct -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
@@ -256,16 +264,38 @@
 				return positionMatrix;
 			}
 
+			function CreateBorder() {
+			    for (var i = 0; i < (lastRow) ; i++) 
+                    if((i%2)==1){
+                        walls[i][0] = WallState.PermaWall; 
+                        walls[i][cols] = WallState.PermaWall; 
+                    }
+			    for (var j = 0; j < (cols - 1) ; j++) {
+			        walls[0][j] = WallState.PermaWall;
+			        walls[lastRow][j] = WallState.PermaWall;
+			    }
+			}
+
+			function CreateEntranceAndExit(entranceCol,exitCol) {
+			    walls[lastRow][entranceCol] = WallState.PermaGap;
+			    walls[0][exitCol] = WallState.PermaGap;
+			}
+
+			function CreateLabyrinthBounding(entranceCol,exitCol) {
+			    CreateBorder();
+			    CreateEntranceAndExit(entranceCol,exitCol);
+			}
+
 			function PaintWalls(walls,rows,cols){ //Devuelve un array de nodos Array tipo "objeto muro, fila, columna"
 				var paintedWalls = [];
-				for (var i = 0; i < (rows-1);i++){
+				for (var i = 0; i < (lastRow+1);i++){
 				    paintedWalls[i] = [];
 				    var even = (i % 2 == 0);
 				    if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
 					else cols++;
 
 					for (var j = 0; j < cols; j++){
-						if(walls[i][j] == WallState.Alive){
+						if((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall)){
 						    paintedWalls[i][j] = CreaMuro();
 							paintedWalls[i][j].position = posMatrix[i][j];
 							if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
@@ -390,11 +420,11 @@
 
 			function AnimateWalls() {
 			    var c = cols;
-			    for (var i = 0; i < (rows - 1) ; i++) {
+			    for (var i = 0; i < (lastRow+1) ; i++) {
 			        if((i%2) == 0) c--;
 			        else c++;
 			        for (var j = 0; j < c; j++) {
-			            if (walls[i][j] != WallState.NonExisting) {
+			            if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.Dead)) {
 			                AnimateWall(i, j);
 			            }
                     }
@@ -431,7 +461,7 @@
 
 			function CambiaMuros() {
                 var c = cols
-			    for (var i = 0; i < (rows - 1); i++){
+			    for (var i = 0; i < (lastRow+1); i++){
 			        var even = ((i % 2) == 0);
 			        if (even) c--;
 			        else c++;
@@ -465,6 +495,7 @@
 
 			var posMatrix = PositionsMatrix(rows,cols);
 			var walls = RandomWallMatrix();
+            CreateLabyrinthBounding(cols/2,cols/2);
 			var paintedWalls = PaintWalls(walls, rows, cols);
 			AnimateWalls();
 
