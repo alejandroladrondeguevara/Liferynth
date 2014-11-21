@@ -73,7 +73,7 @@
                 3 : Muro permanente (no bajará el muro nunca)
                 4 : Hueco permanente (no habrá muro en esa posición)
             */
-            var WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4}
+            var WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4 }
 
 			loadSettings();
 
@@ -116,6 +116,7 @@
 			        cols = 20;
 			        break;
 			}
+			var lastCol = cols - 1;
 			var timeChange;
 			switch (speedSetting) {
 			    case "h":
@@ -176,7 +177,7 @@
 			}
 
 
-			function CreaMuro(){
+			function CreateDefaultWall(){
 				var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
 
 				var FrontMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
@@ -218,6 +219,14 @@
 				box.checkCollisions = true;
 				box.scaling = scaleMuro;
 				return box;
+			}
+
+			function CreateWall(i, j, even) { // i = fila, j = columna, even = par (si es horizontal o vertical)
+			    paintedWalls[i][j] = CreateDefaultWall();
+			    paintedWalls[i][j].position = posMatrix[i][j];
+			    walls[i][j] = WallState.Alive;
+			    AnimateWall(i, j);
+			    if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
 			}
 
 			function RandomWallMatrix() {
@@ -268,9 +277,9 @@
 			    for (var i = 0; i < (lastRow) ; i++) 
                     if((i%2)==1){
                         walls[i][0] = WallState.PermaWall; 
-                        walls[i][cols-1] = WallState.PermaWall; 
+                        walls[i][lastCol] = WallState.PermaWall; 
                     }
-			    for (var j = 0; j < (cols - 1) ; j++) {
+			    for (var j = 0; j < (lastCol) ; j++) {
 			        walls[0][j] = WallState.PermaWall;
 			        walls[lastRow][j] = WallState.PermaWall;
 			    }
@@ -295,8 +304,8 @@
 					else cols++;
 
 					for (var j = 0; j < cols; j++){
-						if((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall)){
-						    paintedWalls[i][j] = CreaMuro();
+					    if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall)) {
+						    paintedWalls[i][j] = CreateDefaultWall();
 							paintedWalls[i][j].position = posMatrix[i][j];
 							if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
 						}
@@ -457,10 +466,69 @@
 			    }
 			}
 
+			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
+			    var n = 0;
+			    var pasadas = 0;
+			    var state;
+			    for (var i = row-1; i <= row+1; i++)
+			        for (var j = col - 1; j <= col + 1; j++) 
+			            if (!(i == row && j == col))    //No somos nosotros mismos
+			                if (i >= 0 && i <= lastRow && j >= 0 && j < lastCol) { //No nos salimos de rango
+			                    state = w[i][j];
+			                    console.log("Estado: ", state);
+			                    if ((state == WallState.Alive) || (state == WallState.PermaWall))
+			                        n++;
+			                }
+			    return n;
 
+			}
 
-			function CambiaMuros() {
-                var c = cols
+			function CopyWalls() { //Devuelve una copia de la matriz walls
+			    var w = [];
+			    var c = cols;
+			    for (var i = 0; i < (lastRow + 1) ; i++) {
+			        w[i] = [];
+			        var even = ((i % 2) == 0);
+			        if (even) c--;
+			        else c++;
+			        for (var j = 0; j < c; j++) {
+			            w[i][j] = walls[i][j];
+			        }
+			    }
+			    return w;
+			}
+
+			function ChangeWallsLife() {
+			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
+
+			    var c = cols;
+			    for (var i = 0; i < (lastRow + 1) ; i++) {
+			        var even = ((i % 2) == 0);
+			        if (even) c--;
+			        else c++;
+			        for (var j = 0; j < c; j++) {
+			            var n = AliveNeighbours8(w, i, j);
+			            if (n == 3) {                         //Genera vida
+			                if (walls[i][j] == WallState.Dead)
+			                    ShowWall(i, j);
+			                else if (walls[i][j] == WallState.NonExisting) {
+			                    CreateWall(i, j, even);
+			                    ShowAnimation(i, j);
+			                }
+			            }
+			            else if ((n > 3) && (walls[i][j] == WallState.Alive)) { //Muerte por inanición 
+			                HideWall(i, j);
+			            }
+			            else if ((n < 2) && (walls[i][j] == WallState.Alive)) { //Muerte por aislamiento
+			                HideWall(i, j);
+			            }
+
+			        }
+			    }
+			}
+
+			function ChangeWalls() {
+			    var c = cols;
 			    for (var i = 0; i < (lastRow+1); i++){
 			        var even = ((i % 2) == 0);
 			        if (even) c--;
@@ -474,12 +542,8 @@
 			                    ShowWall(i, j);
 			            } else if (walls[i][j] == WallState.NonExisting) {
 			                if (Math.floor(Math.random() * 10) <= 1) {
-			                    paintedWalls[i][j] = CreaMuro();
-			                    paintedWalls[i][j].position = posMatrix[i][j];
-			                    walls[i][j] = WallState.Alive;
-			                    AnimateWall(i, j);
+			                    CreateWall(i, j, even);
 			                    ShowAnimation(i, j);
-			                    if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
 			                }
 			            }
 			        }
@@ -499,7 +563,7 @@
 			var paintedWalls = PaintWalls(walls, rows, cols);
 			AnimateWalls();
 
-			window.setInterval(CambiaMuros, timeChange*1000);
+			window.setInterval(ChangeWallsLife, timeChange*1000);
 
             //Jugador
 			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
@@ -646,7 +710,7 @@
                 */
 				
 				
-				//while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=cols-1) {auxi=0;auxj++;} else auxi++;}
+				//while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=lastCol) {auxi=0;auxj++;} else auxi++;}
 				/*shadowGenerator.getShadowMap().renderList.push(walls[auxi][auxj]);
 				plane.receiveShadows = true;
                 */
