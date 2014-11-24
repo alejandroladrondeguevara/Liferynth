@@ -263,7 +263,7 @@
 					if (!even) xAct -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
 
 					for(var j= 0; j< cols; j++){
-						positionMatrix[i][j] =  new BABYLON.Vector3(xAct, yIni, zAct);
+					    positionMatrix[i][j] = new BABYLON.Vector3(xAct, yIni, zAct);
 						xAct += anchuraMuro;
 					}
 					even = !even;
@@ -475,7 +475,6 @@
 			            if (!(i == row && j == col))    //No somos nosotros mismos
 			                if (i >= 0 && i <= lastRow && j >= 0 && j < lastCol) { //No nos salimos de rango
 			                    state = w[i][j];
-			                    console.log("Estado: ", state);
 			                    if ((state == WallState.Alive) || (state == WallState.PermaWall))
 			                        n++;
 			                }
@@ -498,6 +497,30 @@
 			    return w;
 			}
 
+			function UnderneathPlayer(row,col,even) {
+			    var under = false;
+			    var xPlayer = meshPlayer.position.x;
+			    var zPlayer = meshPlayer.position.z;
+			    var mismoPlano = true; /// TODO Si hay varios niveles de laberinto, diferenciar
+			    var xWallMin,xWallMax,zWallMin,zWallMax;
+			    var xWall = posMatrix[row][col].x;
+			    var zWall = posMatrix[row][col].z;
+			    if(even){
+			        xWallMin = xWall - anchuraMuro;
+			        xWallMax = xWall + anchuraMuro;
+			        zWallMin = zWall - profundidadMuro;
+			        zWallMax = zWall + profundidadMuro;
+			    }else{
+			        xWallMin = xWall - profundidadMuro;
+			        xWallMax = xWall + profundidadMuro;
+			        zWallMin = zWall - anchuraMuro;
+			        zWallMax = zWall + anchuraMuro;
+			    }
+			    if (mismoPlano && (xPlayer < xWallMax) && (xPlayer > xWallMin) && (zPlayer < zWallMax) && (zPlayer > zWallMin))
+			        under = true;
+			    return under;
+			}
+
 			function ChangeWallsLife() {
 			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
 
@@ -507,22 +530,21 @@
 			        if (even) c--;
 			        else c++;
 			        for (var j = 0; j < c; j++) {
-			            var n = AliveNeighbours8(w, i, j);
-			            if (n == 3) {                         //Genera vida
-			                if (walls[i][j] == WallState.Dead)
-			                    ShowWall(i, j);
-			                else if (walls[i][j] == WallState.NonExisting) {
-			                    CreateWall(i, j, even);
-			                    ShowAnimation(i, j);
+			                var n = AliveNeighbours8(w, i, j);
+			                if (n == 3 && !UnderneathPlayer(i, j, even) ){  //Genera vida
+			                    if (walls[i][j] == WallState.Dead)
+			                            ShowWall(i, j);
+			                    else if (walls[i][j] == WallState.NonExisting) {
+			                        CreateWall(i, j, even);
+			                        ShowAnimation(i, j);
+			                    }
 			                }
-			            }
-			            else if ((n > 3) && (walls[i][j] == WallState.Alive)) { //Muerte por inanición 
-			                HideWall(i, j);
-			            }
-			            else if ((n < 2) && (walls[i][j] == WallState.Alive)) { //Muerte por aislamiento
-			                HideWall(i, j);
-			            }
-
+			                else if ((n > 3) && (walls[i][j] == WallState.Alive)) { //Muerte por inanición 
+			                    HideWall(i, j);
+			                }
+			                else if ((n < 2) && (walls[i][j] == WallState.Alive)) { //Muerte por aislamiento
+			                    HideWall(i, j);
+			                }
 			        }
 			    }
 			}
@@ -537,13 +559,15 @@
 			            if (walls[i][j] == WallState.Alive){
 			                if (Math.floor(Math.random() * 10) <= 1)
 			                    HideWall(i, j);
-			            } else if (walls[i][j] == WallState.Dead) {
-			                if (Math.floor(Math.random() * 10) <= 1)
-			                    ShowWall(i, j);
-			            } else if (walls[i][j] == WallState.NonExisting) {
-			                if (Math.floor(Math.random() * 10) <= 1) {
-			                    CreateWall(i, j, even);
-			                    ShowAnimation(i, j);
+			            } else if (!UnderneathPlayer(i, j, even)) {
+			                if (walls[i][j] == WallState.Dead) {
+			                    if (Math.floor(Math.random() * 10) <= 1)
+			                        ShowWall(i, j);
+			                } else if (walls[i][j] == WallState.NonExisting) {
+			                    if (Math.floor(Math.random() * 10) <= 1) {
+			                        CreateWall(i, j, even);
+			                        ShowAnimation(i, j);
+			                    }
 			                }
 			            }
 			        }
