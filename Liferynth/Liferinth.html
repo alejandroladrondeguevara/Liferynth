@@ -451,7 +451,7 @@
 			function HideWall(row, col) {
 			    if (walls[row][col] == WallState.Alive) { //Si está vivo
 			        walls[row][col] = WallState.Dead;			        
-			        paintedWalls[row][col].checkCollisions = false;
+			        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
 			        //paintedWalls[row][col].visibility = false;
 			        HideAnimation(row,col);
 			    }
