@@ -147,6 +147,7 @@
 			var alturaMuro = 4;
 			var profundidadMuro = 0.75;
 			var scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro);
+			var numWalls = 0;
 
 			var gravity = new BABYLON.Vector3(0, -9, 0);
 
@@ -239,9 +240,11 @@
 			        else c++;
 
 			        for (var j = 0; j < c; j++){
-			            if (Math.floor(Math.random() * 10) <= 3)
+			            if (Math.floor(Math.random() * 10) <= 3){
 			                //if( ((i+j)*7)%3 == 0)
 			                randomWallMatrix[i][j] = WallState.Alive;
+			                numWalls++;
+			            }
 			            else randomWallMatrix[i][j] = WallState.NonExisting;
 			        }
 			    }
@@ -288,6 +291,7 @@
 			function CreateEntranceAndExit(entranceCol,exitCol) {
 			    walls[lastRow][entranceCol] = WallState.PermaGap;
 			    walls[0][exitCol] = WallState.PermaGap;
+			    numWalls--;
 			}
 
 			function CreateLabyrinthBounding(entranceCol,exitCol) {
@@ -442,9 +446,11 @@
 
 			function HideAnimation(r, c) {
 			    scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
+			    numWalls--;
 			}
 			function ShowAnimation(r, c) {
 			    scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
+			    numWalls++;
 			}
 
 
@@ -452,8 +458,7 @@
 			    if (walls[row][col] == WallState.Alive) { //Si está vivo
 			        walls[row][col] = WallState.Dead;			        
 			        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
-			        //paintedWalls[row][col].visibility = false;
-			        HideAnimation(row,col);
+			        HideAnimation(row, col);
 			    }
 			}
 
@@ -461,8 +466,7 @@
 			    if (walls[row][col] == WallState.Dead) { //Si está muerto, resucitamos
 			        walls[row][col] = WallState.Alive;
 			        paintedWalls[row][col].checkCollisions = true;
-			        //paintedWalls[row][col].visibility = true;
-			        ShowAnimation(row,col);
+			        ShowAnimation(row, col);
 			    }
 			}
 
@@ -531,9 +535,9 @@
 			        else c++;
 			        for (var j = 0; j < c; j++) {
 			                var n = AliveNeighbours8(w, i, j);
-			                if (n == 3 && !UnderneathPlayer(i, j, even) ){  //Genera vida
+			                if ((n == 3) && !UnderneathPlayer(i, j, even)) {  //Genera vida //
 			                    if (walls[i][j] == WallState.Dead)
-			                            ShowWall(i, j);
+			                        ShowWall(i, j);
 			                    else if (walls[i][j] == WallState.NonExisting) {
 			                        CreateWall(i, j, even);
 			                        ShowAnimation(i, j);
@@ -579,12 +583,43 @@
 			    window.setTimeout(function () { jumping = false; }, jumpTime * 1000);
 			}
 
-
+			function GeneratePermaWalls() {
+			    var minR = Math.round(rows/6);
+			    var maxR = Math.round((5 * rows) / 6);
+			    var minC = Math.round(cols / 6);
+			    var maxC = Math.round((5 * cols) / 6);
+			    var numR = maxR-minR;
+			    var numC = maxC-minC;
+			    var numPerm = Math.round((numR*numC) / 4);
+			    var chances = numPerm / ((numR) * (numC)); //Número de muros permanentes entre número de muros
+			    chances *= 100; //Porcentaje de probabilidad
+			    while (numPerm > 0) {
+			        var i = minR;
+			        while (i < maxR && numPerm > 0) {
+			            var j = minC;
+			            while (j < maxC && numPerm > 0) {
+			                if (walls[i][j] != WallState.PermaWall) {
+			                    var random = Math.floor(Math.random() * 100);
+			                    if (random <= chances) {
+			                        if ((walls[i][j] == WallState.Dead) || (walls[i][j] == WallState.NonExisting))
+			                            numWalls++;
+			                        walls[i][j] = WallState.PermaWall;
+			                        numPerm--;
+			                        console.log("Muro permanente: ", i, "-", j);
+			                    }
+			                }
+                            j++;
+			            }
+			            i++;
+			        }
+			    }
+			}
 
 			var posMatrix = PositionsMatrix(rows,cols);
 			var walls = RandomWallMatrix();
-            CreateLabyrinthBounding(cols/2,cols/2);
-			var paintedWalls = PaintWalls(walls, rows, cols);
+			CreateLabyrinthBounding(cols / 2, cols / 2);
+			GeneratePermaWalls();
+            var paintedWalls = PaintWalls(walls, rows, cols);
 			AnimateWalls();
 
 			window.setInterval(ChangeWallsLife, timeChange*1000);
