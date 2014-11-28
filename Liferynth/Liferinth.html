@@ -117,6 +117,10 @@
 			        break;
 			}
 			var lastCol = cols - 1;
+			var numWalls = 0;
+			var minWalls = 100;
+			var maxWalls = 160;
+
 			var timeChange;
 			switch (speedSetting) {
 			    case "h":
@@ -147,7 +151,6 @@
 			var alturaMuro = 4;
 			var profundidadMuro = 0.75;
 			var scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro);
-			var numWalls = 0;
 
 			var gravity = new BABYLON.Vector3(0, -9, 0);
 
@@ -501,7 +504,7 @@
 			    return w;
 			}
 
-			function UnderneathPlayer(row,col,even) {
+			function UnderneathPlayer(row,col) {
 			    var under = false;
 			    var xPlayer = meshPlayer.position.x;
 			    var zPlayer = meshPlayer.position.z;
@@ -509,6 +512,7 @@
 			    var xWallMin,xWallMax,zWallMin,zWallMax;
 			    var xWall = posMatrix[row][col].x;
 			    var zWall = posMatrix[row][col].z;
+			    var even = ((row % 2) == 0);
 			    if(even){
 			        xWallMin = xWall - anchuraMuro;
 			        xWallMax = xWall + anchuraMuro;
@@ -527,7 +531,7 @@
 
 			function ChangeWallsLife() {
 			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
-
+			    console.log("Muros vivos: ", numWalls);
 			    var c = cols;
 			    for (var i = 0; i < (lastRow + 1) ; i++) {
 			        var even = ((i % 2) == 0);
@@ -535,7 +539,8 @@
 			        else c++;
 			        for (var j = 0; j < c; j++) {
 			                var n = AliveNeighbours8(w, i, j);
-			                if ((n == 3) && !UnderneathPlayer(i, j, even)) {  //Genera vida //
+			                if ((n == 3) && (!UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
+			                    //Genera vida
 			                    if (walls[i][j] == WallState.Dead)
 			                        ShowWall(i, j);
 			                    else if (walls[i][j] == WallState.NonExisting) {
@@ -543,10 +548,12 @@
 			                        ShowAnimation(i, j);
 			                    }
 			                }
-			                else if ((n > 3) && (walls[i][j] == WallState.Alive)) { //Muerte por inanición 
+			                else if ((n > 3) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
+			                    //Muerte por inanición 
 			                    HideWall(i, j);
 			                }
-			                else if ((n < 2) && (walls[i][j] == WallState.Alive)) { //Muerte por aislamiento
+			                else if ((n < 2) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
+			                    //Muerte por aislamiento
 			                    HideWall(i, j);
 			                }
 			        }
@@ -560,14 +567,14 @@
 			        if (even) c--;
 			        else c++;
 			        for (var j = 0; j < c; j++) {  
-			            if (walls[i][j] == WallState.Alive){
+			            if ((walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
 			                if (Math.floor(Math.random() * 10) <= 1)
 			                    HideWall(i, j);
-			            } else if (!UnderneathPlayer(i, j, even)) {
+			            } else if ((!UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
 			                if (walls[i][j] == WallState.Dead) {
 			                    if (Math.floor(Math.random() * 10) <= 1)
 			                        ShowWall(i, j);
-			                } else if (walls[i][j] == WallState.NonExisting) {
+			                } else if ((walls[i][j] == WallState.NonExisting) && (numWalls < maxWalls)) {
 			                    if (Math.floor(Math.random() * 10) <= 1) {
 			                        CreateWall(i, j, even);
 			                        ShowAnimation(i, j);
@@ -849,6 +856,7 @@
 				        JumpAnimation();
 				        window.setTimeout(Land, jumpTime * 1000);
 				    }
+				    
 				}
 
 			});
