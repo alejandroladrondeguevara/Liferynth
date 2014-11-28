@@ -181,48 +181,22 @@
 			}
 
 
-			function CreateDefaultWall(){
-				var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
+			function CreateDefaultWall() {
 
-				var FrontMaterial = new BABYLON.StandardMaterial("cubeFront", scene);
-				FrontMaterial.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", scene);
-				FrontMaterial.diffuseTexture.wAng += Math.PI * 0.5;
+			    var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
 
-				FrontMaterial.diffuseTexture.uScale = 1;
-				FrontMaterial.diffuseTexture.vScale = 1;
-			    /*
-				var BackMaterial = new BABYLON.StandardMaterial("cubeBack", scene);
-				BackMaterial.diffuseTexture = new BABYLON.Texture("images/MuroFront.png", scene);
-				BackMaterial.diffuseTexture.wAng += Math.PI*0.5;
+			    var material = new BABYLON.StandardMaterial("wallFront", scene);
+			    material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", scene);
+			    material.diffuseTexture.wAng += Math.PI * 0.5;
 
-				var LeftMaterial = new BABYLON.StandardMaterial("cubeLeft", scene);
-				LeftMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
-				LeftMaterial.diffuseTexture.wAng += Math.PI*0.5;
+			    material.diffuseTexture.uScale = 1;
+			    material.diffuseTexture.vScale = 1;
 
-				var RightMaterial = new BABYLON.StandardMaterial("cubeRight", scene);
-				RightMaterial.diffuseTexture = new BABYLON.Texture("images/MuroLat.png", scene);
-*/
-				var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
-				cubeMultiMat.subMaterials.push(FrontMaterial);
+			    box.material = material;
+			    box.checkCollisions = true;
+			    box.scaling = scaleMuro;
+			    return box;
 
-				/*cubeMultiMat.subMaterials.push(BackMaterial);
-				cubeMultiMat.subMaterials.push(LeftMaterial);
-				cubeMultiMat.subMaterials.push(RightMaterial);*/
-                /*
-				box.subMeshes = [];
-				box.subMeshes.push(new BABYLON.SubMesh(2, 0,  4,  0, 6, box));  //Detrás
-				box.subMeshes.push(new BABYLON.SubMesh(3, 4,  4,  6, 6, box));	//Delante
-				box.subMeshes.push(new BABYLON.SubMesh(0, 8,  4, 12, 6, box));	//Derecha
-				box.subMeshes.push(new BABYLON.SubMesh(1, 12, 4, 18, 6, box));	//Izquierda
- 
-				box.subMeshes.push(new BABYLON.SubMesh(2, 16, 4, 24, 6, box));	//Arriba
-				box.subMeshes.push(new BABYLON.SubMesh(3, 20, 4, 30, 6, box));	//Abajo
-                */
-
-				box.material = cubeMultiMat;
-				box.checkCollisions = true;
-				box.scaling = scaleMuro;
-				return box;
 			}
 
 			function CreateWall(i, j, even) { // i = fila, j = columna, even = par (si es horizontal o vertical)
