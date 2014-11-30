@@ -75,8 +75,6 @@
             */
             var WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4 }
 
-			loadSettings();
-
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
@@ -502,6 +500,20 @@
 			        under = true;
 			    return under;
 			}
+
+			function CellContainsPlayer(i, j) {
+			    /* Devuelve verdadero o falso en función de si el personaje
+                    se encuentra sobre la celda i(fila),j(columna) de la matriz de celdas
+                    NOTA: La matriz de celdas es el hueco que queda dentro de los muros vecinos
+                         _ _
+                        |_|_|
+                        |_|_|   Matriz de celdas 2 filas, 2 columnas (hueco)
+                */
+			    var iMuro = (2 * i) + 1; //Cada celda de la matriz de celdas está rodeada por 4 muros, al ser mayor el nº de filas, que de columnas...
+			    return (camera.position.x >= posMatrix[iMuro][j].x && camera.position.x <= posMatrix[iMuro][j + 1].x
+				 && camera.position.z <= posMatrix[iMuro - 1][j].z && camera.position.z >= posMatrix[iMuro + 1][j].z);
+			}
+
 
 			function ChangeWallsLife() {
 			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
