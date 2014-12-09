@@ -69,6 +69,8 @@
     <Content Include="images\Baldosa.png" />
     <Content Include="images\Baldosa2.png" />
     <Content Include="images\BaldosaReplicada.png" />
+    <Content Include="images\GameOfLifePatterns1.png" />
+    <Content Include="images\GameOfLifePatterns2.png" />
     <Content Include="images\MetalWall.png" />
     <Content Include="images\MetalWallReplica.png" />
     <Content Include="images\MetalWallReplica2.png" />
@@ -76,9 +78,13 @@
     <Content Include="images\MuroLat.png" />
     <Content Include="js\babylon.js" />
     <Content Include="js\hand.js" />
+    <Content Include="js\jQuery.js" />
     <Content Include="Liferinth.html" />
     <Content Include="menu\LiferinthMenu.html" />
     <Content Include="menu\LiferinthSettingsMenu.html" />
+    <Content Include="sounds\GUIClickSound.mp3" />
+    <Content Include="sounds\GUIHoverSound.mp3" />
+    <Content Include="sounds\GUISound3.mp3" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Liferinth</title>
-	<script src="jQuery.js"></script>
+    <script src="../js/jQuery.js"></script>
     <style>
     * 
 	{
@@ -15,30 +15,67 @@
         box-sizing: border-box;
     }
 
-    body 
-	{
-        color: rgb(0,0,0);
-        -webkit-font-smoothing: antialiased;
-        font-family: 'Helvetica Neue', sans-serif;
-        font-size: 20px;
-        font-weight: 400;
-        height: auto !important;
-        height: 100%;
-        min-height: 100%;
-        text-rendering: optimizeLegibility;
-    }
+        nav.vertical > ul > li > a {
+            animation-name: slideLeft;
+            animation-duration: 6s;
+        }
+        @keyframes slideLeft {
+            0% {
+                position: relative;
+                left: 100%;
+            }
+            100% {
+                position: relative;
+                left: 0%;
+            }
+        }
 
-    div.wrapper 
-	{
-        margin: 20px auto;
-		<!--width: 350px;-->
-		width: 400px;
-    }
+        nav.vertical > ul > li > div > ul > li > a{
+            animation-name: slideRight;
+            animation-duration: 6s;
+        }
+        @keyframes slideRight {
+            0% {
+                position: relative;
+                left: -100%;
+                pointer-events: none;
+            }
+
+            100% {
+                position: relative;
+                left: 0%;
+                pointer-events: all;
+            }
+        }
+
+        body {
+            /**color: rgb(0,0,0);**/
+            background-color: rgb(255,255,255);
+            -webkit-font-smoothing: antialiased;
+            font-family: 'Helvetica Neue', sans-serif;
+            font-size: 20px;
+            font-weight: 400;
+            height: auto !important;
+            text-rendering: optimizeLegibility;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            height: 100%;
+        }
+
+        div.wrapper {
+            margin: 20px auto;            
+            /**width: 350px;**/
+            /**width: 400px;**/
+        }
 
     nav.vertical 
 	{
-        border-radius: 4px;
-        box-shadow: 0 0 10px rgba(0,0,0,.15);
+        /**border-radius: 4px;**/
+        /**box-shadow: 0 0 10px rgba(0,0,0,0.15);**/
         overflow: hidden;
         text-align: center;
     }
@@ -50,81 +87,79 @@
       }
 
         nav.vertical > ul > li,
-        nav.vertical > ul > li > div > ul > li
-		{
-          display: block;
-        }
-		
-		 nav.vertical > ul > li > a 
-		 {
-            background-color: rgb(0,0,0);
-            border-bottom: 1px solid rgba(255,255,255,.1);
-            box-shadow: inset 0 1px 1px rgba(0,0,0,.1), 0 1px 1px rgba(0,0,0,.1);
-            color: rgb(255,255,255);
+        nav.vertical > ul > li > div > ul > li {
             display: block;
-            font-weight: 500;
-            height: 50px;
-            letter-spacing: .5rem;
-            line-height: 50px;
-            text-shadow: 0 1px 1px rgba(0,0,0,.1);
-            text-transform: uppercase;
-            transition: all .1s ease;
-            text-decoration: none;           
-            font-size: 1.1rem;
-          }
-		
+            
+        }
+
+            nav.vertical > ul > li > a {
+                background-color: rgb(0,0,0);
+                /**border-bottom: 1px solid rgba(255,255,255,0.1);**/
+                box-shadow: inset 0 1px 1px rgba(0,0,0,0.1), 0 1px 1px rgba(0,0,0,0.1);
+                color: rgb(255,255,255);
+                display: block;
+                font-weight: 500;
+                height: 50px;
+                letter-spacing: .5rem;
+                line-height: 50px;
+                text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+                text-transform: uppercase;
+                /*transition: all .1s ease;*/
+                text-decoration: none;
+                font-size: 1.1rem;
+                cursor: pointer;
+                position: relative;
+                left: 0%;
+        }
+		    
+            /**
           nav.vertical > ul > li > a:hover 
 		  {
              <!--background-color: rgb(255,255,255);-->
-             border-bottom: 1px solid rgba(0,0,0,.1);
+             border-bottom: 1px solid rgba(0,0,0,0.1);
              <!--color: rgb(0,0,0);-->
 			 color: rgb(0,0,0);
              cursor: pointer;
+            }**/
+
+            nav.vertical > ul > li > div > ul > li > input[type=checkbox] + label,
+            nav.vertical > ul > li > div > ul > li > a {
+                /**border-bottom: 1px solid rgba(0,0,0,0.05);**/
+                color: rgb(0,0,0);
+                display: block;
+                font-size: 1.1rem;
+                padding: 10px 0;
+                text-decoration: none;
+                /**transition: all 0.15s linear;**/
+                cursor: pointer;
+                position: relative;
+                left: 0%;
             }
-				
-                nav.vertical > ul > li >  div > ul > li > input[type=checkbox] + label,
-                nav.vertical > ul > li > div > ul > li > a
-				{
-                    <!--background-color: rgb(255,255,255);-->
-                     border-bottom: 1px solid rgba(0,0,0,.05);
-                     color: rgb(0,0,0);
-                     display: block;
-                     font-size: 1.1rem;
-                     padding: 10px 0;
-                     text-decoration: none;
-                     transition: all 0.15s linear;
-                     cursor: pointer;
-                }
-           
-                nav.vertical > ul > li >  div > ul > li:hover > input[type=checkbox] + label,
-                nav.vertical > ul > li > div > ul > li:hover > a
-				{
-                    background-color: rgb(0,0,0);
-                    color: rgb(255,255,255);
-                    padding: 10px 0 10px 50px;
-                }  
-			   
-                    nav.vertical > ul > li > div > ul > li > input[type=checkbox]
-					{
-                      display: none;
-                      visibility: hidden;
-                    }                 
-                   
-				    nav.vertical > ul > li >  div > ul > li > input[type=checkbox]:checked + label
-					{
-						<!--background-color: rgb(255,255,255);-->
-						color: rgb(0,0,0);
-					}  
-					
-					nav.vertical > ul > li >  div > ul > li > input[type=checkbox]:hover + label
-					{
-						background-color: rgb(0,0,0);
-						color: rgb(255,255,255);
-					}
+
+            /**
+            nav.vertical > ul > li > div > ul > li:hover > a  {
+                background-color: rgb(0,0,0);
+                color: rgb(255,255,255);
+                padding: 10px 0 10px 50px;
+                position: relative;
+                left: 0%;
+            }  **/
+
+
+        .enable-hover:hover {
+            background-color: rgb(0,0,0);
+            color: rgb(255,255,255);
+            padding: 10px 0 10px 50px;
+            position: relative;
+            transition: all 0.20s linear;
+            left: 0%;
+        }
+
                          
     </style>   
-        <script>
-		//-------------------------- El siguiente código detecta cuándo se ha hecho la primera visita a la página ---------------
+        <script>    
+        var date;
+        //-------------------------- El siguiente código detecta cuándo se ha hecho la primera visita a la página ---------------
 		var firstLoad;
 		
 		// First Time Visit Processing
@@ -180,7 +215,18 @@
 		
 		// Example code to call it - you may modify this as required
 		function start() {
-			if (firstTime(thisPage())) {
+		    //******************************************************************************************
+		    element = $('nav.vertical > ul > li > div > ul > li > a');
+
+		    elementImg = document.getElementById('img');
+
+		    //wait for animation to finish before removing classes
+		    window.setTimeout(function () {
+		        element.addClass('enable-hover');
+		        elementImg.style.display = 'block'
+		    }, 6000);
+		    //*********************************************************************************************
+		    if (firstTime(thisPage())) {
 				// This code only runs for first visit
 				firstLoad = true;
 			}else {
@@ -191,8 +237,34 @@
 				rows = getUrlVars()["R"];
 				columns = getUrlVars()["Co"];				
 			}
-		}		
-		//--------------------------------------------------------------------	
+		}
+
+        //----------------------------------------------------Funciones de animación-----------------
+		function moveRight(elem) {
+		    var left = 0;
+		    elem.style.position = 'relative';
+		    function frame() {
+		        left++; // update parameters
+		        elem.style.left = left + '%'; // show frame
+		        if (left == 100) // check finish condition
+		            clearInterval(id);
+		    }
+		    var id = setInterval(frame, 10); // draw every 10ms
+		}
+
+		function moveLeft(elem) {
+		    var left = 0;
+		    elem.style.position = 'relative';
+		    function frame() {
+		        left--; // update parameters
+		        elem.style.left = left + '%'; // show frame
+		        if (left == 100) // check finish condition
+		            clearInterval(id);
+		    }
+		    var id = setInterval(frame, 10); // draw every 10ms
+		}
+
+		//-------------------------------------------------Opción Settings del Menú-------------------	
 		function page_settings_menu()
 		{
 			/**
@@ -200,54 +272,52 @@
 			_self - URL replaces the current page
 			_top - URL replaces any framesets that may be loaded
 			**/
-			//window.open("./LiferinthSettingsMenu.html", "_self");	
-			
-			var url = "./LiferinthSettingsMenu.html?";
-			
-			if(firstLoad==true){	
-					
-				url = url + "firstLoad=" + firstLoad;
-				//window.location.href = url;
-				window.open(url, "_self");	
-			}else{
-				url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
-				//window.location.href = url;
-				window.open(url, "_self");
-			}			
+		    //window.open("./LiferinthSettingsMenu.html", "_self");	
+
+		    element = document.getElementById('refSettings');
+		    moveRight(element);
+
+		    setTimeout(function () {
+		        var url = "./LiferinthSettingsMenu.html?";
+
+		        if (firstLoad == true) {
+
+		            //url = url + "firstLoad=" + firstLoad;
+		            //window.location.href = url;
+		            window.open(url, "_self");
+		        } else {
+		            url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
+		            //window.location.href = url;
+		            window.open(url, "_self");
+		        }
+		    }, 1500);					
 		}
-		
-		//http://caniuse.com/#search=localstorage
-		// Run function on load, could also run on dom ready
-		function load() {
-			// Check if localStorage is available (IE8+) and make sure that the visited flag is not already set.
-			if(typeof window.localStorage !== "undefined" && !localStorage.getItem('visited')) {
-				 // Set visited flag in local storage
-				 firstLoad = true;  
-			}else
-			{
-				firstLoad = false;  
-			}
-		}
-		//-----------------------------------------------------------------------
+
+        //---------------------------------------------Opción Play del Menú--------------------------
 		function playGame()
-		{			
-			var url = "../Liferinth.html?";
+		{
+		    element = document.getElementById('refPlay');
+		    moveRight(element);
+
+		    setTimeout(function () {
+			    var url = "../Liferinth.html?";
 			
-			if(firstLoad==true){	
+			    if(firstLoad==true){	
 					
-				url = url + "firstLoad=" + firstLoad;
-				//window.location.href = url;
-				window.open(url, "_self");	
-			}else{
-				url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
-				//window.location.href = url;
-				window.open(url, "_self");
-			}			
+				    url = url + "firstLoad=" + firstLoad;
+				    //window.location.href = url;
+				    window.open(url, "_self");	
+			    }else{
+				    url = url + "C=" + cpu + "&G=" + gpu + "&S=" + speed + "&R=" + rows + "&Co=" + columns;
+				    //window.location.href = url;
+				    window.open(url, "_self");
+			    }
+		    }, 1500);
 		}
 		//----------------------------------------------------------------------
         </script>
 </head>
-<body onload="start()" background="../images/backgroundImage.jpg">
+<body onload="start()">
     <div class="wrapper">
         <nav class="vertical">
             <ul>
@@ -255,22 +325,25 @@
                     <a>Liferinth</a>
                     <div>
                         <ul>
-                            <li>
-                                <a onClick="playGame()">Play</a>
+                            <li id="refPlay">
+                                <a onclick="playGame()">Play</a>
                             </li>
-                            <li>
-                                <input type="checkbox" id="settings" onclick="page_settings_menu()" />
-                                <label for="settings">Settings</label>
+                            <li id="refSettings">
+                                <a onclick="page_settings_menu()">Settings</a>
                             </li>
+                            <!--
                             <li>
-                                <a>About</a>
+                                <a onclick="prueba()">About</a>
                             </li>
+                            -->
                             <li>
                                 <a href="https://github.com/alejandroladrondeguevara/Liferynth" target="_blank">GitHub</a>
                             </li>
+                            <!--
                             <li>
                                 <a>Contact</a>
                             </li>
+                            -->
                         </ul>
                     </div>
                 </li>
@@ -305,6 +378,9 @@
                 </li>
             </ul>
         </nav>
-    </div>
+        <div>
+            <img id="img" src="../images/GameOfLifePatterns1.png" alt="" style="position: fixed; left: 38%; display: none; margin-bottom: auto; ">
+        </div>
+    </div> 
 </body>
 </html>
