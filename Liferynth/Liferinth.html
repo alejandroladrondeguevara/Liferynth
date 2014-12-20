@@ -120,6 +120,10 @@
 			var numWalls = 0;
 			var minWalls = 100;
 			var maxWalls = 160;
+            var exitRow = 0;
+            var exitCol = Math.floor(cols / 2);
+            var entranceRow = lastRow;
+            var entranceCol = Math.floor(cols / 2);
 
 			var timeChange;
 			switch (speedSetting) {
@@ -265,10 +269,49 @@
 			    }
 			}
 
-			function CreateEntranceAndExit(entranceCol,exitCol) {
+			function CreateEntranceAndExit(entranceCol, exitCol) {
+                //La salida del laberinto será un hueco por el que salir
 			    walls[lastRow][entranceCol] = WallState.PermaGap;
-			    walls[0][exitCol] = WallState.PermaGap;
+			    walls[exitRow][exitCol] = WallState.PermaGap;
 			    numWalls--;
+			}
+
+            /* Función que cambia la salida de sitio según los parámetros:
+                -Si es horizontal o vertical
+                -Si pertenece al muro contrario a la entrada o al izquierdo (northWest=true) (fila o columna 0 de la matriz de muros)
+                -Columna o fila correspondiente donde se tiene que colocar la salida
+            */
+			function ChangeExit(horizontal,northWest,pos) { 
+			    var i, j;
+			    var auxExitRow = exitRow;
+			    var auxExitCol = exitCol;
+			    var distinta=true;
+			    if (horizontal) {
+			        j = pos;
+			        distinta = (j != exitCol);
+			        if (distinta) {
+			            exitCol = pos;
+			            if (northWest) { i = 0; exitRow = 0; }
+			            else { i = lastRow; exitRow = lastRow; };
+			        }
+			    } else {
+			        i = (pos*2)+1; /*Si identificamos los muros verticales del borde de 0 al último (lastRow-1)/2,
+                                                no se corresponden con su posición en la matriz*/
+			        distinta = (i != exitRow);
+			        if (distinta) {
+			            exitRow = i;
+			            if (northWest) { j = 0; exitCol = 0; }
+			            else { j = lastCol; exitCol = lastCol; };
+			        }
+			    }
+			    if (distinta) {
+			        walls[auxExitRow][auxExitCol] = WallState.PermaWall; //Levantamos el muro de salida anterior
+			        ShowWall(auxExitRow, auxExitCol);
+			        walls[i][j] = WallState.PermaGap;
+			        HideWall(i, j);
+			        console.log("Muro Nuevo: ", i, " ", j);
+			    }
+			    
 			}
 
 			function CreateLabyrinthBounding(entranceCol,exitCol) {
@@ -284,12 +327,13 @@
 				    if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
 					else cols++;
 
-					for (var j = 0; j < cols; j++){
-					    if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall)) {
+				    for (var j = 0; j < cols; j++) {
+				        var entradaSalida = (walls[i][j] == WallState.PermaGap);
+					    if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall) || entradaSalida) {
 						    paintedWalls[i][j] = CreateDefaultWall();
 							paintedWalls[i][j].position = posMatrix[i][j];
 							if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
-						}
+					    }
 					}
 				}
 				return paintedWalls;
@@ -414,7 +458,7 @@
 			        if((i%2) == 0) c--;
 			        else c++;
 			        for (var j = 0; j < c; j++) {
-			            if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.Dead)) {
+			            if ((walls[i][j] != WallState.NonExisting)) {
 			                AnimateWall(i, j);
 			            }
                     }
@@ -432,19 +476,18 @@
 
 
 			function HideWall(row, col) {
-			    if (walls[row][col] == WallState.Alive) { //Si está vivo
+			    if (walls[row][col] == WallState.Alive) //Si está vivo, muere
 			        walls[row][col] = WallState.Dead;			        
-			        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
-			        HideAnimation(row, col);
-			    }
+			    window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
+			    HideAnimation(row, col);
 			}
 
 			function ShowWall(row, col) {
-			    if (walls[row][col] == WallState.Dead) { //Si está muerto, resucitamos
+                
+			    if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
 			        walls[row][col] = WallState.Alive;
-			        paintedWalls[row][col].checkCollisions = true;
-			        ShowAnimation(row, col);
-			    }
+			    paintedWalls[row][col].checkCollisions = true;
+			    ShowAnimation(row, col);
 			}
 
 			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
@@ -612,10 +655,12 @@
 
 			var posMatrix = PositionsMatrix(rows,cols);
 			var walls = RandomWallMatrix();
-			CreateLabyrinthBounding(cols / 2, cols / 2);
+			CreateLabyrinthBounding(entranceCol, exitCol);
 			GeneratePermaWalls();
             var paintedWalls = PaintWalls(walls, rows, cols);
-			AnimateWalls();
+            AnimateWalls();
+            HideWall(entranceRow, entranceCol);
+            HideWall(exitRow,exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
 
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 
@@ -701,6 +746,7 @@
 				camera.keysDown = [];
 				camera.keysLeft = [];
 				camera.keysRight = [];
+				camera.position.y = alturaSuelo + (alturaPlayer / 2);
 				scene.activeCamera = camera;
 
                 //Cámara desde arriba
@@ -844,6 +890,7 @@
 				        JumpAnimation();
 				        window.setTimeout(Land, jumpTime * 1000);
 				    }
+				    ChangeExit(true,false,1);
 				    
 				}
 
