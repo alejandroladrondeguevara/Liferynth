@@ -213,13 +213,16 @@
 
 			function RandomWallMatrix() {
 			    var randomWallMatrix = [];
-			    var c = cols;
+			    var c;
+
+			    //PARALELO
+                //Poca carga de trabajo, se realiza una vez al principio 
 			    for (var i = 0; i < (lastRow+1);i++){
 			        randomWallMatrix[i] = [];
 			        var even = (i % 2 == 0);
-			        if (even) c--; //Las filas pares son muros horizontales, hay una columna menos
-			        else c++;
-
+			        if (even) c = cols-1; //Las filas pares son muros horizontales, hay una columna menos
+			        else c = cols;
+                    //PARALELO
 			        for (var j = 0; j < c; j++){
 			            if (Math.floor(Math.random() * 10) <= 3){
 			                //if( ((i+j)*7)%3 == 0)
@@ -233,36 +236,38 @@
 			}
 
 			function PositionsMatrix(rows,cols){
-				var even = true;
 				var positionMatrix = CreateMatrix(rows,cols);
 
 				var zIni = (anchuraMuro/2) + anchuraMuro* (rows/2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
 				var xIni = - anchuraMuro* (cols/2);
-				var yIni = alturaSuelo+alturaMuro/2;
-				var zAct = zIni;
+				var yIni = alturaSuelo + alturaMuro / 2;
 
-				for (var i = 0; i< (lastRow+1); i++){
+			    //PARALELO
+                //Poca carga de trabajo, sólo se ejecuta una vez al principio del programa
+				for (var i = 0; i < (lastRow + 1) ; i++) {
+				    var even = (i % 2) == 0;
+				    var zAct = zIni - i*(anchuraMuro / 2);
+					var xAux = xIni;
+					if (!even) xAux -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
 
-					var xAct = xIni;
-					if (!even) xAct -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
-
-					for(var j= 0; j< cols; j++){
+                    //PARALELO
+					for (var j = 0; j < cols; j++) {
+					    var xAct = xAux + j * anchuraMuro; // En cada vuelta xAct += anchuraMuro;
 					    positionMatrix[i][j] = new BABYLON.Vector3(xAct, yIni, zAct);
-						xAct += anchuraMuro;
 					}
-					even = !even;
-					zAct -= (anchuraMuro/2);
 
 				}
 				return positionMatrix;
 			}
 
 			function CreateBorder() {
+			    //PARALELO: Poca carga, una ejecución al principio
 			    for (var i = 0; i < (lastRow) ; i++) 
                     if((i%2)==1){
                         walls[i][0] = WallState.PermaWall; 
                         walls[i][lastCol] = WallState.PermaWall; 
                     }
+			    //PARALELO: Poca carga, una ejecución al principio
 			    for (var j = 0; j < (lastCol) ; j++) {
 			        walls[0][j] = WallState.PermaWall;
 			        walls[lastRow][j] = WallState.PermaWall;
@@ -320,14 +325,17 @@
 			}
 
 			function PaintWalls(walls,rows,cols){ //Devuelve un array de nodos Array tipo "objeto muro, fila, columna"
-				var paintedWalls = [];
+			    var paintedWalls = [];
+			    var c;
+			    //PARALELO
+                //Poca carga, se ejecutará una vez al principio del programa
 				for (var i = 0; i < (lastRow+1);i++){
 				    paintedWalls[i] = [];
 				    var even = (i % 2 == 0);
-				    if (even) cols--; //Las filas pares son muros horizontales, hay una columna menos
-					else cols++;
-
-				    for (var j = 0; j < cols; j++) {
+				    if (even) c = cols-1; //Las filas pares son muros horizontales, hay una columna menos
+					else c = cols;
+                    //PARALELO
+				    for (var j = 0; j < c; j++) {
 				        var entradaSalida = (walls[i][j] == WallState.PermaGap);
 					    if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall) || entradaSalida) {
 						    paintedWalls[i][j] = CreateDefaultWall();
@@ -453,10 +461,11 @@
 			}
 
 			function AnimateWalls() {
-			    var c = cols;
+			    var c;
+			    //PARALELO
 			    for (var i = 0; i < (lastRow+1) ; i++) {
-			        if((i%2) == 0) c--;
-			        else c++;
+			        if((i%2) == 0) c = cols-1;
+			        else c = cols;
 			        for (var j = 0; j < c; j++) {
 			            if ((walls[i][j] != WallState.NonExisting)) {
 			                AnimateWall(i, j);
@@ -494,6 +503,7 @@
 			    var n = 0;
 			    var pasadas = 0;
 			    var state;
+			    //PARALELO, variable contador n (de reducción)
 			    for (var i = row-1; i <= row+1; i++)
 			        for (var j = col - 1; j <= col + 1; j++) 
 			            if (!(i == row && j == col))    //No somos nosotros mismos
@@ -508,12 +518,13 @@
 
 			function CopyWalls() { //Devuelve una copia de la matriz walls
 			    var w = [];
-			    var c = cols;
+			    var c;
+                //PARALELO
 			    for (var i = 0; i < (lastRow + 1) ; i++) {
 			        w[i] = [];
 			        var even = ((i % 2) == 0);
-			        if (even) c--;
-			        else c++;
+			        if (even) c = cols-1;
+			        else c = cols;
 			        for (var j = 0; j < c; j++) {
 			            w[i][j] = walls[i][j];
 			        }
@@ -563,11 +574,14 @@
 			function ChangeWallsLife() {
 			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
 			    console.log("Muros vivos: ", numWalls);
-			    var c = cols;
+			    var c;
+			    //PARALELO: Se escribe en una posición distinta de la matriz cada vuelta del bucle interno
+                //Gran carga de trabajo, ejecución periódica y costosa
 			    for (var i = 0; i < (lastRow + 1) ; i++) {
 			        var even = ((i % 2) == 0);
-			        if (even) c--;
-			        else c++;
+			        if (even) c = cols-1;
+			        else c = cols;
+                    //PARALELO
 			        for (var j = 0; j < c; j++) {
 			                var n = AliveNeighbours8(w, i, j);
 			                if ((n == 3) && (!UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
@@ -592,11 +606,13 @@
 			}
 
 			function ChangeWalls() {
-			    var c = cols;
+			    var c;
+			    //PARALELO:
+                //Gran carga de trabajo, se ejecuta periódicamente y recorre toda la matriz
 			    for (var i = 0; i < (lastRow+1); i++){
 			        var even = ((i % 2) == 0);
-			        if (even) c--;
-			        else c++;
+			        if (even) c = cols-1;
+			        else c = cols;
 			        for (var j = 0; j < c; j++) {  
 			            if ((walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
 			                if (Math.floor(Math.random() * 10) <= 1)
@@ -631,6 +647,8 @@
 			    var numPerm = Math.round((numR*numC) / 4);
 			    var chances = numPerm / ((numR) * (numC)); //Número de muros permanentes entre número de muros
 			    chances *= 100; //Porcentaje de probabilidad
+                //NO PARALELO: No se sabe hasta cuándo va a iterar
+                //Poca carga de trabajo, se ejecuta una vez
 			    while (numPerm > 0) {
 			        var i = minR;
 			        while (i < maxR && numPerm > 0) {
