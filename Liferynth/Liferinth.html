@@ -5,6 +5,7 @@
     <title>Liferinth.js</title>
     <script src="js/babylon.js"></script>
     <script src="js/hand.js"></script>
+    <script src="js/Walls.js"></script>
     <style>
         html, body {
             width: 100%;
@@ -82,15 +83,6 @@
 
             loadSettings();
 
-            /*Estado del muro: 
-                0 : No hay muro creado
-                1 : Muro activo
-                2 : Muro no visible
-                3 : Muro permanente (no bajará el muro nunca)
-                4 : Hueco permanente (no habrá muro en esa posición)
-            */
-            var WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4 }
-
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
@@ -155,20 +147,15 @@
 			        break;
 			}
 
-			var alturaSuelo = 0;
+			var floorHeight = 0;
 			var planeSize = 500;
 
-			var margen = 1.01;
+			var margin = 1.01;
 
-			var alturaPlayer = 1.75;
-			var anchuraPlayer = 0.5;
-			var longitudPlayer = 0.5;
-			var ellipsoidPlayer = new BABYLON.Vector3(0.5, alturaPlayer / 4, 0.5);
-
-			var anchuraMuro = 6;
-			var alturaMuro = 4;
-			var profundidadMuro = 0.75;
-			var scaleMuro = new BABYLON.Vector3(profundidadMuro, alturaMuro, anchuraMuro);
+			var playerHeight = 1.75;
+			var playerWidth = 0.5;
+			var playerLength = 0.5;
+			var ellipsoidPlayer = new BABYLON.Vector3(0.5, playerHeight / 4, 0.5);
 
 			var gravity = new BABYLON.Vector3(0, -9, 0);
 
@@ -183,7 +170,71 @@
 
             //Variables del salto: Altura del salto, tiempo de vuelo
 			var jumpHeight = 1.5;
-            var jumpTime = 0.3;
+			var jumpTime = 0.3;
+
+
+			var posMatrix;
+			var paintedWalls;
+			var walls;
+			var _this = this;
+			var Walls = new Walls(_this);
+			var WallState = Walls.WallState;
+
+
+            /****************************************************************************
+             ****************************************************************************
+             *****************      Métodos Gestión de los Enemigos     *****************
+             ****************************************************************************
+             ****************************************************************************/
+
+			var enemy = []; // 0 enemigos inicialmente
+			var numEnemies = 0;
+            // Mismo tamaño que el jugador por ahora //TODO
+			var enemyHeight = playerHeight;
+			var enemyWidth = playerWidth;
+			var enemyLength = playerLength;
+
+			function CreateEnemy(row, col) {
+			/*Crea un enemigo en la posición row,col de la matriz de posiciones del laberinto*/
+			    var e = new Object();
+			    e.walls = walls;
+			    var testPos = paintedWalls[lastRow][5].position; //TODO
+			    e.position = new BABYLON.Vector3(testPos.x, testPos.y, testPos.z - 3);
+			    e.move = function (horizontal, positive) {
+			    /* 
+                    Mueve al enemigo en una dirección dentro del laberinto
+                */
+			        //Si (horizontal == true) --> Eje x
+			        if (horizontal) {
+			            if (positive) { e.position.x += wallWidth; }
+			            else { e.position.x -= wallWidth; }
+			        } else {
+			            if (positive) { e.position.z += wallWidth; }
+			            else { e.position.z -= wallWidth; }
+			        }
+			    };
+			    enemy[numEnemies] = e;
+			    numEnemies++;
+			}
+
+
+
+			function ManageEnemies(){
+			    //PARALELO
+			    // No se modifica el mapa de muros, si un enemigo lo modificara, 
+			    // se llevaría a cabo al finalizar el bucle (Tareas pendientes)
+			    for (var i = 0; i < numEnemies; i++) {
+			        enemy[i];
+			    }
+
+			}
+
+
+            /****************************************************************************
+             ****************************************************************************
+             *****************       Métodos Gestión del Laberinto      *****************
+             ****************************************************************************
+             ****************************************************************************/
 
 			function CreateMatrix(rows,cols) {
 			  var arr = [];
@@ -198,200 +249,6 @@
 			  return arr;
 			}
 
-
-			function CreateDefaultWall() {
-
-			    var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
-
-			    var material = new BABYLON.StandardMaterial("wallFront", scene);
-			    material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", scene);
-			    material.diffuseTexture.wAng += Math.PI * 0.5;
-
-			    material.diffuseTexture.uScale = 1;
-			    material.diffuseTexture.vScale = 1;
-
-			    box.material = material;
-			    box.checkCollisions = true;
-			    box.scaling = scaleMuro;
-			    return box;
-
-			}
-
-			function CreateWall(i, j, even) { // i = fila, j = columna, even = par (si es horizontal o vertical)
-			    paintedWalls[i][j] = CreateDefaultWall();
-			    paintedWalls[i][j].position = posMatrix[i][j];
-			    walls[i][j] = WallState.Alive;
-			    AnimateWall(i, j);
-			    if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
-			}
-
-			function RandomWallMatrix() {
-			    var randomWallMatrix = [];
-			    var c;
-
-			    //PARALELO
-                //Poca carga de trabajo, se realiza una vez al principio 
-			    for (var i = 0; i < (lastRow+1);i++){
-			        randomWallMatrix[i] = [];
-			        var even = (i % 2 == 0);
-			        if (even) c = cols-1; //Las filas pares son muros horizontales, hay una columna menos
-			        else c = cols;
-                    //PARALELO
-			        for (var j = 0; j < c; j++){
-			            if (Math.floor(Math.random() * 10) <= 3){
-			                //if( ((i+j)*7)%3 == 0)
-			                randomWallMatrix[i][j] = WallState.Alive;
-			                numWalls++;
-			            }
-			            else randomWallMatrix[i][j] = WallState.NonExisting;
-			        }
-			    }
-			    return randomWallMatrix;
-			}
-
-			function PositionsMatrix(rows,cols){
-				var positionMatrix = CreateMatrix(rows,cols);
-
-				var zIni = (anchuraMuro/2) + anchuraMuro* (rows/2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
-				var xIni = - anchuraMuro* (cols/2);
-				var yIni = alturaSuelo + alturaMuro / 2;
-
-			    //PARALELO
-                //Poca carga de trabajo, sólo se ejecuta una vez al principio del programa
-				for (var i = 0; i < (lastRow + 1) ; i++) {
-				    var even = (i % 2) == 0;
-				    var zAct = zIni - i*(anchuraMuro / 2);
-					var xAux = xIni;
-					if (!even) xAux -= (anchuraMuro/2); //Filas pares horizontales, impares verticales
-
-                    //PARALELO
-					for (var j = 0; j < cols; j++) {
-					    var xAct = xAux + j * anchuraMuro; // En cada vuelta xAct += anchuraMuro;
-					    positionMatrix[i][j] = new BABYLON.Vector3(xAct, yIni, zAct);
-					}
-
-				}
-				return positionMatrix;
-			}
-
-			function CreateBorder() {
-			    //PARALELO: Poca carga, una ejecución al principio
-			    for (var i = 0; i < (lastRow) ; i++) 
-                    if((i%2)==1){
-                        walls[i][0] = WallState.PermaWall; 
-                        walls[i][lastCol] = WallState.PermaWall; 
-                    }
-			    //PARALELO: Poca carga, una ejecución al principio
-			    for (var j = 0; j < (lastCol) ; j++) {
-			        walls[0][j] = WallState.PermaWall;
-			        walls[lastRow][j] = WallState.PermaWall;
-			    }
-			}
-
-			function CreateEntranceAndExit(entranceCol, exitCol) {
-                //La salida del laberinto será un hueco por el que salir
-			    walls[lastRow][entranceCol] = WallState.PermaGap;
-			    walls[exitRow][exitCol] = WallState.PermaGap;
-			    numWalls--;
-			}
-
-            /* Función que cambia la salida de sitio según los parámetros:
-                -Si es horizontal o vertical
-                -Si pertenece al muro contrario a la entrada o al izquierdo (northWest=true) (fila o columna 0 de la matriz de muros)
-                -Columna o fila correspondiente donde se tiene que colocar la salida
-            */
-			function ChangeExit(horizontal,northWest,pos) { 
-			    var i, j;
-			    var auxExitRow = exitRow;
-			    var auxExitCol = exitCol;
-			    var distinta=true;
-			    if (horizontal) {
-			        j = pos;
-			        distinta = (j != exitCol);
-			        if (distinta) {
-			            exitCol = pos;
-			            if (northWest) { i = 0; exitRow = 0; }
-			            else { i = lastRow; exitRow = lastRow; };
-			        }
-			    } else {
-			        i = (pos*2)+1; /*Si identificamos los muros verticales del borde de 0 al último (lastRow-1)/2,
-                                                no se corresponden con su posición en la matriz*/
-			        distinta = (i != exitRow);
-			        if (distinta) {
-			            exitRow = i;
-			            if (northWest) { j = 0; exitCol = 0; }
-			            else { j = lastCol; exitCol = lastCol; };
-			        }
-			    }
-			    if (distinta) {
-			        walls[auxExitRow][auxExitCol] = WallState.PermaWall; //Levantamos el muro de salida anterior
-			        ShowWall(auxExitRow, auxExitCol);
-			        walls[i][j] = WallState.PermaGap;
-			        HideWall(i, j);
-			        console.log("Muro Nuevo: ", i, " ", j);
-			    }
-			    
-			}
-
-			function CreateLabyrinthBounding(entranceCol,exitCol) {
-			    CreateBorder();
-			    CreateEntranceAndExit(entranceCol,exitCol);
-			}
-
-			function PaintWalls(walls,rows,cols){ //Devuelve un array de nodos Array tipo "objeto muro, fila, columna"
-			    var paintedWalls = [];
-			    var c;
-			    //PARALELO
-                //Poca carga, se ejecutará una vez al principio del programa
-				for (var i = 0; i < (lastRow+1);i++){
-				    paintedWalls[i] = [];
-				    var even = (i % 2 == 0);
-				    if (even) c = cols-1; //Las filas pares son muros horizontales, hay una columna menos
-					else c = cols;
-                    //PARALELO
-				    for (var j = 0; j < c; j++) {
-				        var entradaSalida = (walls[i][j] == WallState.PermaGap);
-					    if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall) || entradaSalida) {
-						    paintedWalls[i][j] = CreateDefaultWall();
-							paintedWalls[i][j].position = posMatrix[i][j];
-							if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
-					    }
-					}
-				}
-				return paintedWalls;
-			}
-
-			function AnimateWall(r, c) {
-			    var string1 = "animation " + r + " " + c;
-			    var animationBox = new BABYLON.Animation(string1, "position.y", 75,
-                    BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-			    // An array with all animation keys
-			    var keys = [];
-
-			        keys.push({
-			            frame: 0,
-			            value: alturaSuelo + alturaMuro / 2
-			        });
-			        keys.push({
-			            frame: 20,
-			            value: alturaSuelo
-			        });
-			        keys.push({
-			            frame: 100,
-			            value: alturaSuelo - (alturaMuro * margen) / 2
-			        });
-			        keys.push({
-			            frame: 120,
-			            value: alturaSuelo + alturaMuro / 4
-			        });
-			        keys.push({
-			            frame: 200,
-			            value: alturaSuelo + alturaMuro / 2
-			        });
-			    animationBox.setKeys(keys);
-			    paintedWalls[r][c].animations.push(animationBox);
-			}
-
 			function AnimatePlayer() {
 			    var string1 = "Player position";
 			    var animationPosition = new BABYLON.Animation(string1, "position.y", 100/jumpTime,
@@ -403,31 +260,31 @@
                 // 100-200 Animación aterrizaje
 			    keys.push({
 			        frame: 0,
-			        value: alturaSuelo + alturaPlayer / 2
+			        value: floorHeight + playerHeight / 2
 			    });
 			    keys.push({
 			        frame: 55,
-			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight*(3/4)
+			        value: floorHeight + playerHeight / 2 + jumpHeight*(3/4)
 			    });
 			    keys.push({
 			        frame: 100,
-			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight
+			        value: floorHeight + playerHeight / 2 + jumpHeight
 			    });
 			    keys.push({
 			        frame: 140,
-			        value: alturaSuelo + alturaPlayer / 2 + jumpHeight*(3/4)
+			        value: floorHeight + playerHeight / 2 + jumpHeight*(3/4)
 			    });
 			    keys.push({
 			        frame: 200,
-			        value: alturaSuelo + alturaPlayer / 2
+			        value: floorHeight + playerHeight / 2
 			    });
 			    keys.push({
 			        frame: 250,
-			        value: alturaSuelo + alturaPlayer / 3
+			        value: floorHeight + playerHeight / 3
 			    });
 			    keys.push({
 			        frame: 300,
-			        value: alturaSuelo + alturaPlayer / 2
+			        value: floorHeight + playerHeight / 2
 			    });
 
 			    animationPosition.setKeys(keys);
@@ -441,15 +298,15 @@
 			    // 250-300 Animación levantarse
 			    keys2.push({
 			        frame: 200,
-			        value: alturaPlayer
+			        value: playerHeight
 			    });
 			    keys2.push({
 			        frame: 250,
-			        value: alturaPlayer * (2/3)
+			        value: playerHeight * (2/3)
 			    });
 			    keys2.push({
 			        frame: 300,
-			        value: alturaPlayer
+			        value: playerHeight
 			    });
 			    animationCrouch.setKeys(keys2);
 
@@ -466,51 +323,12 @@
 			}
 			function CrouchAnimation() {
 			    scene.beginAnimation(collidingBox, 200, 250, false);
-			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, (alturaPlayer*(2/3))/ 4, 0.5);
+			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, (playerHeight*(2/3))/ 4, 0.5);
 			}
 			function StandUpAnimation() {
 			    crouching = false;
 			    scene.beginAnimation(collidingBox, 250, 300, false);
 			    collidingBox.ellipsoid = ellipsoidPlayer;
-			}
-
-			function AnimateWalls() {
-			    var c;
-			    //PARALELO
-			    for (var i = 0; i < (lastRow+1) ; i++) {
-			        if((i%2) == 0) c = cols-1;
-			        else c = cols;
-			        for (var j = 0; j < c; j++) {
-			            if ((walls[i][j] != WallState.NonExisting)) {
-			                AnimateWall(i, j);
-			            }
-                    }
-			    }
-			}
-
-			function HideAnimation(r, c) {
-			    scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
-			    numWalls--;
-			}
-			function ShowAnimation(r, c) {
-			    scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
-			    numWalls++;
-			}
-
-
-			function HideWall(row, col) {
-			    if (walls[row][col] == WallState.Alive) //Si está vivo, muere
-			        walls[row][col] = WallState.Dead;			        
-			    window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
-			    HideAnimation(row, col);
-			}
-
-			function ShowWall(row, col) {
-                
-			    if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
-			        walls[row][col] = WallState.Alive;
-			    paintedWalls[row][col].checkCollisions = true;
-			    ShowAnimation(row, col);
 			}
 
 			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
@@ -530,63 +348,8 @@
 
 			}
 
-			function CopyWalls() { //Devuelve una copia de la matriz walls
-			    var w = [];
-			    var c;
-                //PARALELO
-			    for (var i = 0; i < (lastRow + 1) ; i++) {
-			        w[i] = [];
-			        var even = ((i % 2) == 0);
-			        if (even) c = cols-1;
-			        else c = cols;
-			        for (var j = 0; j < c; j++) {
-			            w[i][j] = walls[i][j];
-			        }
-			    }
-			    return w;
-			}
-
-			function UnderneathPlayer(row,col) {
-			    var under = false;
-			    var xPlayer = meshPlayer.position.x;
-			    var zPlayer = meshPlayer.position.z;
-			    var mismoPlano = true; /// TODO Si hay varios niveles de laberinto, diferenciar
-			    var xWallMin,xWallMax,zWallMin,zWallMax;
-			    var xWall = posMatrix[row][col].x;
-			    var zWall = posMatrix[row][col].z;
-			    var even = ((row % 2) == 0);
-			    if(even){
-			        xWallMin = xWall - anchuraMuro;
-			        xWallMax = xWall + anchuraMuro;
-			        zWallMin = zWall - profundidadMuro;
-			        zWallMax = zWall + profundidadMuro;
-			    }else{
-			        xWallMin = xWall - profundidadMuro;
-			        xWallMax = xWall + profundidadMuro;
-			        zWallMin = zWall - anchuraMuro;
-			        zWallMax = zWall + anchuraMuro;
-			    }
-			    if (mismoPlano && (xPlayer < xWallMax) && (xPlayer > xWallMin) && (zPlayer < zWallMax) && (zPlayer > zWallMin))
-			        under = true;
-			    return under;
-			}
-
-			function CellContainsPlayer(i, j) {
-			    /* Devuelve verdadero o falso en función de si el personaje
-                    se encuentra sobre la celda i(fila),j(columna) de la matriz de celdas
-                    NOTA: La matriz de celdas es el hueco que queda dentro de los muros vecinos
-                         _ _
-                        |_|_|
-                        |_|_|   Matriz de celdas 2 filas, 2 columnas (hueco)
-                */
-			    var iMuro = (2 * i) + 1; //Cada celda de la matriz de celdas está rodeada por 4 muros, al ser mayor el nº de filas, que de columnas...
-			    return (camera.position.x >= posMatrix[iMuro][j].x && camera.position.x <= posMatrix[iMuro][j + 1].x
-				 && camera.position.z <= posMatrix[iMuro - 1][j].z && camera.position.z >= posMatrix[iMuro + 1][j].z);
-			}
-
-
 			function ChangeWallsLife() {
-			    var w = CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
+			    var w = Walls.CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
 			    console.log("Muros vivos: ", numWalls);
 			    var c;
 			    //PARALELO: Se escribe en una posición distinta de la matriz cada vuelta del bucle interno
@@ -598,22 +361,22 @@
                     //PARALELO
 			        for (var j = 0; j < c; j++) {
 			                var n = AliveNeighbours8(w, i, j);
-			                if ((n == 3) && (!UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
+			                if ((n == 3) && (!Walls.UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
 			                    //Genera vida
 			                    if (walls[i][j] == WallState.Dead)
-			                        ShowWall(i, j);
+			                        Walls.ShowWall(i, j);
 			                    else if (walls[i][j] == WallState.NonExisting) {
-			                        CreateWall(i, j, even);
-			                        ShowAnimation(i, j);
+			                        Walls.CreateWall(i, j, even);
+			                        Walls.ShowAnimation(i, j);
 			                    }
 			                }
 			                else if ((n > 3) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
 			                    //Muerte por inanición 
-			                    HideWall(i, j);
+			                    Walls.HideWall(i, j);
 			                }
 			                else if ((n < 2) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
 			                    //Muerte por aislamiento
-			                    HideWall(i, j);
+			                    Walls.HideWall(i, j);
 			                }
 			        }
 			    }
@@ -630,11 +393,11 @@
 			        for (var j = 0; j < c; j++) {  
 			            if ((walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
 			                if (Math.floor(Math.random() * 10) <= 1)
-			                    HideWall(i, j);
-			            } else if ((!UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
+			                    Walls.HideWall(i, j);
+			            } else if ((!Walls.UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
 			                if (walls[i][j] == WallState.Dead) {
 			                    if (Math.floor(Math.random() * 10) <= 1)
-			                        ShowWall(i, j);
+			                        Walls.ShowWall(i, j);
 			                } else if ((walls[i][j] == WallState.NonExisting) && (numWalls < maxWalls)) {
 			                    if (Math.floor(Math.random() * 10) <= 1) {
 			                        CreateWall(i, j, even);
@@ -651,57 +414,24 @@
 			    window.setTimeout(function () { jumping = false; }, jumpTime * 1000);
 			}
 
-			function GeneratePermaWalls() {
-			    var minR = Math.round(rows/6);
-			    var maxR = Math.round((5 * rows) / 6);
-			    var minC = Math.round(cols / 6);
-			    var maxC = Math.round((5 * cols) / 6);
-			    var numR = maxR-minR;
-			    var numC = maxC-minC;
-			    var numPerm = Math.round((numR*numC) / 4);
-			    var chances = numPerm / ((numR) * (numC)); //Número de muros permanentes entre número de muros
-			    chances *= 100; //Porcentaje de probabilidad
-                //NO PARALELO: No se sabe hasta cuándo va a iterar
-                //Poca carga de trabajo, se ejecuta una vez
-			    while (numPerm > 0) {
-			        var i = minR;
-			        while (i < maxR && numPerm > 0) {
-			            var j = minC;
-			            while (j < maxC && numPerm > 0) {
-			                if (walls[i][j] != WallState.PermaWall) {
-			                    var random = Math.floor(Math.random() * 100);
-			                    if (random <= chances) {
-			                        if ((walls[i][j] == WallState.Dead) || (walls[i][j] == WallState.NonExisting))
-			                            numWalls++;
-			                        walls[i][j] = WallState.PermaWall;
-			                        numPerm--;
-			                        console.log("Muro permanente: ", i, "-", j);
-			                    }
-			                }
-                            j++;
-			            }
-			            i++;
-			        }
-			    }
-			}
 
-			var posMatrix = PositionsMatrix(rows,cols);
-			var walls = RandomWallMatrix();
-			CreateLabyrinthBounding(entranceCol, exitCol);
-			GeneratePermaWalls();
-            var paintedWalls = PaintWalls(walls, rows, cols);
-            AnimateWalls();
-            HideWall(entranceRow, entranceCol);
-            HideWall(exitRow,exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
+			posMatrix = Walls.PositionsMatrix(rows,cols);
+			walls = Walls.RandomWallMatrix();
+			Walls.CreateLabyrinthBounding(entranceCol, exitCol);
+			Walls.GeneratePermaWalls();
+            paintedWalls = Walls.PaintWalls(walls, rows, cols);
+            Walls.AnimateWalls();
+            Walls.HideWall(entranceRow, entranceCol);
+            Walls.HideWall(exitRow,exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
 
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 
             //Jugador
 			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
 			    collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
-			    meshPlayer.scaling = new BABYLON.Vector3(anchuraPlayer, alturaPlayer, longitudPlayer);
-			    collidingBox.scaling = new BABYLON.Vector3(anchuraPlayer, alturaPlayer, longitudPlayer);
-			    meshPlayer.position.y = alturaSuelo + (meshPlayer.scaling.y / 2);
+			    meshPlayer.scaling = new BABYLON.Vector3(playerWidth, playerHeight, playerLength);
+			    collidingBox.scaling = new BABYLON.Vector3(playerWidth, playerHeight, playerLength);
+			    meshPlayer.position.y = floorHeight + (meshPlayer.scaling.y / 2);
 			    collidingBox.position.y = meshPlayer.position.y;
 			    collidingBox.checkCollisions = true;
 			    collidingBox.applyGravity = true;
@@ -737,13 +467,13 @@
 
 				//Spot
 			/*	
-			    var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margen, meshPlayer.position.z),
+			    var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margin, meshPlayer.position.z),
                     new BABYLON.Vector3(meshPlayer.rotation.x, -0.01, meshPlayer.rotation.z), 2.2, 2, scene);
 				light2.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
 				light2.specular = new BABYLON.Color3(1, 1, 1);
             */
 			    var angFlashlight = -0.4;
-			    var flashlight = new BABYLON.SpotLight("Flashlight", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margen, meshPlayer.position.z),
+			    var flashlight = new BABYLON.SpotLight("Flashlight", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margin, meshPlayer.position.z),
                     new BABYLON.Vector3(Math.sin(meshPlayer.rotation.y), angFlashlight, Math.cos(meshPlayer.rotation.y)), 3, 3, scene);
 			        //new BABYLON.Vector3(-0.5, -0.2, 0.4), 3, 3, scene);
 				flashlight.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
@@ -778,7 +508,7 @@
 				camera.keysDown = [];
 				camera.keysLeft = [];
 				camera.keysRight = [];
-				camera.position.y = alturaSuelo + (alturaPlayer / 2);
+				camera.position.y = floorHeight + (playerHeight / 2);
 				scene.activeCamera = camera;
 
                 //Cámara desde arriba
@@ -812,7 +542,7 @@
 				    materialPlane.diffuseTexture.uScale = planeSize / 7.5;
 				    materialPlane.diffuseTexture.vScale = planeSize / 7.5;
 				plane.rotation.x = Math.PI / 2;
-				plane.position.y = alturaSuelo;
+				plane.position.y = floorHeight;
 				plane.material = materialPlane;
 
             // Ceiling
@@ -823,7 +553,7 @@
 				    materialCeiling.diffuseTexture.uScale = planeSize / 3;
 				    materialCeiling.diffuseTexture.vScale = planeSize / 3;
 				ceiling.rotation.x = -Math.PI / 2;
-				ceiling.position.y = alturaSuelo + alturaMuro;
+				ceiling.position.y = floorHeight + Walls.wallScale.y;
 				ceiling.material = materialCeiling;
                // ceiling.rotation.
 

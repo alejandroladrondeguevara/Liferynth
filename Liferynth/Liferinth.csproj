@@ -85,6 +85,7 @@
     <Content Include="sounds\GUIClickSound.mp3" />
     <Content Include="sounds\GUIHoverSound.mp3" />
     <Content Include="sounds\GUISound3.mp3" />
+    <Content Include="js\Walls.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
