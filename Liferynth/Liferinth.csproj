@@ -79,6 +79,7 @@
     <Content Include="js\babylon.js" />
     <Content Include="js\hand.js" />
     <Content Include="js\jQuery.js" />
+    <Content Include="js\Player.js" />
     <Content Include="Liferinth.html" />
     <Content Include="menu\LiferinthMenu.html" />
     <Content Include="menu\LiferinthSettingsMenu.html" />

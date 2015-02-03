@@ -6,6 +6,7 @@
     <script src="js/babylon.js"></script>
     <script src="js/hand.js"></script>
     <script src="js/Walls.js"></script>
+    <script src="js/Player.js"></script>
     <style>
         html, body {
             width: 100%;
@@ -152,16 +153,7 @@
 
 			var margin = 1.01;
 
-			var playerHeight = 1.75;
-			var playerWidth = 0.5;
-			var playerLength = 0.5;
-			var ellipsoidPlayer = new BABYLON.Vector3(0.5, playerHeight / 4, 0.5);
-
 			var gravity = new BABYLON.Vector3(0, -9, 0);
-
-			var speed = 0.14;                   // Velocidad del jugador
-			var speedReduceCrouching = 0.4;     // Velocidad del jugador agachado
-			var backSpeed = -0.07;              // Velocidad del jugador retrocediendo
 
 			var activeFlashlight = true;
 			var topDownCameraHeight = 40;       // Altura de la cámara topdown
@@ -172,11 +164,13 @@
 			var jumpHeight = 1.5;
 			var jumpTime = 0.3;
 
+			var _this = this;
+
+			var Player = new Player(_this);
 
 			var posMatrix;
 			var paintedWalls;
 			var walls;
-			var _this = this;
 			var Walls = new Walls(_this);
 			var WallState = Walls.WallState;
 
@@ -247,88 +241,6 @@
 			  }
 
 			  return arr;
-			}
-
-			function AnimatePlayer() {
-			    var string1 = "Player position";
-			    var animationPosition = new BABYLON.Animation(string1, "position.y", 100/jumpTime,
-                    BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-			    // An array with all animation keys
-			    var keys = [];
-
-			    // 0-100 Animación salto
-                // 100-200 Animación aterrizaje
-			    keys.push({
-			        frame: 0,
-			        value: floorHeight + playerHeight / 2
-			    });
-			    keys.push({
-			        frame: 55,
-			        value: floorHeight + playerHeight / 2 + jumpHeight*(3/4)
-			    });
-			    keys.push({
-			        frame: 100,
-			        value: floorHeight + playerHeight / 2 + jumpHeight
-			    });
-			    keys.push({
-			        frame: 140,
-			        value: floorHeight + playerHeight / 2 + jumpHeight*(3/4)
-			    });
-			    keys.push({
-			        frame: 200,
-			        value: floorHeight + playerHeight / 2
-			    });
-			    keys.push({
-			        frame: 250,
-			        value: floorHeight + playerHeight / 3
-			    });
-			    keys.push({
-			        frame: 300,
-			        value: floorHeight + playerHeight / 2
-			    });
-
-			    animationPosition.setKeys(keys);
-
-			    // An array with all animation keys
-			    var keys2 = [];
-			    var string2 = "Player scaling";
-			    var animationCrouch = new BABYLON.Animation(string2, "scaling.y", 100/jumpTime,
-                    BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-			    // 200-250 Animación agacharse
-			    // 250-300 Animación levantarse
-			    keys2.push({
-			        frame: 200,
-			        value: playerHeight
-			    });
-			    keys2.push({
-			        frame: 250,
-			        value: playerHeight * (2/3)
-			    });
-			    keys2.push({
-			        frame: 300,
-			        value: playerHeight
-			    });
-			    animationCrouch.setKeys(keys2);
-
-			    collidingBox.animations.push(animationPosition);
-			    collidingBox.animations.push(animationCrouch);
-			    
-
-			}
-			function JumpAnimation() {
-			    scene.beginAnimation(collidingBox, 0, 100, false);
-			}
-			function LandAnimation() {
-			    scene.beginAnimation(collidingBox, 100, 200, false);
-			}
-			function CrouchAnimation() {
-			    scene.beginAnimation(collidingBox, 200, 250, false);
-			    collidingBox.ellipsoid = new BABYLON.Vector3(0.5, (playerHeight*(2/3))/ 4, 0.5);
-			}
-			function StandUpAnimation() {
-			    crouching = false;
-			    scene.beginAnimation(collidingBox, 250, 300, false);
-			    collidingBox.ellipsoid = ellipsoidPlayer;
 			}
 
 			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
@@ -409,11 +321,6 @@
 			    }
 			}
 
-			function Land() {
-			    LandAnimation();
-			    window.setTimeout(function () { jumping = false; }, jumpTime * 1000);
-			}
-
 
 			posMatrix = Walls.PositionsMatrix(rows,cols);
 			walls = Walls.RandomWallMatrix();
@@ -427,33 +334,9 @@
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 
             //Jugador
-			    meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
-			    collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
-			    meshPlayer.scaling = new BABYLON.Vector3(playerWidth, playerHeight, playerLength);
-			    collidingBox.scaling = new BABYLON.Vector3(playerWidth, playerHeight, playerLength);
-			    meshPlayer.position.y = floorHeight + (meshPlayer.scaling.y / 2);
-			    collidingBox.position.y = meshPlayer.position.y;
-			    collidingBox.checkCollisions = true;
-			    collidingBox.applyGravity = true;
-			    collidingBox.ellipsoid = ellipsoidPlayer;
-			    AnimatePlayer();
-			    collidingBox.showBoundingBox=true;
-
+			    Player.Initialize();
 			//Luces
 
-				//var light0 = new BABYLON.PointLight("Omni0", new BABYLON.Vector3(0, 100, 100), scene);
-
-                 //Direccional
-                /*
-				var light0 = new BABYLON.DirectionalLight("Dir0", new BABYLON.Vector3(-0.5, -0.4, 0.5), scene);
-				light0.diffuse = new BABYLON.Color3(1, 1, 1);
-				light0.specular = new BABYLON.Color3(1, 1, 1);
-				light0.position = new BABYLON.Vector3(20, 40, 20);
-
-				var light1 = new BABYLON.DirectionalLight("Dir1", new BABYLON.Vector3(0.3, -0.4, -0.3), scene);
-				light1.diffuse = new BABYLON.Color3(0.3, 0.3, 0.3);
-				light1.specular = new BABYLON.Color3(1, 1, 1);
-                */
 				//Hemisférica
 				var light1 = new BABYLON.HemisphericLight("Hemi0", new BABYLON.Vector3(0, 1, 0), scene);
 				light1.diffuse = new BABYLON.Color3(0.1, 0.1, 0.1);
@@ -466,12 +349,7 @@
 				light2.groundColor = new BABYLON.Color3(0, 0, 0);
 
 				//Spot
-			/*	
-			    var light2 = new BABYLON.SpotLight("Spot0", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margin, meshPlayer.position.z),
-                    new BABYLON.Vector3(meshPlayer.rotation.x, -0.01, meshPlayer.rotation.z), 2.2, 2, scene);
-				light2.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
-				light2.specular = new BABYLON.Color3(1, 1, 1);
-            */
+
 			    var angFlashlight = -0.4;
 			    var flashlight = new BABYLON.SpotLight("Flashlight", new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y + (meshPlayer.scaling.y / 2) * margin, meshPlayer.position.z),
                     new BABYLON.Vector3(Math.sin(meshPlayer.rotation.y), angFlashlight, Math.cos(meshPlayer.rotation.y)), 3, 3, scene);
@@ -483,20 +361,6 @@
 
 
 			// Cámara
-			/*
-				var cameraArcRotative;
-				camera = new BABYLON.ArcRotateCamera("CameraRotate", -Math.PI/2, Math.PI/2.2, 12, new BABYLON.Vector3(0, 3, 0), scene);
-				camera.wheelPrecision = 15;
-				camera.lowerRadiusLimit = 0.0001;
-				camera.upperRadiusLimit = 22;
-				scene.activeCamera = camera;
-				camera.attachControl(canvas);
-				camera.keysUp = [];
-				camera.keysDown = [];
-				camera.keysLeft = [];
-				camera.keysRight = [];
-				camera.checkCollisions=true;
-*/
                 //Cámara que sigue al jugador
 				var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, -1, -5), scene);
 				camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
@@ -637,8 +501,8 @@
                 //Key Control
 				if (evt.keyCode == 17) {
 				    if (!crouching && !jumping) {
-				        CrouchAnimation();
-				        speed = speed * speedReduceCrouching;
+				        Player.CrouchAnimation();
+				        speed = speedReduceCrouching;
 				        crouching = true;
 				    }
 				}
@@ -649,8 +513,7 @@
 				if (evt.keyCode == 32) {
 				    if (!jumping && !crouching) {
 				        jumping = true;
-				        JumpAnimation();
-				        window.setTimeout(Land, jumpTime * 1000);
+				        Player.JumpAnimation();
 				    }
 				    //ChangeExit(true,false,1); //Cambia la salida de sitio
 				    
@@ -670,8 +533,8 @@
 					backwards = false;
 				}
 				if (evt.keyCode == 17) {
-				    speed = speed / speedReduceCrouching;
-				    StandUpAnimation();
+				    speed = defaultSpeed;
+				    Player.StandUpAnimation();
 				}
 			});
 
@@ -679,25 +542,15 @@
 			//BeforeREnder
 			scene.registerBeforeRender(function(){
 				if(scene.isReady() && meshPlayer) {
-					if (turnLeft) {
-						collidingBox.rotation.y -= 0.05;
-					} else if (turnRight) {
-						collidingBox.rotation.y += 0.05;
-					}
-					var vel,velZ,velX;
-					if(forward){
-						velZ = Math.cos(collidingBox.rotation.y)*speed;
-						velX = Math.sin(collidingBox.rotation.y)*speed;
-						vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
-						collidingBox.moveWithCollisions(vel);
-					}
-					else
-						if(backwards){
-							velZ = Math.cos(collidingBox.rotation.y)*backSpeed;
-							velX = Math.sin(collidingBox.rotation.y)*backSpeed;
-							vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
-							collidingBox.moveWithCollisions(vel);
-						}
+					if (turnLeft)
+					    Player.TurnLeft();
+					else if (turnRight)
+					    Player.TurnRight();
+					
+					if (forward)
+					    Player.MoveForward();
+					else if(backwards)
+						Player.MoveBackwards();
 
 					meshPlayer.position = collidingBox.position;
 					meshPlayer.rotation = collidingBox.rotation;

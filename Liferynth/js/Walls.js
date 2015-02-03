@@ -3,12 +3,19 @@
 
 Walls = function (game) {
 
-    this.game = game;
+    //Variables del juego que necesitamos aquí
+        this.game = game;
+        this.scene = game.scene;
+        this.walls = game.walls;
+        this.paintedWalls = game.paintedWalls;
+        this.posMatrix = game.posMatrix;
+        this.numWalls = game.numWalls;
+        this.rows = game.rows;
+        this.cols = game.cols;
+        this.floorHeight = game.floorHeight;
+        this.meshPlayer = game.meshPlayer;
+        this.collidingBox = game.collidingBox;
 
-    this.walls = game.walls;
-    this.paintedWalls = game.paintedWalls;
-    this.posMatrix = game.posMatrix;
-    this.numWalls = game.numWalls;
     /*  Estado del muro: 
             0 : No hay muro creado
             1 : Muro activo
@@ -18,17 +25,10 @@ Walls = function (game) {
     */
     this.WallState = { NonExisting: 0, Alive: 1, Dead: 2, PermaWall: 3, PermaGap: 4 }
 
-    this.rows = game.rows;
-    this.cols = game.cols;
-
-    this.floorHeight = game.floorHeight;
-
     var wallWidth = 6;
     var wallHeight = 4;
     var wallDepth = 0.75;
     this.wallScale = new BABYLON.Vector3(wallDepth, wallHeight, wallWidth);
-
-    this.meshPlayer = game.meshPlayer;
 
    
 
@@ -43,10 +43,10 @@ Walls = function (game) {
   
     this.CreateDefaultWall = function () {
 
-        var box = BABYLON.Mesh.CreateBox("Box", 1.0, scene);
+        var box = BABYLON.Mesh.CreateBox("Box", 1.0, this.scene);
 
-        var material = new BABYLON.StandardMaterial("wallFront", scene);
-        material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", scene);
+        var material = new BABYLON.StandardMaterial("wallFront", this.scene);
+        material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", this.scene);
         material.diffuseTexture.wAng += Math.PI * 0.5;
 
         material.diffuseTexture.uScale = 1;
@@ -315,11 +315,11 @@ Walls = function (game) {
     }
 
     function HideAnimation (r, c) {
-        scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
+        this.scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
         numWalls--;
     }
     this.ShowAnimation = function (r, c) {
-        scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
+        this.scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
         numWalls++;
     }
 
