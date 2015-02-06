@@ -127,7 +127,7 @@
 			}
 			var lastCol = cols - 1;
 			var numWalls = 0;
-			var minWalls = 170;
+			var minWalls = 150;
 			var maxWalls = 220;
             var exitRow = 0;
             var exitCol = Math.floor(cols / 2);
@@ -170,6 +170,7 @@
 			var paintedWalls;
 			var walls;
 			var Walls = new Walls(_this);
+			var wallScale = Walls.wallScale;
 			var WallState = Walls.WallState;
 
 			var enemies = []; // 0 enemigos inicialmente
@@ -194,6 +195,20 @@
 			  }
 
 			  return arr;
+			}
+
+            /* Devuelve verdadero o falso en función de si el personaje
+                se encuentra sobre la celda i(fila),j(columna) de la matriz de celdas
+                NOTA: La matriz de celdas es el hueco que queda dentro de los muros vecinos
+                     _ _
+                    |_|_|
+                    |_|_|   Matriz de celdas 2 filas, 2 columnas (hueco)
+            */
+			function CellContainsPlayer(i, j) {
+			    //Cada celda de la matriz de celdas está rodeada por 4 muros, al ser mayor el nº de filas, que de columnas...
+			    var iMuro = (2 * i) + 1;
+			    return (meshPlayer.position.x >= posMatrix[iMuro][j].x && meshPlayer.position.x <= posMatrix[iMuro][j + 1].x
+				 && meshPlayer.position.z <= posMatrix[iMuro - 1][j].z && meshPlayer.position.z >= posMatrix[iMuro + 1][j].z);
 			}
 
 			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
@@ -243,6 +258,16 @@
 			                    //Muerte por aislamiento
 			                    Walls.HideWall(i, j);
 			                }
+			                else if (Math.floor(Math.random() * 100) <= 2) {//Con una probabilidad de 2% cambia
+			                    if (walls[i][j] == WallState.Alive)
+			                        Walls.HideWall(i, j);
+			                    else if (walls[i][j] == WallState.Dead)
+			                        Walls.ShowWall(i, j);
+			                    else {
+			                        Walls.CreateWall(i, j, even);
+			                        Walls.ShowAnimation(i, j);
+			                    }
+			                }
 			        }
 			    }
 			}
@@ -283,6 +308,8 @@
             Walls.AnimateWalls();
             Walls.HideWall(entranceRow, entranceCol);
             Walls.HideWall(exitRow,exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
+
+            Enemies.CreateEnemy((lastRow/2)-1, Math.floor(cols / 2));
 
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 

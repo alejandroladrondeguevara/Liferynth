@@ -19,24 +19,14 @@
 
 
     this.CreateEnemy = function (row, col) {
-        /*Crea un enemigo en la posición row,col de la matriz de posiciones del laberinto*/
-        var e = new Enemy(game);
-        e.walls = walls;
-        var testPos = paintedWalls[lastRow][5].position; //TODO
-        e.position = new BABYLON.Vector3(testPos.x, testPos.y, testPos.z - 3);
-        e.move = function (horizontal, positive) {
-            /* 
-                Mueve al enemigo en una dirección dentro del laberinto
-            */
-            //Si (horizontal == true) --> Eje x
-            if (horizontal) {
-                if (positive) { e.position.x += wallWidth; }
-                else { e.position.x -= wallWidth; }
-            } else {
-                if (positive) { e.position.z += wallWidth; }
-                else { e.position.z -= wallWidth; }
-            }
-        };
+        /*Crea un enemigo en la posición row,col de la matriz de celdas del laberinto
+        NOTA: La matriz de celdas es el hueco que queda dentro de los muros vecinos
+                     _ _
+                    |_|_|   Matriz de muros 5 filas, 3 columnas
+                    |_|_|   Matriz de celdas 2 filas, 2 columnas (hueco)
+        */
+        var e = new Enemy(game, row, col);
+        e.Initialize();
         enemies[numEnemies] = e;
         numEnemies++;
     }
@@ -53,3 +43,4 @@
 
     }
 }
+

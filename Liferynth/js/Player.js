@@ -44,8 +44,9 @@ Player = function (game) {
         collidingBox.checkCollisions = true;
         collidingBox.applyGravity = true;
         collidingBox.ellipsoid = ellipsoidPlayer;
-        this.AnimatePlayer();
         collidingBox.showBoundingBox = true;
+
+        this.AnimatePlayer();
     }
     this.AnimatePlayer = function () {
         var string1 = "Player position";
