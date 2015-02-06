@@ -7,6 +7,7 @@
     <script src="js/hand.js"></script>
     <script src="js/Walls.js"></script>
     <script src="js/Player.js"></script>
+    <script src="js/Enemy.js"></script>
     <style>
         html, body {
             width: 100%;
@@ -160,10 +161,6 @@
 			var activeCamera = 0;               // 0 = FollowCam, 1 = TopDownCamera
 			var numCameras = 2;                 // Número de cámaras
 
-            //Variables del salto: Altura del salto, tiempo de vuelo
-			var jumpHeight = 1.5;
-			var jumpTime = 0.3;
-
 			var _this = this;
 
 			var Player = new Player(_this);
@@ -174,54 +171,9 @@
 			var Walls = new Walls(_this);
 			var WallState = Walls.WallState;
 
-
-            /****************************************************************************
-             ****************************************************************************
-             *****************      Métodos Gestión de los Enemigos     *****************
-             ****************************************************************************
-             ****************************************************************************/
-
 			var enemy = []; // 0 enemigos inicialmente
 			var numEnemies = 0;
-            // Mismo tamaño que el jugador por ahora //TODO
-			var enemyHeight = playerHeight;
-			var enemyWidth = playerWidth;
-			var enemyLength = playerLength;
-
-			function CreateEnemy(row, col) {
-			/*Crea un enemigo en la posición row,col de la matriz de posiciones del laberinto*/
-			    var e = new Object();
-			    e.walls = walls;
-			    var testPos = paintedWalls[lastRow][5].position; //TODO
-			    e.position = new BABYLON.Vector3(testPos.x, testPos.y, testPos.z - 3);
-			    e.move = function (horizontal, positive) {
-			    /* 
-                    Mueve al enemigo en una dirección dentro del laberinto
-                */
-			        //Si (horizontal == true) --> Eje x
-			        if (horizontal) {
-			            if (positive) { e.position.x += wallWidth; }
-			            else { e.position.x -= wallWidth; }
-			        } else {
-			            if (positive) { e.position.z += wallWidth; }
-			            else { e.position.z -= wallWidth; }
-			        }
-			    };
-			    enemy[numEnemies] = e;
-			    numEnemies++;
-			}
-
-
-
-			function ManageEnemies(){
-			    //PARALELO
-			    // No se modifica el mapa de muros, si un enemigo lo modificara, 
-			    // se llevaría a cabo al finalizar el bucle (Tareas pendientes)
-			    for (var i = 0; i < numEnemies; i++) {
-			        enemy[i];
-			    }
-
-			}
+			var Enemy = new Enemy(_this);
 
 
             /****************************************************************************

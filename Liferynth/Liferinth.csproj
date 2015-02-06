@@ -78,6 +78,7 @@
     <Content Include="images\MuroLat.png" />
     <Content Include="js\babylon.js" />
     <Content Include="js\hand.js" />
+    <Content Include="js\Enemy.js" />
     <Content Include="js\jQuery.js" />
     <Content Include="js\Player.js" />
     <Content Include="Liferinth.html" />
