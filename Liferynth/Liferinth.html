@@ -7,6 +7,7 @@
     <script src="js/hand.js"></script>
     <script src="js/Walls.js"></script>
     <script src="js/Player.js"></script>
+    <script src="js/Enemies.js"></script>
     <script src="js/Enemy.js"></script>
     <style>
         html, body {
@@ -126,8 +127,8 @@
 			}
 			var lastCol = cols - 1;
 			var numWalls = 0;
-			var minWalls = 100;
-			var maxWalls = 160;
+			var minWalls = 170;
+			var maxWalls = 220;
             var exitRow = 0;
             var exitCol = Math.floor(cols / 2);
             var entranceRow = lastRow;
@@ -171,9 +172,9 @@
 			var Walls = new Walls(_this);
 			var WallState = Walls.WallState;
 
-			var enemy = []; // 0 enemigos inicialmente
+			var enemies = []; // 0 enemigos inicialmente
 			var numEnemies = 0;
-			var Enemy = new Enemy(_this);
+			var Enemies = new Enemies(_this);
 
 
             /****************************************************************************
