@@ -426,7 +426,7 @@
 				exitArrow(window, BABYLON, scene, meshPlayer, paintedWalls[exitRow][exitCol]);
 
 
-
+            /*
 			window.addEventListener("keypress", function (evt) {
 			    if (!scene)
 			        return;
@@ -451,10 +451,33 @@
 			        }
 			    }
 			});
+            */
+
 			window.addEventListener("keydown", function (evt) {
 
 				if (!scene)
 					return;
+
+				if (evt.keyCode == 70) {
+				    if (activeFlashlight)
+				        flashlight.setEnabled(0);
+				    else flashlight.setEnabled(1);
+				    activeFlashlight = !activeFlashlight;
+
+				}
+				if (evt.keyCode == 74) {
+				    activeCamera = (activeCamera + 1) % numCameras;
+				    switch (activeCamera) {
+				        case 0:
+				            scene.activeCamera = camera;
+				            break;
+				        case 1:
+				            scene.activeCamera = topDownCamera;
+				            break;
+				        default:
+				            break;
+				    }
+				}
 
 				//console.log(evt.keyCode);
 
