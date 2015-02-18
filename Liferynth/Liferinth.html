@@ -105,7 +105,7 @@
 			        rows = 10;
 			        break;
 			    default:
-			        rows = 20;
+			        rows = 10;
 			        break;
 			}
 			var lastRow = rows-2; //Por cómo está hecha la matriz, esta es la última fila de la matriz de muros
@@ -121,7 +121,7 @@
 			        cols = 10;
 			        break;
 			    default:
-			        cols = 20;
+			        cols = 10;
 			        break;
 			}
 			var lastCol = cols - 1;
@@ -149,8 +149,11 @@
 			        break;
 			}
 
-			var floorHeight = 0;
-			var planeSize = 500;
+            var floorHeight = 0;            
+			var offsetSize = 4;
+			var planeWidthSize = (cols * offsetSize) + ((cols * offsetSize) / 2) - offsetSize;
+			var planeDepthSize = (rows * offsetSize) - ((rows * offsetSize) / 4);
+			var planeSize = planeDepthSize;
 
 			var margin = 1.01;
 
@@ -354,6 +357,10 @@
 				camera.position.y = floorHeight + (playerHeight / 2);
 				scene.activeCamera = camera;
 
+				var camera2 = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
+				scene.activeCamera = camera2;
+				camera2.attachControl(canvas, false);
+
                 //Cámara desde arriba
 				var topDownCamera = new BABYLON.FollowCamera("TopDownCam", new BABYLON.Vector3(0, 0, 0), scene);
 				topDownCamera.position.y = topDownCameraHeight;
@@ -373,7 +380,8 @@
 
 
 			// Ground
-				var plane = BABYLON.Mesh.CreatePlane("Ground", planeSize, scene);
+				//var plane = BABYLON.Mesh.CreatePlane("Ground", planeSize, scene);
+				var plane = BABYLON.Mesh.CreateGround("ground1", planeWidthSize, planeDepthSize, 2, scene);
 				var materialPlane = new BABYLON.StandardMaterial("Baldosa", scene);
 				materialPlane.diffuseTexture = new BABYLON.Texture("images/BaldosaReplicada.png", scene);
             /*
@@ -383,22 +391,27 @@
             */
                 //Múltiples baldosas
 				    materialPlane.diffuseTexture.uScale = planeSize / 7.5;
-				    materialPlane.diffuseTexture.vScale = planeSize / 7.5;
-				plane.rotation.x = Math.PI / 2;
+				    materialPlane.diffuseTexture.vScale = planeSize / 7.5;				    
+                //plane.rotation.x = Math.PI / 2;
+				plane.position.x = paintedWalls[0][0].position.x + (planeWidthSize / 2) - offsetSize;
+				plane.position.z = paintedWalls[0][0].position.z - (planeDepthSize / 2);
 				plane.position.y = floorHeight;
 				plane.material = materialPlane;
 
             // Ceiling
-				var ceiling = BABYLON.Mesh.CreatePlane("Ceiling", planeSize, scene);
+				//var ceiling = BABYLON.Mesh.CreatePlane("Ceiling", planeSize, scene);
+				var ceiling = BABYLON.Mesh.CreateGround("ground1", planeWidthSize, planeDepthSize, 2, scene);
 				var materialCeiling = new BABYLON.StandardMaterial("Celda", scene);
 				materialCeiling.diffuseTexture = new BABYLON.Texture("images/Baldosa.png", scene);
                 //Múltiples baldosas
 				    materialCeiling.diffuseTexture.uScale = planeSize / 3;
 				    materialCeiling.diffuseTexture.vScale = planeSize / 3;
-				ceiling.rotation.x = -Math.PI / 2;
+
+				ceiling.rotation.x = -Math.PI;// -Math.PI/ 2;
+				ceiling.position.x = paintedWalls[0][0].position.x + (planeWidthSize / 2) - offsetSize;
+				ceiling.position.z = paintedWalls[0][0].position.z - (planeDepthSize / 2);
 				ceiling.position.y = floorHeight + Walls.wallScale.y;
 				ceiling.material = materialCeiling;
-               // ceiling.rotation.
 
             // Collisions
 
