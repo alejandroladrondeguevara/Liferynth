@@ -10,6 +10,7 @@
     <script src="js/Enemies.js"></script>
     <script src="js/Enemy.js"></script>
     <script src="js/WebCLFunctions.js"></script>
+    <script src="js/exitArrow.js"></script>
     <style>
         html, body {
             width: 100%;
@@ -418,6 +419,12 @@
 				/*shadowGenerator.getShadowMap().renderList.push(walls[auxi][auxj]);
 				plane.receiveShadows = true;
                 */
+
+            // Dynamic world objects
+
+                //Adds arrow that's indicates the exit
+				exitArrow(window, BABYLON, scene, meshPlayer, paintedWalls[exitRow][exitCol]);
+
 
 
 			window.addEventListener("keypress", function (evt) {
