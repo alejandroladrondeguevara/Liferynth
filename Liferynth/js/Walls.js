@@ -153,15 +153,14 @@ Walls = function (game) {
 
     function CreateBorder () {
         //PARALELO: Poca carga, una ejecución al principio
-        for (var i = 0; i < (lastRow) ; i++)
-            if ((i % 2) == 1) {
-                walls[i][0] = WallState.PermaWall;
-                walls[i][lastCol] = WallState.PermaWall;
-            }
+        for (var i = 1; i < (lastRow) ; i=i+2){
+            walls[i][0] = WallState.PermaWall;
+            walls[i][lastCol] = WallState.PermaWall;
+        }
         //PARALELO: Poca carga, una ejecución al principio
-        for (var j = 0; j < (lastCol) ; j++) {
-            walls[0][j] = WallState.PermaWall;
-            walls[lastRow][j] = WallState.PermaWall;
+        for (var j = 0; j < (lastCol) ; j=j+2) {
+                walls[0][j] = WallState.PermaWall;
+                walls[lastRow][j] = WallState.PermaWall;
         }
     }
 
@@ -178,10 +177,10 @@ Walls = function (game) {
     }
 
     this.GeneratePermaWalls = function () {
-        var minR = Math.round(rows / 6);
-        var maxR = Math.round((5 * rows) / 6);
-        var minC = Math.round(cols / 6);
-        var maxC = Math.round((5 * cols) / 6);
+        var minR = Math.round(rows / 3);
+        var maxR = Math.round((2 * rows) / 3);
+        var minC = Math.round(cols / 3);
+        var maxC = Math.round((2 * cols) / 3);
         var numR = maxR - minR;
         var numC = maxC - minC;
         var numPerm = Math.round((numR * numC) / 4);
@@ -201,7 +200,7 @@ Walls = function (game) {
                                 numWalls++;
                             walls[i][j] = WallState.PermaWall;
                             numPerm--;
-                            console.log("Muro permanente: ", i, "-", j);
+                            console.log("Muro permanente en: ", i, "-", j);
                         }
                     }
                     j++;
@@ -255,7 +254,6 @@ Walls = function (game) {
             ShowWall(auxExitRow, auxExitCol);
             walls[i][j] = WallState.PermaGap;
             HideWall(i, j);
-            console.log("Muro Nuevo: ", i, " ", j);
         }
 
     }
@@ -332,11 +330,11 @@ Walls = function (game) {
     }
 
     this.ShowWall = function (row, col) {
-
         if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
             walls[row][col] = WallState.Alive;
-        paintedWalls[row][col].checkCollisions = true;
+        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = true; }, 1.1 * 1000);
         this.ShowAnimation(row, col);
+        
     }
 
 
@@ -373,18 +371,20 @@ Walls = function (game) {
         var xWall = posMatrix[row][col].x;
         var zWall = posMatrix[row][col].z;
         var even = ((row % 2) == 0);
+        var playerWidth = meshPlayer.scaling.x;
+        var aux = 1.01;
         if (even) {
-            xWallMin = xWall - wallWidth;
-            xWallMax = xWall + wallWidth;
-            zWallMin = zWall - wallDepth;
-            zWallMax = zWall + wallDepth;
+            xWallMin = xWall - wallWidth - playerWidth * aux;
+            xWallMax = xWall + wallWidth + playerWidth * aux;
+            zWallMin = zWall - wallDepth - playerWidth * aux;
+            zWallMax = zWall + wallDepth + playerWidth * aux;
         } else {
-            xWallMin = xWall - wallDepth;
-            xWallMax = xWall + wallDepth;
-            zWallMin = zWall - wallWidth;
-            zWallMax = zWall + wallWidth;
+            xWallMin = xWall - wallDepth - playerWidth * aux;
+            xWallMax = xWall + wallDepth + playerWidth * aux;
+            zWallMin = zWall - wallWidth - playerWidth * aux;
+            zWallMax = zWall + wallWidth + playerWidth * aux;
         }
-        if (mismoPlano && (xPlayer < xWallMax) && (xPlayer > xWallMin) && (zPlayer < zWallMax) && (zPlayer > zWallMin))
+        if (mismoPlano && (xPlayer <= xWallMax) && (xPlayer >= xWallMin) && (zPlayer <= zWallMax) && (zPlayer >= zWallMin))
             under = true;
         return under;
     }

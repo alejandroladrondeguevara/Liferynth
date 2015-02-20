@@ -96,16 +96,16 @@
 			var rows;
 			switch (rowsSettings) {
 			    case "m":
-			        rows = 30;
+			        rows = 40;
 			        break;
 			    case "n":
-			        rows = 20;
+			        rows = 30;
 			        break;
 			    case "f":
-			        rows = 10;
+			        rows = 20;
 			        break;
 			    default:
-			        rows = 10;
+			        rows = 20;
 			        break;
 			}
 			var lastRow = rows-2; //Por cómo está hecha la matriz, esta es la última fila de la matriz de muros
@@ -126,8 +126,11 @@
 			}
 			var lastCol = cols - 1;
 			var numWalls = 0;
-			var minWalls = 150;
-			var maxWalls = 220;
+            //Con 20x20 muros: Min 150, Max 220
+			var auxX = (20 * 20) / 120;
+			var auxY = (20 * 20) / 200;
+			var minWalls = Math.floor((cols * rows) / auxX); 
+			var maxWalls = Math.floor((cols * rows) / auxY);
             var exitRow = 0;
             var exitCol = Math.floor(cols / 2);
             var entranceRow = lastRow;
@@ -215,7 +218,6 @@
 
 			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
 			    var n = 0;
-			    var pasadas = 0;
 			    var state;
 			    //PARALELO, variable contador n (de reducción)
 			    for (var i = row-1; i <= row+1; i++)
@@ -242,34 +244,37 @@
 			        else c = cols;
                     //PARALELO
 			        for (var j = 0; j < c; j++) {
+			            var state = walls[i][j];
+			            if (state != WallState.PermaWall && state != WallState.PermaGap) {
 			                var n = AliveNeighbours8(w, i, j);
 			                if ((n == 3) && (!Walls.UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
 			                    //Genera vida
-			                    if (walls[i][j] == WallState.Dead)
+			                    if (state == WallState.Dead)
 			                        Walls.ShowWall(i, j);
-			                    else if (walls[i][j] == WallState.NonExisting) {
+			                    else if (state == WallState.NonExisting) {
 			                        Walls.CreateWall(i, j, even);
 			                        Walls.ShowAnimation(i, j);
 			                    }
 			                }
-			                else if ((n > 3) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
+			                else if ((n > 3) && (state == WallState.Alive) && (numWalls > minWalls)) {
 			                    //Muerte por inanición 
 			                    Walls.HideWall(i, j);
 			                }
-			                else if ((n < 2) && (walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
+			                else if ((n < 2) && (state == WallState.Alive) && (numWalls > minWalls)) {
 			                    //Muerte por aislamiento
 			                    Walls.HideWall(i, j);
 			                }
 			                else if (Math.floor(Math.random() * 100) <= 2) {//Con una probabilidad de 2% cambia
-			                    if (walls[i][j] == WallState.Alive)
+			                    if (state == WallState.Alive)
 			                        Walls.HideWall(i, j);
-			                    else if (walls[i][j] == WallState.Dead)
+			                    else if (state == WallState.Dead)
 			                        Walls.ShowWall(i, j);
 			                    else {
 			                        Walls.CreateWall(i, j, even);
 			                        Walls.ShowAnimation(i, j);
 			                    }
 			                }
+			            }
 			        }
 			    }
 			}
@@ -316,7 +321,9 @@
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 
             //Jugador
-			    Player.Initialize();
+			Player.Initialize();
+			collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
+			collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;
 			//Luces
 
 				//Hemisférica
@@ -358,8 +365,8 @@
 				scene.activeCamera = camera;
 
 				var camera2 = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
-				scene.activeCamera = camera2;
-				camera2.attachControl(canvas, false);
+				//scene.activeCamera = camera2;
+				//camera2.attachControl(canvas, false);
 
                 //Cámara desde arriba
 				var topDownCamera = new BABYLON.FollowCamera("TopDownCam", new BABYLON.Vector3(0, 0, 0), scene);
