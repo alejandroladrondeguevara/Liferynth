@@ -158,9 +158,9 @@ Walls = function (game) {
             walls[i][lastCol] = WallState.PermaWall;
         }
         //PARALELO: Poca carga, una ejecución al principio
-        for (var j = 0; j < (lastCol) ; j=j+2) {
-                walls[0][j] = WallState.PermaWall;
-                walls[lastRow][j] = WallState.PermaWall;
+        for (var j = 0; j < (lastCol) ; j++) {
+            walls[0][j] = WallState.PermaWall;
+            walls[lastRow][j] = WallState.PermaWall;
         }
     }
 
@@ -170,7 +170,7 @@ Walls = function (game) {
         walls[exitRow][exitCol] = WallState.PermaGap;
         numWalls--;
     }
-
+    
     this.CreateLabyrinthBounding = function (entranceCol, exitCol) {
         CreateBorder();
         CreateEntranceAndExit(entranceCol, exitCol);
@@ -332,7 +332,7 @@ Walls = function (game) {
     this.ShowWall = function (row, col) {
         if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
             walls[row][col] = WallState.Alive;
-        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = true; }, 1.1 * 1000);
+        paintedWalls[row][col].checkCollisions = true;
         this.ShowAnimation(row, col);
         
     }
