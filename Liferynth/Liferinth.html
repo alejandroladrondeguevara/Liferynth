@@ -68,7 +68,10 @@
 <body onload="loadSettings()">
     <canvas id="renderCanvas"></canvas>
     <script>
+
         var platforms;
+        var devices;
+
         if (window.webcl == undefined) {
             alert("Unfortunately your system does not support WebCL. " +
                   "Make sure that you have both the OpenCL driver " +
@@ -83,8 +86,39 @@
             }
 
             loadSettings();
-            listDevices(platforms);
+            //listDevices(platforms);
 
+
+            // Obtenemos las plataformas e información de ellas
+            var platforms = webcl.getPlatforms();
+            var device = null; var u = 0; var platform = null;
+
+            for (var i = 0, il = platforms.length; i < il; ++i) {
+                var p = platforms[i];
+                var profile = p.getInfo(WebCL.PLATFORM_PROFILE);
+                var version = p.getInfo(WebCL.PLATFORM_VERSION);
+                var extensions = p.getInfo(WebCL.PLATFORM_EXTENSIONS);
+
+                // Dispositivos en la plataforma p
+                var devices = p.getDevices(WebCL.DEVICE_TYPE_ALL);
+                
+                for (var j = 0, jl = devices.length; j < jl; ++j) {
+                    var d = devices[j];
+                    var devCompUnits = d.getInfo(WebCL.DEVICE_MAX_COMPUTE_UNITS);
+
+                    if (device == null || u < devCompUnits) {
+                        device = d;
+                        u = devCompUnits;
+                        platform = p;
+                    }
+                }
+                //Creamos el contexto con el dispositivo seleccionado
+                var context = cl.createContext( {
+                    'platform': platform,
+                    'device': device,
+                } );
+            }
+           
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
