@@ -88,9 +88,8 @@
             loadSettings();
             //listDevices(platforms);
 
-
+            
             // Obtenemos las plataformas e información de ellas
-            var platforms = webcl.getPlatforms();
             var device = null; var u = 0; var platform = null;
 
             for (var i = 0, il = platforms.length; i < il; ++i) {
@@ -112,11 +111,14 @@
                         platform = p;
                     }
                 }
+
+                var nameP = platform.getInfo(WebCL.PLATFORM_NAME);
+                var nameD = device.getInfo(WebCL.DEVICE_NAME);
+
+                console.log('Platform: ', nameP, 'Device: ', nameD);
+
                 //Creamos el contexto con el dispositivo seleccionado
-                var context = cl.createContext( {
-                    'platform': platform,
-                    'device': device,
-                } );
+                var context = webcl.createContext(device.getInfo(WebCL.DEVICE_TYPE));
             }
            
 		    var canvas = document.getElementById("renderCanvas");
