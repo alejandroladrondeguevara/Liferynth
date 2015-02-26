@@ -173,6 +173,7 @@ Player = function (game) {
     //Disparar
 
         var MISSILE_SPEED = 100.0; //Disminuye si se aumenta el valor
+        var MISSILE_SIZE = 0.5     //Tamaño del misil
         var missiles = [];         //Array de misiles 
         var directions = [];       //Array de direcciones de cada misil
 
@@ -182,7 +183,7 @@ Player = function (game) {
 
                 //Instancia un nuevo misil
                 var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
-                missile.scaling = new BABYLON.Vector3(CONSTANTS.MISSILE_SIZE, CONSTANTS.MISSILE_SIZE, CONSTANTS.MISSILE_SIZE);
+                missile.scaling = new BABYLON.Vector3(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
                 missile.position = new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y, meshPlayer.position.z);
                 missile.rotation = new BABYLON.Vector3(meshPlayer.rotation.x, meshPlayer.rotation.y, meshPlayer.rotation.z);
                 missiles.push(missile);
