@@ -22,6 +22,9 @@ Player = function (game) {
 
         this.entranceRow = game.entranceRow;
         this.entranceCol = game.entranceCol;
+
+        this.Walls = game.Walls;
+        this.planeWidthSize = game.planeWidthSize;
         
 
     jumpHeight = 1.5;              // Altura del salto del jugador
@@ -171,11 +174,13 @@ Player = function (game) {
     //-------------------------------------------- Habilidades del jugador ---------------------------------------------
     
     //Disparar
-
-        var MISSILE_SPEED = 100.0; //Disminuye si se aumenta el valor
-        var MISSILE_SIZE = 0.5     //Tamaño del misil
-        var missiles = [];         //Array de misiles 
-        var directions = [];       //Array de direcciones de cada misil
+        //Constantes
+        var MISSILE_SPEED = 200.0;              //Disminuye la velocidad si se aumenta el valor
+        var MISSILE_SIZE = 0.5;                 //Tamaño del misil
+        var MISSILE_OFFSET = planeWidthSize*2;    //Distancia máxima a la que se puede llegar el misil
+        //Variables
+        var missiles = [];                      //Array de misiles 
+        var directions = [];                    //Array de direcciones de cada misil
 
         window.addEventListener("keydown", function (evt) {
             //Tacla E para disparar
@@ -189,8 +194,8 @@ Player = function (game) {
                 missiles.push(missile);
 
                 //Dirección actual entre la cámara y el jugador
-                var heading = new BABYLON.Vector3(meshPlayer.position.x - camera.position.x, 0, meshPlayer.position.z - camera.position.z);            
-                directions.push(heading);
+                var direction = new BABYLON.Vector3(meshPlayer.position.x - camera.position.x, 0, meshPlayer.position.z - camera.position.z);            
+                directions.push(direction);
 
                 this.scene.registerBeforeRender(function () {
 
@@ -201,11 +206,45 @@ Player = function (game) {
                         missiles[i].position.x += (directions[i].x / MISSILE_SPEED);
                         missiles[i].position.z += (directions[i].z / MISSILE_SPEED);
 
+                        var foundIt = false;
+
+                        //Si el misil no impacta y se aleja una determinada distancia, desaparece
+                        if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
+                            //Destruye la malla (objeto)
+                            var _missile = missiles[i];                            
+                            missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            _missile.dispose();
+                            directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            foundIt = true;
+                        }
+
                         //Detección de colisiones
+                        var j = 0;  
+                        while (j < (rows - 1) && !foundIt) {
+                            var k = 0;
+                            while (k < cols && !foundIt) {
+                                if ((walls[j][k] == Walls.WallState.Alive)){
+                                    if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
+                                        //Oculta la parede en la que ha impacto el misil
+                                        Walls.HideWall(j, k);
+                                        //Destruye la malla (objeto)
+                                        var _missile = missiles[i];
+                                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                        _missile.dispose();
+                                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                        foundIt = true;
+                                    }
+                                }
+                                k++;
+                            }
+                            j++;
+                        }
                     }
 
                 });
             }
         });
         
+
+
 }

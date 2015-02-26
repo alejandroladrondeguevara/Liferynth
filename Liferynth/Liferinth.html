@@ -203,9 +203,7 @@
 			var activeCamera = 0;               // 0 = FollowCam, 1 = TopDownCamera
 			var numCameras = 2;                 // Número de cámaras
 
-			var _this = this;
-
-			var Player = new Player(_this);
+			var _this = this;			
 			
 
 			var posMatrix;
@@ -219,6 +217,7 @@
 			var numEnemies = 0;
 			var Enemies = new Enemies(_this);
 
+			
 
             /****************************************************************************
              ****************************************************************************
@@ -358,6 +357,7 @@
 			window.setInterval(ChangeWallsLife, timeChange*1000);
 
             //Jugador
+			var Player = new Player(_this);
 			Player.Initialize();
 
             //Luces
