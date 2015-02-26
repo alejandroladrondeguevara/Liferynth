@@ -15,9 +15,14 @@ Player = function (game) {
         this.meshPlayer = game.meshPlayer;
         this.collidingBox = game.collidingBox;
         this.gravity = game.gravity;
+        this.camera = game.camera;
 
         this.jumping = game.jumping;
         this.crouching = game.crouching;
+
+        this.entranceRow = game.entranceRow;
+        this.entranceCol = game.entranceCol;
+        
 
     jumpHeight = 1.5;              // Altura del salto del jugador
     jumpTime = 0.3;                // Tiempo de salto (vuelo) del jugador
@@ -32,8 +37,7 @@ Player = function (game) {
     playerLength = 0.5;             // Longitud del jugador
 
     ellipsoidPlayer = new BABYLON.Vector3(0.5, playerHeight / 4, 0.5); //Colisionador del jugador
-
-
+    
     this.Initialize = function () {
         meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
         collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
@@ -46,8 +50,15 @@ Player = function (game) {
         collidingBox.ellipsoid = ellipsoidPlayer;
         collidingBox.showBoundingBox = true;
 
+        //Posición incial del jugador
+        collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;
+        meshPlayer.position.x = collidingBox.position.x
+        meshPlayer.position.z = collidingBox.position.z
+
         this.AnimatePlayer();
     }
+
     this.AnimatePlayer = function () {
         var string1 = "Player position";
         var animationPosition = new BABYLON.Animation(string1, "position.y", 100 / jumpTime,
@@ -111,8 +122,6 @@ Player = function (game) {
 
         collidingBox.animations.push(animationPosition);
         collidingBox.animations.push(animationCrouch);
-
-
     }
 
     
@@ -136,9 +145,11 @@ Player = function (game) {
 
     this.TurnLeft = function () {
         collidingBox.rotation.y -= 0.05;
+        meshPlayer.rotation.y = collidingBox.rotation.y;
     }
     this.TurnRight = function () {
         collidingBox.rotation.y += 0.05;
+        meshPlayer.rotation.y = collidingBox.rotation.y;
     }
 
     this.MoveForward = function () {
@@ -156,4 +167,44 @@ Player = function (game) {
         vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
         collidingBox.moveWithCollisions(vel);
     }
+
+    //-------------------------------------------- Habilidades del jugador ---------------------------------------------
+    
+    //Disparar
+
+        var MISSILE_SPEED = 100.0; //Disminuye si se aumenta el valor
+        var missiles = [];         //Array de misiles 
+        var directions = [];       //Array de direcciones de cada misil
+
+        window.addEventListener("keydown", function (evt) {
+            //Tacla E para disparar
+            if (evt.keyCode == 69) {
+
+                //Instancia un nuevo misil
+                var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
+                missile.scaling = new BABYLON.Vector3(CONSTANTS.MISSILE_SIZE, CONSTANTS.MISSILE_SIZE, CONSTANTS.MISSILE_SIZE);
+                missile.position = new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y, meshPlayer.position.z);
+                missile.rotation = new BABYLON.Vector3(meshPlayer.rotation.x, meshPlayer.rotation.y, meshPlayer.rotation.z);
+                missiles.push(missile);
+
+                //Dirección actual entre la cámara y el jugador
+                var heading = new BABYLON.Vector3(meshPlayer.position.x - camera.position.x, 0, meshPlayer.position.z - camera.position.z);            
+                directions.push(heading);
+
+                this.scene.registerBeforeRender(function () {
+
+                    /// Misiles: Animación y detección de colisiones 
+                    for (var i = 0; i < missiles.length; i++) {
+
+                        //Movimiento del misil
+                        missiles[i].position.x += (directions[i].x / MISSILE_SPEED);
+                        missiles[i].position.z += (directions[i].z / MISSILE_SPEED);
+
+                        //Detección de colisiones
+                    }
+
+                });
+            }
+        });
+        
 }
