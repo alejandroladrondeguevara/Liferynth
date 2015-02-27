@@ -53,6 +53,13 @@ Player = function (game) {
         collidingBox.ellipsoid = ellipsoidPlayer;
         collidingBox.showBoundingBox = true;
 
+        //Posición inicial del jugador
+        collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;
+        meshPlayer.position.x = collidingBox.position.x;
+        meshPlayer.position.z = collidingBox.position.z;
+
+
         //Posición incial del jugador
         collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
         collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;

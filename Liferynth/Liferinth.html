@@ -115,12 +115,11 @@
 
                 var nameP = platform.getInfo(WebCL.PLATFORM_NAME);
                 var nameD = device.getInfo(WebCL.DEVICE_NAME);
-
-                console.log('Platform: ', nameP, 'Device: ', nameD);
-
-                //Creamos el contexto con el dispositivo seleccionado
-                var context = webcl.createContext(device.getInfo(WebCL.DEVICE_TYPE));
             }
+
+            //Creamos el contexto con el dispositivo seleccionado
+            var context = webcl.createContext(device.getInfo(WebCL.DEVICE_TYPE));
+            console.log('Platform: ', nameP, 'Device: ', nameD);
            
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
@@ -356,7 +355,6 @@
             //Jugador
 			var Player = new Player(_this);
 			Player.Initialize();
-
             //Luces
 
 				//Hemisférica
