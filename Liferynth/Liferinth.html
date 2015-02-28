@@ -11,6 +11,7 @@
     <script src="js/Enemy.js"></script>
     <script src="js/WebCLFunctions.js"></script>
     <script src="js/exitArrow.js"></script>
+    <script src="js/Cameras.js"></script>
     <style>
         html, body {
             width: 100%;
@@ -141,7 +142,7 @@
 			        rows = 20;
 			        break;
 			    default:
-			        rows = 20;
+			        rows = 30;
 			        break;
 			}
 			var lastRow = rows-2; //Por cómo está hecha la matriz, esta es la última fila de la matriz de muros
@@ -157,7 +158,7 @@
 			        cols = 10;
 			        break;
 			    default:
-			        cols = 10;
+			        cols = 20;
 			        break;
 			}
 			var lastCol = cols - 1;
@@ -199,12 +200,8 @@
 			var gravity = new BABYLON.Vector3(0, -9, 0);
 
 			var activeFlashlight = true;
-			var topDownCameraHeight = 40;       // Altura de la cámara topdown
-			var activeCamera = 0;               // 0 = FollowCam, 1 = TopDownCamera
-			var numCameras = 2;                 // Número de cámaras
 
-			var _this = this;			
-			
+			var _this = this;						
 
 			var posMatrix;
 			var paintedWalls;
@@ -380,46 +377,16 @@
 			        //new BABYLON.Vector3(-0.5, -0.2, 0.4), 3, 3, scene);
 				flashlight.diffuse = new BABYLON.Color3(0.7, 0.7, 0.7);
 				flashlight.specular = new BABYLON.Color3(0.7, 0.7, 0.7);
-				flashlight.range = 20;
-				
+				flashlight.range = 20;				
 
 
-			// Cámaras
-                //Cámara que sigue al jugador
-				var camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0, -1, -5), scene);
-				camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
-				camera.maxCameraSpeed = 20;
-				camera.applyGravity = true;
-				camera.radius = -3.5;
-				camera.heightOffset = 0.5;
-				camera.keysUp = [];
-				camera.keysDown = [];
-				camera.keysLeft = [];
-				camera.keysRight = [];
-				camera.position.y = floorHeight + (playerHeight / 2);
-				scene.activeCamera = camera;
-
-                //Cámara "libre" fija
-				var camera2 = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
-				//scene.activeCamera = camera2;
-				//camera2.attachControl(canvas, false);
-
-                //Cámara desde arriba
-				var topDownCamera = new BABYLON.FollowCamera("TopDownCam", new BABYLON.Vector3(0, 0, 0), scene);
-				topDownCamera.position.y = topDownCameraHeight;
-				topDownCamera.target = meshPlayer;
-				topDownCamera.heightOffset = topDownCameraHeight;
-				topDownCamera.radius = -0.1;
-				topDownCamera.keysUp = [];
-				topDownCamera.keysDown = [];
-				topDownCamera.keysLeft = [];
-				topDownCamera.keysRight = [];
-
+            // Cámaras
+				var Cameras = new Cameras(_this);
+				Cameras.Initialize();
 
             // Material
 				var invisible = new BABYLON.StandardMaterial("default", scene);
 				invisible.alpha = 0.1;
-
 
 			// Ground
 				//var plane = BABYLON.Mesh.CreatePlane("Ground", planeSize, scene);
@@ -463,13 +430,11 @@
 				scene.gravity = gravity;
 				plane.checkCollisions = true;
 
-
 			// Shadows
 
 				/*var shadowGenerator = new BABYLON.ShadowGenerator(2048, flashlight);
 				shadowGenerator.useVarianceShadowMap = true;
-                */
-				
+                */		
 				
 				//while(walls[auxi][auxj] != WallState.Alive){ if(auxi>=lastCol) {auxi=0;auxj++;} else auxi++;}
 				/*shadowGenerator.getShadowMap().renderList.push(walls[auxi][auxj]);
@@ -478,37 +443,10 @@
 
             // Dynamic world objects
 
-                //Adds arrow that's indicates the exit
+                //Flecha que indica la dirección actual de la salida
 				exitArrow(window, BABYLON, scene, meshPlayer, paintedWalls[exitRow][exitCol]);
 
-
-            /*
-			window.addEventListener("keypress", function (evt) {
-			    if (!scene)
-			        return;
-			    if (evt.keyCode == 102) {
-			        if (activeFlashlight)
-			            flashlight.setEnabled(0);
-			        else flashlight.setEnabled(1);
-			        activeFlashlight = !activeFlashlight;
-
-			    }
-			    if (evt.keyCode == 99) {
-			        activeCamera = (activeCamera + 1) % numCameras;
-			        switch (activeCamera) {
-			            case 0:
-			                scene.activeCamera = camera;
-			                break;
-			            case 1:
-			                scene.activeCamera = topDownCamera;
-			                break;
-			            default:
-			                break;
-			        }
-			    }
-			});
-            */
-
+            
 			window.addEventListener("keydown", function (evt) {
 
 				if (!scene)
@@ -521,31 +459,14 @@
 				    activeFlashlight = !activeFlashlight;
 
 				}
-				if (evt.keyCode == 74) {
-				    activeCamera = (activeCamera + 1) % numCameras;
-				    switch (activeCamera) {
-				        case 0:
-				            scene.activeCamera = camera;
-				            break;
-				        case 1:
-				            scene.activeCamera = topDownCamera;
-				            break;
-				        default:
-				            break;
-				    }
-				}
+				
+			    //console.log(evt.keyCode);
 
-				//console.log(evt.keyCode);
-
-				if (evt.keyCode == 32) {
-
-				}
 				//Key LEFT
 				if (evt.keyCode == 37 || evt.keyCode == 65) {
 					turnLeft = true;
 					turnRight = false;
 				}
-
 				//Key RIGHT
 				if (evt.keyCode == 39 || evt.keyCode == 68) {
 					turnLeft = false;
@@ -555,7 +476,6 @@
 				if (evt.keyCode == 38 || evt.keyCode == 87) {
 					forward = true;
 					backwards = false;
-
 				}
 				//Key BACK
 				if (evt.keyCode == 40 || evt.keyCode == 83) {
@@ -579,8 +499,7 @@
 				        jumping = true;
 				        Player.JumpAnimation();
 				    }
-				    //ChangeExit(true,false,1); //Cambia la salida de sitio
-				    
+				    //ChangeExit(true,false,1); //Cambia la salida de sitio				    
 				}
 
 			});
@@ -591,7 +510,6 @@
 					turnLeft = false;
 					turnRight = false;
 				}
-
 			    if (evt.keyCode == 38 || evt.keyCode == 40 || evt.keyCode == 87 || evt.keyCode == 83) {
 					forward = false;
 					backwards = false;
@@ -602,9 +520,9 @@
 				}
 			});
 
-			//BeforeREnder
-			scene.registerBeforeRender(function(){
-				if(scene.isReady() && meshPlayer) {
+			//BeforeRender
+			scene.registerBeforeRender(function () {
+			    if (scene.isReady() && meshPlayer) {
 					if (turnLeft)
 					    Player.TurnLeft();
 					else if (turnRight)
@@ -620,9 +538,8 @@
 					meshPlayer.scaling = collidingBox.scaling;
 					flashlight.position = collidingBox.position;
 					flashlight.direction = new BABYLON.Vector3(Math.sin(collidingBox.rotation.y), angFlashlight, Math.cos(collidingBox.rotation.y))
-					topDownCamera.rotation.y = meshPlayer.rotation.y;
-				}
 
+				}
 			});
 
             // Render loop
@@ -638,7 +555,6 @@
                 // Register new frame
                 BABYLON.Tools.QueueNewFrame(renderLoop);
             };
-
 
             BABYLON.Tools.QueueNewFrame(renderLoop);
         }
