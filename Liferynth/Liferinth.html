@@ -523,10 +523,10 @@
 			//BeforeRender
 			scene.registerBeforeRender(function () {
 			    if (scene.isReady() && meshPlayer) {
-					if (turnLeft)
-					    Player.TurnLeft();
-					else if (turnRight)
-					    Player.TurnRight();
+			        if (turnLeft)
+			            Player.TurnLeft();
+			        else if (turnRight) 
+			            Player.TurnRight();
 					
 					if (forward)
 					    Player.MoveForward();
@@ -548,7 +548,7 @@
                 engine.beginFrame();
 
                 scene.render();
-				window.document.title = BABYLON.Tools.GetFps().toFixed() + " fps";
+                //window.document.title = BABYLON.Engine.getFps();//.GetFps().toFixed() + " fps";
                 // Present
                 engine.endFrame();
 

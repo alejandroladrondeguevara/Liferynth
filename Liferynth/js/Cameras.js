@@ -19,6 +19,10 @@ Cameras = function (game) {
     topDownCamera = new BABYLON.FollowCamera("TopDownCam", new BABYLON.Vector3(0, 0, 0), scene);
     //camera2 = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 8, 50, BABYLON.Vector3.Zero(), scene);
 
+    //Vistas
+    completView = new BABYLON.Viewport(0, 0, 1, 1);
+    smallView = new BABYLON.Viewport(0, 0, 0.2, 0.2);
+
     this.Initialize = function () {
 
         //Cámara que sigue al jugador
@@ -47,8 +51,14 @@ Cameras = function (game) {
         topDownCamera.keysLeft = [];
         topDownCamera.keysRight = [];
 
+        //Se fija la cámara FollowCamera como principal
+        scene.activeCameras[0] = camera;
+        scene.activeCameras[1] = topDownCamera;
+        //Se liga la vista complata a la cámara FollowCamera
+        camera.viewport = completView;
+        topDownCamera.viewport = smallView;
     }
-
+    
     window.addEventListener("keydown", function (evt) {
 
         if (!scene)
@@ -56,40 +66,28 @@ Cameras = function (game) {
         if (evt.keyCode == 74) {
             activeCamera = (activeCamera + 1) % numCameras;
             switch (activeCamera) {
+                //Se activa la cámara FollowCamera como principal
                 case 0:
-                    scene.activeCamera = camera;
+                    //Se fija la cámara FollowCamera como principal
+                    scene.activeCameras[0] = camera;
+                    scene.activeCameras[1] = topDownCamera;
+                    //Se liga la vista complata a la cámara FollowCamera
+                    topDownCamera.viewport = smallView;
+                    camera.viewport = completView;
                     break;
+                //Se activa la cámara TopDownCamera como principal
                 case 1:
-                    scene.activeCamera = topDownCamera;
-                    //Registra la distancia actual entre la cámara (FollowCamera) y el jugador 
-                    distanceCamera = BABYLON.Vector3.Distance(camera.position, meshPlayer.position);
+                    //Se fija la cámara TopDownCamera como principal
+                    scene.activeCameras[0] = topDownCamera;
+                    scene.activeCameras[1] = camera;
+                    //Se liga la vista complata a la cámara TopDownCamera
+                    topDownCamera.viewport = completView;
+                    camera.viewport = smallView;
                     break;
                 default:
                     break;
             }
         }
     });
-
-    //BeforeRender
-    scene.registerBeforeRender(function () {
-
-        topDownCamera.rotation.y = meshPlayer.rotation.y;
-
-        switch (activeCamera) {
-            //FollowCamera
-            case 0:
-                break;
-            //TopDownCamera
-            case 1:
-                //Actualiza la posición de la cámara 
-                camera.position.x = meshPlayer.position.x;// - distanceCamera;
-                camera.position.z = meshPlayer.position.z - distanceCamera;
-                break;
-            default:
-                break;
-        }
-
-    });
-
 
 }
