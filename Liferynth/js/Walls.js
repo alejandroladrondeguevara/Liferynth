@@ -4,17 +4,19 @@
 Walls = function (game) {
 
     //Variables del juego que necesitamos aquí
-        this.game = game;
-        this.scene = game.scene;
-        this.walls = game.walls;
-        this.paintedWalls = game.paintedWalls;
-        this.posMatrix = game.posMatrix;
-        this.numWalls = game.numWalls;
-        this.rows = game.rows;
-        this.cols = game.cols;
-        this.floorHeight = game.floorHeight;
-        this.meshPlayer = game.meshPlayer;
-        this.collidingBox = game.collidingBox;
+    this.game = game;
+    this.scene = game.scene;
+    this.walls = game.walls;
+    this.binWalls = game.binWalls;  //Muros binarios (true o false) si están levantados o no (para WebCL)
+    this.paintedWalls = game.paintedWalls;
+    this.posMatrix = game.posMatrix;
+    this.numWalls = game.numWalls;
+    this.rows = game.rows;
+    this.cols = game.cols;
+    this.floorHeight = game.floorHeight;
+    this.meshPlayer = game.meshPlayer;
+    this.collidingBox = game.collidingBox;
+    this.totalWalls = game.totalWalls;
 
     /*  Estado del muro: 
             0 : No hay muro creado
@@ -30,7 +32,64 @@ Walls = function (game) {
     var wallDepth = 0.75;
     this.wallScale = new BABYLON.Vector3(wallDepth, wallHeight, wallWidth);
 
-   
+    binWalls = new Uint8Array(totalWalls); //Será el input del método kernel
+
+    /*
+        --------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------
+                                        Funciones de binWalls 
+        --------------------------------------------------------------------------------
+        --------------------------------------------------------------------------------      
+    */
+
+    function linealToXY (z) {
+        y = z % cols;
+        x = Math.floor(z / cols);
+        return [x, y];
+    }
+
+    this.linealFromXY = function (x, y) {
+        return y + x * cols;
+    }
+
+    function fillBinWalls() {
+        for (i in binWalls) {
+            var aux = linealToXY(i);
+            var x = aux[0]; var y = aux[1];
+            var even = (x % 2 == 0);
+            var c;
+            if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
+            else c = cols;
+            if (x < c && y <= lastRow) {
+                if (walls[x][y] == WallState.PermaWall || walls[x][y] == WallState.Alive)
+                    binWalls[i] = 1;
+                else binWalls[i] = 0;
+            }
+            else
+                binWalls[i] = 0;
+        }
+    }
+
+    this.updateWalls = function() {
+        /*Actualiza la matriz walls en función de los resultados obtenidos por WebCL en el array results*/
+        for (i in results) {
+            var aux = linealToXY(i);
+            var x = aux[0]; var y = aux[1];
+            var even = (x % 2 == 0);
+            var c;
+            if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
+            else c = cols;
+            if (x < c && y <= lastRow) {
+                if (walls[x][y] == WallState.Alive) {
+                    if (results[i] == 0) this.HideWall(x, y);
+                }
+                else if (walls[x][y] == WallState.Dead) {
+                    if (results[i] == 1) ShowWall(x, y);
+                }
+            }
+        }
+    }
+
 
     /*
         --------------------------------------------------------------------------------
@@ -40,7 +99,8 @@ Walls = function (game) {
         --------------------------------------------------------------------------------                            
     */
 
-  
+
+
     this.CreateDefaultWall = function () {
 
         var box = BABYLON.Mesh.CreateBox("Box", 1.0, this.scene);
@@ -69,6 +129,7 @@ Walls = function (game) {
 
 
 
+
     /*
         --------------------------------------------------------------------------------
         --------------------------------------------------------------------------------
@@ -76,6 +137,20 @@ Walls = function (game) {
         --------------------------------------------------------------------------------
         --------------------------------------------------------------------------------                            
     */
+
+
+    function CreateMatrix(rows, cols) {
+        var arr = [];
+
+        for (var i = 0; i < rows; i++) {
+            arr[i] = []; //Vacío
+            for (var j = 0; j < cols; j++) {
+                arr[i][j] = 0;
+            }
+        }
+
+        return arr;
+    }
 
 
     this.RandomWallMatrix = function () {
@@ -122,11 +197,12 @@ Walls = function (game) {
                 }
             }
         }
+        fillBinWalls();
         return paintedWalls;
     }
 
 
-    this.PositionsMatrix = function(rows, cols) {
+    this.PositionsMatrix = function (rows, cols) {
         var positionMatrix = CreateMatrix(rows, cols);
 
         var zIni = (wallWidth / 2) + wallWidth * (rows / 2); //Cada celda está separada por 4 de distancia y vamos a empezar por el origen (centro del laberinto)
@@ -151,9 +227,9 @@ Walls = function (game) {
         return positionMatrix;
     }
 
-    function CreateBorder () {
+    function CreateBorder() {
         //PARALELO: Poca carga, una ejecución al principio
-        for (var i = 1; i < (lastRow) ; i=i+2){
+        for (var i = 1; i < (lastRow) ; i = i + 2) {
             walls[i][0] = WallState.PermaWall;
             walls[i][lastCol] = WallState.PermaWall;
         }
@@ -164,13 +240,13 @@ Walls = function (game) {
         }
     }
 
-    function CreateEntranceAndExit (entranceCol, exitCol) {
+    function CreateEntranceAndExit(entranceCol, exitCol) {
         //La salida del laberinto será un hueco por el que salir
         walls[lastRow][entranceCol] = WallState.PermaGap;
         walls[exitRow][exitCol] = WallState.PermaGap;
-        numWalls--;
+        numWalls = numWalls - 2;
     }
-    
+
     this.CreateLabyrinthBounding = function (entranceCol, exitCol) {
         CreateBorder();
         CreateEntranceAndExit(entranceCol, exitCol);
@@ -253,7 +329,7 @@ Walls = function (game) {
             walls[auxExitRow][auxExitCol] = WallState.PermaWall; //Levantamos el muro de salida anterior
             ShowWall(auxExitRow, auxExitCol);
             walls[i][j] = WallState.PermaGap;
-            HideWall(i, j);
+            this.HideWall(i, j);
         }
 
     }
@@ -267,7 +343,7 @@ Walls = function (game) {
         --------------------------------------------------------------------------------                            
     */
 
-    function AnimateWall (r, c) {
+    function AnimateWall(r, c) {
         var string1 = "animation " + r + " " + c;
         var animationBox = new BABYLON.Animation(string1, "position.y", 75,
             BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
@@ -298,7 +374,7 @@ Walls = function (game) {
         paintedWalls[r][c].animations.push(animationBox);
     }
 
-    this.AnimateWalls = function() {
+    this.AnimateWalls = function () {
         var c;
         //PARALELO
         for (var i = 0; i < (lastRow + 1) ; i++) {
@@ -312,7 +388,7 @@ Walls = function (game) {
         }
     }
 
-    function HideAnimation (r, c) {
+    function HideAnimation(r, c) {
         this.scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
         numWalls--;
     }
@@ -325,6 +401,7 @@ Walls = function (game) {
     this.HideWall = function (row, col) {
         if (walls[row][col] == WallState.Alive) //Si está vivo, muere
             walls[row][col] = WallState.Dead;
+        binWalls[this.linealFromXY(row, col)] = 0;
         window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
         HideAnimation(row, col);
     }
@@ -332,9 +409,10 @@ Walls = function (game) {
     this.ShowWall = function (row, col) {
         if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
             walls[row][col] = WallState.Alive;
+        binWalls[this.linealFromXY(row, col)] = 1;
         paintedWalls[row][col].checkCollisions = true;
         this.ShowAnimation(row, col);
-        
+
     }
 
 

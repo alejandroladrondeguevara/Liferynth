@@ -10,6 +10,7 @@
     <script src="js/Enemies.js"></script>
     <script src="js/Enemy.js"></script>
     <script src="js/WebCLFunctions.js"></script>
+    <script src="js/LiferinthFunctions.js"></script>
     <script src="js/exitArrow.js"></script>
     <script src="js/Cameras.js"></script>
     <style>
@@ -26,52 +27,78 @@
             height: 100%;
         }
     </style>
-	<script>
- 
-            /** Global variables **/
-            var cpu, gpu, speedSetting, rowsSettings, columnsSettings;
-            //----------------------------------------------------------------------------------------------------
-            /** Obtiene las variables que se pasan como parámetros en la URL **/
-            function getUrlVars() {
-                var vars = {};
-                var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-                    vars[key] = value;
-                });
-                return vars;
-            }
-            //-----------------------------------------------------------------------------------------------------
-            /** Carga las opciones que previamente han sido seleccionadas en el menú **/
-            function loadSettings() {
-                cpu = getUrlVars()["C"];
-                gpu = getUrlVars()["G"];
-                speedSetting = getUrlVars()["S"];
-                rowsSettings = getUrlVars()["R"];
-                columnsSettings = getUrlVars()["Co"];
 
-                /**
-                Values
-                    cpu:				"green","red"
-                    gpu:				"green","red"
-                    speedSetting: 		"l"(Low),"n"(Normal),"h"(high)
-                    rowsSettings:  		"f"(Few),"n"(Normal),"m"(many)
-                    columns:			"f"(Few),"n"(Normal),"m"(many)
-                **/
-                if (cpu == "undefined") {
-                    cpu = "green";
-                    gpu = "green";
-                    speedSetting = "n"; 	//Normal
-                    rowsSettings = "n";		//Normal
-                    columnsSettings = "n";	//Normal
-                }
+
+    <!--Programa en WebCL -->
+    <script id="square" type="x-kernel">
+        __kernel void square(
+        __global uchar* input,
+        __global uchar* output,
+        const uint count)
+        {
+            int i = get_global_id(0);
+            if(i < count)
+                output[i] = 0;
+        }
+    </script>
+
+
+    <script>
+
+        /** Global variables **/
+        var cpu, gpu, speedSetting, rowsSettings, columnsSettings;
+        //----------------------------------------------------------------------------------------------------
+        /** Obtiene las variables que se pasan como parámetros en la URL **/
+        function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+                vars[key] = value;
+            });
+            return vars;
+        }
+        //-----------------------------------------------------------------------------------------------------
+        /** Carga las opciones que previamente han sido seleccionadas en el menú **/
+        function loadSettings() {
+            cpu = getUrlVars()["C"];
+            gpu = getUrlVars()["G"];
+            speedSetting = getUrlVars()["S"];
+            rowsSettings = getUrlVars()["R"];
+            columnsSettings = getUrlVars()["Co"];
+
+            /**
+            Values
+                cpu:				"green","red"
+                gpu:				"green","red"
+                speedSetting: 		"l"(Low),"n"(Normal),"h"(high)
+                rowsSettings:  		"f"(Few),"n"(Normal),"m"(many)
+                columns:			"f"(Few),"n"(Normal),"m"(many)
+            **/
+            if (cpu == "undefined") {
+                cpu = "green";
+                gpu = "green";
+                speedSetting = "n"; 	//Normal
+                rowsSettings = "n";		//Normal
+                columnsSettings = "n";	//Normal
             }
-	</script>
+        }
+    </script>
 </head>
 <body onload="loadSettings()">
     <canvas id="renderCanvas"></canvas>
     <script>
-
-        var platforms;
-        var devices;
+        /*
+        --------------------------
+            Variables de WebCL
+        --------------------------
+        */
+            var platforms; var platform;
+            var devices; var device;
+            var queue;
+            var globalWorkSize; var localWorkSize; var workGroupSize;
+            var kernelSource; var kernel;
+          //Buffers y tamaños
+            var DATA_SIZE = 0; var count = 0;
+            var input; var output; var results; var data;
 
         if (window.webcl == undefined) {
             alert("Unfortunately your system does not support WebCL. " +
@@ -89,38 +116,6 @@
             loadSettings();
             //listDevices(platforms);
 
-            
-            // Obtenemos las plataformas e información de ellas
-            var device = null; var u = 0; var platform = null;
-
-            for (var i = 0, il = platforms.length; i < il; ++i) {
-                var p = platforms[i];
-                var profile = p.getInfo(WebCL.PLATFORM_PROFILE);
-                var version = p.getInfo(WebCL.PLATFORM_VERSION);
-                var extensions = p.getInfo(WebCL.PLATFORM_EXTENSIONS);
-
-                // Dispositivos en la plataforma p
-                var devices = p.getDevices(WebCL.DEVICE_TYPE_ALL);
-                
-                for (var j = 0, jl = devices.length; j < jl; ++j) {
-                    var d = devices[j];
-                    var devCompUnits = d.getInfo(WebCL.DEVICE_MAX_COMPUTE_UNITS);
-
-                    if (device == null || u < devCompUnits) {
-                        device = d;
-                        u = devCompUnits;
-                        platform = p;
-                    }
-                }
-
-                var nameP = platform.getInfo(WebCL.PLATFORM_NAME);
-                var nameD = device.getInfo(WebCL.DEVICE_NAME);
-            }
-
-            //Creamos el contexto con el dispositivo seleccionado
-            var context = webcl.createContext(device.getInfo(WebCL.DEVICE_TYPE));
-            console.log('Platform: ', nameP, 'Device: ', nameD);
-           
 		    var canvas = document.getElementById("renderCanvas");
             var engine = new BABYLON.Engine(canvas, true);
             var scene = new BABYLON.Scene(engine);
@@ -162,7 +157,7 @@
 			}
 			var lastCol = cols - 1;
 			var numWalls = 0;
-            //Con 20x20 muros: Min 150, Max 220
+            //Con 20x20 muros: Min 120, Max 200
 			var auxX = (20 * 20) / 120;
 			var auxY = (20 * 20) / 200;
 			var minWalls = Math.floor((cols * rows) / auxX); 
@@ -205,6 +200,8 @@
 			var posMatrix;
 			var paintedWalls;
 			var walls;
+			var binWalls;
+			var totalWalls = rows*cols;
 			var Walls = new Walls(_this);
 			var wallScale = Walls.wallScale;
 			var WallState = Walls.WallState;
@@ -212,132 +209,6 @@
 			var enemies = []; // 0 enemigos inicialmente
 			var numEnemies = 0;
 			var Enemies = new Enemies(_this);
-
-			
-
-            /****************************************************************************
-             ****************************************************************************
-             *****************       Métodos Gestión del Laberinto      *****************
-             ****************************************************************************
-             ****************************************************************************/
-
-			function CreateMatrix(rows,cols) {
-			  var arr = [];
-
-			  for (var i=0;i<rows;i++) {
-				 arr[i] = []; //Vacío
-				 for (var j=0;j<cols;j++) {
-					arr[i][j] = 0;
-				 }
-			  }
-
-			  return arr;
-			}
-
-            /* Devuelve verdadero o falso en función de si el personaje
-                se encuentra sobre la celda i(fila),j(columna) de la matriz de celdas
-                NOTA: La matriz de celdas es el hueco que queda dentro de los muros vecinos
-                     _ _
-                    |_|_|
-                    |_|_|   Matriz de celdas 2 filas, 2 columnas (hueco)
-            */
-			function CellContainsPlayer(i, j) {
-			    //Cada celda de la matriz de celdas está rodeada por 4 muros, al ser mayor el nº de filas, que de columnas...
-			    var iMuro = (2 * i) + 1;
-			    return (meshPlayer.position.x >= posMatrix[iMuro][j].x && meshPlayer.position.x <= posMatrix[iMuro][j + 1].x
-				 && meshPlayer.position.z <= posMatrix[iMuro - 1][j].z && meshPlayer.position.z >= posMatrix[iMuro + 1][j].z);
-			}
-
-			function AliveNeighbours8(w,row, col) { //Recibe muro (fila y columna) y devuelve el número de vecinos vivos (muros activos) en 8-vecindad
-			    var n = 0;
-			    var state;
-			    //PARALELO, variable contador n (de reducción)
-			    for (var i = row-1; i <= row+1; i++)
-			        for (var j = col - 1; j <= col + 1; j++) 
-			            if (!(i == row && j == col))    //No somos nosotros mismos
-			                if (i >= 0 && i <= lastRow && j >= 0 && j < lastCol) { //No nos salimos de rango
-			                    state = w[i][j];
-			                    if ((state == WallState.Alive) || (state == WallState.PermaWall))
-			                        n++;
-			                }
-			    return n;
-
-			}
-
-			function ChangeWallsLife() {
-			    var w = Walls.CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
-			    console.log("Muros vivos: ", numWalls);
-			    var c;
-			    //PARALELO: Se escribe en una posición distinta de la matriz cada vuelta del bucle interno
-                //Gran carga de trabajo, ejecución periódica y costosa
-			    for (var i = 0; i < (lastRow + 1) ; i++) {
-			        var even = ((i % 2) == 0);
-			        if (even) c = cols-1;
-			        else c = cols;
-                    //PARALELO
-			        for (var j = 0; j < c; j++) {
-			            var state = walls[i][j];
-			            if (state != WallState.PermaWall && state != WallState.PermaGap) {
-			                var n = AliveNeighbours8(w, i, j);
-			                if ((n == 3) && (!Walls.UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
-			                    //Genera vida
-			                    if (state == WallState.Dead)
-			                        Walls.ShowWall(i, j);
-			                    else if (state == WallState.NonExisting) {
-			                        Walls.CreateWall(i, j, even);
-			                        Walls.ShowAnimation(i, j);
-			                    }
-			                }
-			                else if ((n > 3) && (state == WallState.Alive) && (numWalls > minWalls)) {
-			                    //Muerte por inanición 
-			                    Walls.HideWall(i, j);
-			                }
-			                else if ((n < 2) && (state == WallState.Alive) && (numWalls > minWalls)) {
-			                    //Muerte por aislamiento
-			                    Walls.HideWall(i, j);
-			                }
-			                else if (Math.floor(Math.random() * 100) <= 2) {//Con una probabilidad de 2% cambia
-			                    if (state == WallState.Alive)
-			                        Walls.HideWall(i, j);
-			                    else if (state == WallState.Dead)
-			                        Walls.ShowWall(i, j);
-			                    else {
-			                        Walls.CreateWall(i, j, even);
-			                        Walls.ShowAnimation(i, j);
-			                    }
-			                }
-			            }
-			        }
-			    }
-			}
-
-			function ChangeWalls() {
-			    var c;
-			    //PARALELO:
-                //Gran carga de trabajo, se ejecuta periódicamente y recorre toda la matriz
-			    for (var i = 0; i < (lastRow+1); i++){
-			        var even = ((i % 2) == 0);
-			        if (even) c = cols-1;
-			        else c = cols;
-			        for (var j = 0; j < c; j++) {  
-			            if ((walls[i][j] == WallState.Alive) && (numWalls > minWalls)) {
-			                if (Math.floor(Math.random() * 10) <= 1)
-			                    Walls.HideWall(i, j);
-			            } else if ((!Walls.UnderneathPlayer(i, j)) && (numWalls < maxWalls)) {
-			                if (walls[i][j] == WallState.Dead) {
-			                    if (Math.floor(Math.random() * 10) <= 1)
-			                        Walls.ShowWall(i, j);
-			                } else if ((walls[i][j] == WallState.NonExisting) && (numWalls < maxWalls)) {
-			                    if (Math.floor(Math.random() * 10) <= 1) {
-			                        CreateWall(i, j, even);
-			                        ShowAnimation(i, j);
-			                    }
-			                }
-			            }
-			        }
-			    }
-			}
-
 
 			posMatrix = Walls.PositionsMatrix(rows,cols);
 			walls = Walls.RandomWallMatrix();
@@ -350,7 +221,10 @@
 
             Enemies.CreateEnemy((lastRow/2)-1, Math.floor(cols / 2));
 
-			window.setInterval(ChangeWallsLife, timeChange*1000);
+            
+            initWebCLKernel();
+            //window.setInterval(ChangeWallsLife, timeChange * 1000);
+            window.setInterval(runKernel, timeChange * 1000);
 
             //Jugador
 			var Player = new Player(_this);

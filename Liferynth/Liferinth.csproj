@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="js\Cameras.js" />
+    <Content Include="js\LiferinthFunctions.js" />
     <Content Include="meshes\arrow.babylon" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
