@@ -42,9 +42,9 @@ Walls = function (game) {
         --------------------------------------------------------------------------------      
     */
 
-    function linealToXY (z) {
-        y = z % cols;
-        x = Math.floor(z / cols);
+    function linealToXY(z) {
+        var x = Math.floor(z / cols);
+        var y = z % cols;
         return [x, y];
     }
 
@@ -60,7 +60,7 @@ Walls = function (game) {
             var c;
             if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
             else c = cols;
-            if (x < c && y <= lastRow) {
+            if (x <= lastRow && y < c) {
                 if (walls[x][y] == WallState.PermaWall || walls[x][y] == WallState.Alive)
                     binWalls[i] = 1;
                 else binWalls[i] = 0;
@@ -79,12 +79,16 @@ Walls = function (game) {
             var c;
             if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
             else c = cols;
-            if (x < c && y <= lastRow) {
+            if (x <= lastRow && y < c) {
                 if (walls[x][y] == WallState.Alive) {
                     if (results[i] == 0) this.HideWall(x, y);
                 }
                 else if (walls[x][y] == WallState.Dead) {
                     if (results[i] == 1) ShowWall(x, y);
+                }
+                else if (walls[x][y] == WallState.NonExisting) {
+                    Walls.CreateWall(x, y, even);
+                    Walls.ShowAnimation(x, y);
                 }
             }
         }

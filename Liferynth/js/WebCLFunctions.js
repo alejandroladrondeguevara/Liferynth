@@ -62,10 +62,10 @@ function initWebCLKernel() {
     // Creamos una cola de comandos
     queue = context.createCommandQueue(device, null);
 
-    // Obtenemos el programa square (del script)
-    kernelSource = getKernel("square");
+    // Obtenemos el programa life (del script)
+    kernelSource = getKernel("life");
     if (kernelSource == null) {
-        console.error("No hay un kernel de nombre: " + "square"); exit(-1);
+        console.error("No hay un kernel de nombre: " + "life"); exit(-1);
     }
     // Lo creamos
     program = context.createProgram(kernelSource);
@@ -73,7 +73,7 @@ function initWebCLKernel() {
     // Lo compilamos
     program.build([device]);
 
-    kernel = program.createKernel("square");
+    kernel = program.createKernel("life");
 
     // Crear los arrays de entrada y salida (buffers)
     input = context.createBuffer(webcl.MEM_READ_ONLY, Uint8Array.BYTES_PER_ELEMENT * count);

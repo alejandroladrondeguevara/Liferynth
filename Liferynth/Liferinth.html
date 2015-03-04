@@ -30,15 +30,14 @@
 
 
     <!--Programa en WebCL -->
-    <script id="square" type="x-kernel">
-        __kernel void square(
+    <script id="life" type="x-kernel">
+        __kernel void life(
         __global uchar* input,
         __global uchar* output,
         const uint count)
         {
             int i = get_global_id(0);
-            if(i < count)
-                output[i] = 0;
+            output[i] = 0;
         }
     </script>
 
