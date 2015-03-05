@@ -9,6 +9,8 @@ Player = function (game) {
         this.paintedWalls = game.paintedWalls;
         this.posMatrix = game.posMatrix;
         this.numWalls = game.numWalls;
+        this.rowsSettings = game.rowsSettings;
+        this.columnsSettings = game.columnsSettings;
         this.rows = game.rows;
         this.cols = game.cols;
         this.floorHeight = game.floorHeight;
@@ -66,6 +68,10 @@ Player = function (game) {
         meshPlayer.position.x = collidingBox.position.x
         meshPlayer.position.z = collidingBox.position.z
 
+        //Número de disparos
+        this.setNumOfShoots();
+
+        //Animaciones
         this.AnimatePlayer();
     }
 
@@ -179,7 +185,9 @@ Player = function (game) {
     }
 
     //-------------------------------------------- Habilidades del jugador ---------------------------------------------
-    
+   
+
+
     //Disparar
         //Constantes
         var MISSILE_SPEED = 200.0;              //Disminuye la velocidad si se aumenta el valor
@@ -188,10 +196,61 @@ Player = function (game) {
         //Variables
         var missiles = [];                      //Array de misiles 
         var directions = [];                    //Array de direcciones de cada misil
+        var numMissiles = 0;
+        var maxNumMissiles = 0;
+        var numMissilesDisplay = document.getElementById("numMissiles_display");
+
+        //Establece el número máximo e inicial de misiles
+        this.setNumOfShoots = function()
+        {
+            switch (this.rowsSettings)
+            {
+                case "m":
+                    maxNumMissiles = 20;
+                    break;
+                case "n":
+                    maxNumMissiles = 10;
+                    break;
+                case "f":
+                    maxNumMissiles = 5;
+                    break;
+                default:
+                    maxNumMissiles = 10;
+                    break;
+            }
+            numMissiles = maxNumMissiles;
+            displayNumMissiles();
+        }
+
+        //Muestra en pantalla el valor actual
+        function displayNumMissiles()
+        {
+            //Actualiza el valor que se muestra en la pantalla
+            numMissilesDisplay.innerHTML = numMissiles;
+        }
+
+        //Incrementa el número de misiles
+        function incrementMissiles()
+        {
+            if (numMissiles<maxNumMissiles)
+                numMissiles++;
+            displayNumMissiles();
+        }
+
+        //Decrementa el número de misiles
+       function decrementMissiles()
+        {
+            if (numMissiles>0)
+                numMissiles--;
+            displayNumMissiles();
+        }
 
         window.addEventListener("keydown", function (evt) {
             //Tacla E para disparar
-            if (evt.keyCode == 69) {
+            if (evt.keyCode == 69 && numMissiles > 0) {
+
+                //Decrementa el número de disparos
+                decrementMissiles();
 
                 //Instancia un nuevo misil
                 var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
@@ -250,8 +309,7 @@ Player = function (game) {
 
                 });
             }
-        });
-        
+        });       
 
 
 }

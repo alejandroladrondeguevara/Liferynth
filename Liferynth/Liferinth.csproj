@@ -57,6 +57,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="css\Style.css" />
     <Content Include="js\Cameras.js" />
     <Content Include="js\LiferinthFunctions.js" />
     <Content Include="meshes\arrow.babylon" />
@@ -81,7 +82,7 @@
     <Content Include="images\MuroLat.png" />
     <Content Include="js\babylon.js" />
     <Content Include="js\Enemy.js" />
-    <Content Include="js\exitArrow.js" />
+    <Content Include="js\ExitArrow.js" />
     <Content Include="js\hand.js" />
     <Content Include="js\Enemies.js" />
     <Content Include="js\jQuery.js" />

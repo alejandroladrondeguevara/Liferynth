@@ -1,37 +1,48 @@
-﻿function exitArrow(window, BABYLON, scene, meshPlayer, exitWall) {
+﻿ExitArrow = function (game) {
 
-    var material1 = new BABYLON.StandardMaterial("material01", scene);
-    var material2 = new BABYLON.StandardMaterial("material02", scene);
+    //Variables del juego que necesitamos aquí
+        this.game = game;
+        this.scene = game.scene;
+        this.paintedWalls = game.paintedWalls;
+        this.meshPlayer = game.meshPlayer;
+        this.exitRow = game.exitRow;
+        this.exitCol = game.exitCol;
 
-    material1.diffuseColor = new BABYLON.Color3.Black();
-    material2.diffuseColor = new BABYLON.Color3.White();
 
-    material1.specularColor = new BABYLON.Color3.White();
-    //material1.wireframe = true;
+    this.Initialize = function () {
 
-    //var arrow;
-    BABYLON.SceneLoader.ImportMesh("Arrow", "meshes/", "arrow.babylon", scene, function (newMeshes) {
-        //var arrow = scene.getMeshByID("Arrow");
-        var arrow = newMeshes[0];
-        arrow.position.y = meshPlayer.position.y + 1.0;
-        arrow.position.z = meshPlayer.position.z + 0.5;
-        arrow.position.x = meshPlayer.position.x + 1.0;
-        arrow.rotation.x = -Math.PI / 2;
-        arrow.material = material1;
-        //arrow.scaling = new Babylon.vector3(0.5, 0.5, 0.5);
+        var material1 = new BABYLON.StandardMaterial("material01", scene);
+        //var material2 = new BABYLON.StandardMaterial("material02", scene);
+        material1.diffuseColor = new BABYLON.Color3.Black();
+        //material2.diffuseColor = new BABYLON.Color3.White();
+        material1.specularColor = new BABYLON.Color3.White();
+        //material1.wireframe = true;
 
-        scene.registerBeforeRender(function () {
+        BABYLON.SceneLoader.ImportMesh("Arrow", "meshes/", "arrow.babylon", scene, function (newMeshes) {
 
-            arrow.lookAt(exitWall.position, 0, -Math.PI / 2, 0);
+            //var arrow = scene.getMeshByID("Arrow");
+            var arrow = newMeshes[0];
             arrow.position.y = meshPlayer.position.y + 1.0;
-            arrow.position.z = meshPlayer.position.z - 0.5;
+            arrow.position.z = meshPlayer.position.z + 0.5;
             arrow.position.x = meshPlayer.position.x + 1.0;
+            arrow.rotation.x = -Math.PI / 2;
+            arrow.material = material1;
+            //arrow.scaling = new Babylon.vector3(0.5, 0.5, 0.5);
 
-            //window.setInterval(function () { arrow.material = arrow.material == material1 ? material2 : material1; }, 3000);
-            //window.setInterval(function () { arrow.material = material2; }, 500);
+            scene.registerBeforeRender(function () {
+
+                //arrow.lookAt(exitWall.position, 0, -Math.PI / 2, 0);
+                arrow.lookAt(paintedWalls[exitRow][exitCol].position, 0, -Math.PI / 2, 0);
+                arrow.position.y = meshPlayer.position.y + 1.0;
+                arrow.position.z = meshPlayer.position.z - 0.5;
+                arrow.position.x = meshPlayer.position.x + 1.0;
+
+                //window.setInterval(function () { arrow.material = arrow.material == material1 ? material2 : material1; }, 3000);
+                //window.setInterval(function () { arrow.material = material2; }, 500);
+
+            });
 
         });
-
-    });
+    }
 
 }
