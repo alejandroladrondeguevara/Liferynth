@@ -83,13 +83,16 @@ Walls = function (game) {
                 if (walls[x][y] == WallState.Alive) {
                     if (results[i] == 0) this.HideWall(x, y);
                 }
-                else if (walls[x][y] == WallState.Dead) {
-                    if (results[i] == 1) ShowWall(x, y);
-                }
-                else if (walls[x][y] == WallState.NonExisting) {
-                    Walls.CreateWall(x, y, even);
-                    Walls.ShowAnimation(x, y);
-                }
+                else
+                    if (!(this.UnderneathPlayer(x, y)) && (results[i] == 1)) {
+                        if (walls[x][y] == WallState.Dead) {
+                            this.ShowWall(x, y);
+                        }
+                        else if (walls[x][y] == WallState.NonExisting) {
+                            this.CreateWall(x, y, even);
+                            this.ShowAnimation(x, y);
+                        }
+                    }
             }
         }
     }
@@ -331,7 +334,7 @@ Walls = function (game) {
         }
         if (distinta) {
             walls[auxExitRow][auxExitCol] = WallState.PermaWall; //Levantamos el muro de salida anterior
-            ShowWall(auxExitRow, auxExitCol);
+            this.ShowWall(auxExitRow, auxExitCol);
             walls[i][j] = WallState.PermaGap;
             this.HideWall(i, j);
         }

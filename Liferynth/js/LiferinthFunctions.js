@@ -70,11 +70,13 @@ function ChangeWallsLife() {
                 else if (Math.floor(Math.random() * 100) <= 2) {//Con una probabilidad de 2% cambia
                     if (state == WallState.Alive)
                         Walls.HideWall(i, j);
-                    else if (state == WallState.Dead)
+                    else if (state == WallState.Dead && !Walls.UnderneathPlayer(i, j))
                         Walls.ShowWall(i, j);
                     else {
-                        Walls.CreateWall(i, j, even);
-                        Walls.ShowAnimation(i, j);
+                        if (!Walls.UnderneathPlayer(i, j)) {
+                            Walls.CreateWall(i, j, even);
+                            Walls.ShowAnimation(i, j);
+                        }
                     }
                 }
             }
