@@ -93,6 +93,10 @@ function runKernel() {
     kernel.setArg(0, input);
     kernel.setArg(1, output);
     kernel.setArg(2, new Uint32Array([count]));
+    kernel.setArg(3, new Uint32Array([rows]));
+    kernel.setArg(4, new Uint32Array([cols]));
+    kernel.setArg(5, new Uint32Array([lastRow]));
+    kernel.setArg(6, new Uint32Array([lastCol]));
     // Obtenemos el tamaño del grupo de trabajo máximo en el dispositivo
     workGroupSize = kernel.getWorkGroupInfo(device, webcl.KERNEL_WORK_GROUP_SIZE);
     // globalWorkSize % workGroupSize tiene que dar 0
