@@ -87,6 +87,7 @@ function initWebCLKernel() {
 
 function runKernel() {
 
+
     // Escribir los datos en el array de entrada
     queue.enqueueWriteBuffer(input, true, 0, Uint8Array.BYTES_PER_ELEMENT * count, binWalls);
     // Argumentos para nuestro programa Kernel
@@ -121,6 +122,7 @@ function runKernel() {
     var msg = "Computed " + correct + "/" + count + " correct values";
     */
     Walls.updateWalls();
+
     var msg = "Correcto!";
     console.log(msg);
 }

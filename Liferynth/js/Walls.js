@@ -401,6 +401,7 @@ Walls = function (game) {
     }
     this.ShowAnimation = function (r, c) {
         this.scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
+        binWalls[this.linealFromXY(r, c)] = 1;
         numWalls++;
     }
 
@@ -415,8 +416,7 @@ Walls = function (game) {
 
     this.ShowWall = function (row, col) {
         if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
-            walls[row][col] = WallState.Alive;
-        binWalls[this.linealFromXY(row, col)] = 1;
+            walls[row][col] = WallState.Alive; 
         paintedWalls[row][col].checkCollisions = true;
         this.ShowAnimation(row, col);
 
