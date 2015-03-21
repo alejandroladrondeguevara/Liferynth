@@ -87,6 +87,7 @@ function initWebCLKernel() {
 
 function runKernel() {
 
+    
 
     // Escribir los datos en el array de entrada
     queue.enqueueWriteBuffer(input, true, 0, Uint8Array.BYTES_PER_ELEMENT * count, binWalls);
@@ -103,12 +104,18 @@ function runKernel() {
     // globalWorkSize % workGroupSize tiene que dar 0
     globalWorkSize[0] = count + workGroupSize - (count % workGroupSize);
     localWorkSize[0] = workGroupSize;
+
+    var t0 = performance.now();
+
     // Ejecutamos el kernel usando el máximo número de "work group items" en este dispositivo
     queue.enqueueNDRangeKernel(kernel, globalWorkSize.length, null, globalWorkSize, localWorkSize);
     // Esperamos a que acaba para recopilar los resultados
     queue.finish();
     // Recuperamos los resultados
     queue.enqueueReadBuffer(output, true, 0, Uint8Array.BYTES_PER_ELEMENT * count, results);
+
+    var t1 = performance.now();
+    console.log("Llamada a 'life' (con WebCL) tardó: " + (t1 - t0).toFixed(2) + " milisegundos.");
 
     /*
     // Validate our results (to 6 figure accuracy)
@@ -123,6 +130,5 @@ function runKernel() {
     */
     Walls.updateWalls();
 
-    var msg = "Correcto!";
-    console.log(msg);
+
 }

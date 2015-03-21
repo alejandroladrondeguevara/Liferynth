@@ -36,6 +36,9 @@ function AliveNeighbours8(w, row, col) { //Recibe muro (fila y columna) y devuel
 }
 
 function ChangeWallsLife() {
+
+    var t0 = performance.now();
+
     var w = Walls.CopyWalls(); //Necesitamos tener una matriz estática hasta pasar una generación para no influir con cambios sucesivos en la misma
     console.log("Muros vivos: ", numWalls);
     var c;
@@ -82,6 +85,8 @@ function ChangeWallsLife() {
             }
         }
     }
+    var t1 = performance.now();
+    console.log("Llamada a 'changeWallsLife' (JavaScript) tardó: " + (t1 - t0).toFixed(2) + " milisegundos.");
 }
 
 function ChangeWalls() {
