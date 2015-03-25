@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\Style.css" />
+    <Content Include="js\Ammo.js" />
     <Content Include="js\Cameras.js" />
     <Content Include="js\LiferinthFunctions.js" />
     <Content Include="meshes\arrow.babylon" />

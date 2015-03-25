@@ -57,19 +57,24 @@ Player = function (game) {
 
         //Posición inicial del jugador
         collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
-        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
         meshPlayer.position.x = collidingBox.position.x;
         meshPlayer.position.z = collidingBox.position.z;
 
 
         //Posición incial del jugador
         collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
-        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
         meshPlayer.position.x = collidingBox.position.x
         meshPlayer.position.z = collidingBox.position.z
 
+        // Se sube la pared de la entrada y se convierte en una pared permanente
+        Walls.ShowAnimation(entranceRow, entranceCol);
+        Walls.ShowWall(entranceRow, entranceCol);
+        Walls.SetPermaWall(entranceRow, entranceCol);
+
         //Número de disparos
-        this.setNumOfShoots();
+        this.SetNumOfShoots();
 
         //Animaciones
         this.AnimatePlayer();
@@ -201,7 +206,7 @@ Player = function (game) {
         var numMissilesDisplay = document.getElementById("numMissiles_display");
 
         //Establece el número máximo e inicial de misiles
-        this.setNumOfShoots = function()
+        this.SetNumOfShoots = function()
         {
             switch (this.rowsSettings)
             {
@@ -219,30 +224,41 @@ Player = function (game) {
                     break;
             }
             numMissiles = maxNumMissiles;
-            displayNumMissiles();
+            DisplayNumMissiles();
         }
 
         //Muestra en pantalla el valor actual
-        function displayNumMissiles()
+        function DisplayNumMissiles()
         {
             //Actualiza el valor que se muestra en la pantalla
             numMissilesDisplay.innerHTML = numMissiles;
         }
 
         //Incrementa el número de misiles
-        function incrementMissiles()
+        this.IncrementMissiles = function()// incrementMissiles()
         {
             if (numMissiles<maxNumMissiles)
                 numMissiles++;
-            displayNumMissiles();
+            DisplayNumMissiles();
+        }
+
+        // Devuelve el número máximo de misiles
+        this.GetMaxMissiles = function ()
+        {
+            return maxNumMissiles;
+        }
+
+        // Devuelve el número actual de misiles
+        this.GetNumMissiles = function () {
+            return numMissiles;
         }
 
         //Decrementa el número de misiles
-       function decrementMissiles()
+       function DecrementMissiles()
         {
             if (numMissiles>0)
                 numMissiles--;
-            displayNumMissiles();
+            DisplayNumMissiles();
         }
 
         window.addEventListener("keydown", function (evt) {
@@ -250,7 +266,7 @@ Player = function (game) {
             if (evt.keyCode == 69 && numMissiles > 0) {
 
                 //Decrementa el número de disparos
-                decrementMissiles();
+                DecrementMissiles();
 
                 //Instancia un nuevo misil
                 var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
@@ -289,10 +305,21 @@ Player = function (game) {
                         while (j < (rows - 1) && !foundIt) {
                             var k = 0;
                             while (k < cols && !foundIt) {
+                                // Si es una pared viva
                                 if ((walls[j][k] == Walls.WallState.Alive)){
                                     if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
                                         //Oculta la parede en la que ha impactado el misil
                                         Walls.HideWall(j, k);
+                                        //Destruye la malla (objeto)
+                                        var _missile = missiles[i];
+                                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                        _missile.dispose();
+                                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                        foundIt = true;
+                                    }
+                                // Sino si es una pared permanente
+                                } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
+                                    if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
                                         //Destruye la malla (objeto)
                                         var _missile = missiles[i];
                                         missiles.splice(i, 1);//"Elimina" la posición i reordenando el array

@@ -13,6 +13,7 @@
     <script src="js/LiferinthFunctions.js"></script>
     <script src="js/ExitArrow.js"></script>
     <script src="js/Cameras.js"></script>
+    <script src="js/Ammo.js"></script>
     <link href="css/Style.css" rel="stylesheet" />
 
     <!--Programa en WebCL -->
@@ -208,7 +209,7 @@
                 var floorHeight = 0;
                 var offsetSize = 4;
                 var planeWidthSize = (cols * offsetSize) + ((cols * offsetSize) / 2) - offsetSize;
-                var planeDepthSize = (rows * offsetSize) - ((rows * offsetSize) / 4);
+                var planeDepthSize = (rows * offsetSize) - ((rows * offsetSize) / 3.5);
                 var planeSize = planeDepthSize;
 
                 var margin = 1.01;                
@@ -243,8 +244,8 @@
                 Walls.HideWall(entranceRow, entranceCol);
                 Walls.HideWall(exitRow, exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
             
-                // Frecuencia para el cambio de la salida (30 segundos)
-                    var changeExitFrecuenvy = 30000;
+                // Frecuencia para el cambio de la salida (20 segundos)
+                    var changeExitFrecuenvy = 20000;
 
                 //Cambia la salida de sitio
                     window.setInterval(function () { Walls.ChangeExit(Math.round(Math.random()), Math.round(Math.random()), Math.floor((Math.random() * (10)) + 1)); }, changeExitFrecuenvy);
@@ -268,11 +269,32 @@
 
             /*
             --------------------------
-                Creación del jugador
+                Definición y creación del jugador
             --------------------------
             */
                 var Player = new Player(_this);
                 Player.Initialize();
+
+            /*
+            --------------------------
+                Definición y creación del laberinto
+            --------------------------
+            */
+                var numAmmo = 20;
+                var Ammo = new Ammo(_this);
+                var ammo = Ammo.Initialize(numAmmo);
+
+                // Materiales
+                    var material1 = new BABYLON.StandardMaterial("ammoMaterial1", scene);
+                    var material2 = new BABYLON.StandardMaterial("ammoMaterial2", scene);
+                    material1.diffuseColor = new BABYLON.Color3.Black();
+                    material2.diffuseColor = new BABYLON.Color3.White();
+                // "Animación" para el cambio de material
+                    window.setInterval(function () {                    
+                        for (var i = 0; i < ammo.length; i++) {
+                            ammo[i].material = ammo[i].material == material1 ? material2 : material1;
+                        }
+                    }, 300);
 
             /*
             --------------------------
@@ -369,9 +391,7 @@
 
                 //Flecha que indica la dirección actual de la salida
                     var Arrow = new ExitArrow(_this);
-                    Arrow.Initialize();
-
-
+                    Arrow.Initialize();                
             /*
             --------------------------
                 Eventos
@@ -477,7 +497,8 @@
                     engine.beginFrame();
 
                     scene.render();
-                    //window.document.title = BABYLON.Engine.getFps();//.GetFps().toFixed() + " fps";
+
+                    //window.document.title = "x: " + meshPlayer.position.x + " y: " + meshPlayer.position.z;// BABYLON.Engine.getFps();//.GetFps().toFixed() + " fps";
                     // Present
                     engine.endFrame();
 

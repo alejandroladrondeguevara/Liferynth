@@ -8,7 +8,6 @@
         this.exitRow = game.exitRow;
         this.exitCol = game.exitCol;
 
-
     this.Initialize = function () {
 
         var material1 = new BABYLON.StandardMaterial("material01", scene);
@@ -40,9 +39,7 @@
                 //window.setInterval(function () { arrow.material = arrow.material == material1 ? material2 : material1; }, 3000);
                 //window.setInterval(function () { arrow.material = material2; }, 500);
 
-            });
-
+            });            
         });
-    }
-
+    }   
 }

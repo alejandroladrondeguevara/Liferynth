@@ -422,6 +422,10 @@ Walls = function (game) {
 
     }
 
+    this.SetPermaWall = function (row, col) {
+        walls[row][col] = WallState.PermaWall;
+    }
+
 
     /*
         --------------------------------------------------------------------------------
