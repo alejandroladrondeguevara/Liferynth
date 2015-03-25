@@ -274,7 +274,7 @@ Player = function (game) {
 
                         var foundIt = false;
 
-                        //Si el misil no impacta y se aleja una determinada distancia, desaparece
+                        //Si el misil no impacta y se aleja una determinada distancia desaparece
                         if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
                             //Destruye la malla (objeto)
                             var _missile = missiles[i];                            
@@ -291,7 +291,7 @@ Player = function (game) {
                             while (k < cols && !foundIt) {
                                 if ((walls[j][k] == Walls.WallState.Alive)){
                                     if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
-                                        //Oculta la parede en la que ha impacto el misil
+                                        //Oculta la parede en la que ha impactado el misil
                                         Walls.HideWall(j, k);
                                         //Destruye la malla (objeto)
                                         var _missile = missiles[i];
