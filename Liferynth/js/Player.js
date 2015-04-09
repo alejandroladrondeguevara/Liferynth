@@ -55,13 +55,6 @@ Player = function (game) {
         collidingBox.ellipsoid = ellipsoidPlayer;
         collidingBox.showBoundingBox = true;
 
-        //Posición inicial del jugador
-        collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
-        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
-        meshPlayer.position.x = collidingBox.position.x;
-        meshPlayer.position.z = collidingBox.position.z;
-
-
         //Posición incial del jugador
         collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
         collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
@@ -78,6 +71,20 @@ Player = function (game) {
 
         //Animaciones
         this.AnimatePlayer();
+    }
+
+    this.Reset = function () {
+
+        //Posición incial del jugador
+        collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
+        collidingBox.position.y = floorHeight + (meshPlayer.scaling.y / 2);
+        meshPlayer.position.y = collidingBox.position.y;
+        meshPlayer.position.x = collidingBox.position.x
+        meshPlayer.position.z = collidingBox.position.z
+
+        //Número de disparos
+        this.SetNumOfShoots();
     }
 
     this.AnimatePlayer = function () {

@@ -435,6 +435,14 @@ Walls = function (game) {
         --------------------------------------------------------------------------------                            
     */
 
+    this.GetExitRow = function() {
+        return exitRow;
+    }
+
+    this.GetExitCol = function () {
+        return exitCol;
+    }
+
     this.CopyWalls = function () { //Devuelve una copia de la matriz walls
         var w = [];
         var c;
