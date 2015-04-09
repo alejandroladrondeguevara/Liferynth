@@ -266,8 +266,7 @@
                 paintedWalls = Walls.PaintWalls(walls, rows, cols);
                 Walls.AnimateWalls();
                 Walls.HideWall(entranceRow, entranceCol);
-                //Walls.HideWall(exitRow, exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
-                Walls.ShowWall(exitRow, exitCol);
+                Walls.HideWall(exitRow, exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
                 // Frecuencia para el cambio de la salida (20 segundos)
                     var changeExitFrecuenvy = 20000;
 
@@ -279,8 +278,9 @@
                 Definición y creación de enemigos
             --------------------------
             */
-                var Enemies = new Enemies(_this);
-                Enemies.CreateEnemy((lastRow / 2) - 1, Math.floor(cols / 2));
+                var Enemies = new Enemies(_this);                
+                Enemies.CreateEnemy(((lastRow / 2) - 1)*2, Math.floor(cols / 2));                
+                Enemies.ManageEnemies();
 
             /*
            --------------------------
@@ -502,6 +502,7 @@
 
                 //BeforeRender
                 scene.registerBeforeRender(function () {
+
                     if (scene.isReady() && meshPlayer) {
                         if (turnLeft)
                             Player.TurnLeft();
@@ -546,7 +547,7 @@
                                 engine.hideLoadingUI();
 
                             }, 4000);
-                        }
+                        }                        
                     }
                 });                
                 

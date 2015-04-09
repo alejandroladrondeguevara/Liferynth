@@ -16,6 +16,7 @@
 
         this.enemies = game.enemies;
         this.numEnemies = game.numEnemies;
+        this.Walls = game.Walls;
 
 
     this.CreateEnemy = function (row, col) {
@@ -37,9 +38,13 @@
         //PARALELO
         // No se modifica el mapa de muros, si un enemigo lo modificara, 
         // se llevaría a cabo al finalizar el bucle (Tareas pendientes)
-        for (var i = 0; i < numEnemies; i++) {
-            enemies[i];
-        }
+        this.scene.registerBeforeRender(function () {
+            
+            for (var i = 0; i < numEnemies; i++) {
+                enemies[i].Move();
+            }
+            
+        });
 
     }
 }
