@@ -105,7 +105,7 @@ function runKernel() {
     globalWorkSize[0] = count + workGroupSize - (count % workGroupSize);
     localWorkSize[0] = workGroupSize;
 
-    var t0 = performance.now();
+    //var t0 = performance.now();
 
     // Ejecutamos el kernel usando el máximo número de "work group items" en este dispositivo
     queue.enqueueNDRangeKernel(kernel, globalWorkSize.length, null, globalWorkSize, localWorkSize);
@@ -114,20 +114,9 @@ function runKernel() {
     // Recuperamos los resultados
     queue.enqueueReadBuffer(output, true, 0, Uint8Array.BYTES_PER_ELEMENT * count, results);
 
-    var t1 = performance.now();
-    console.log("Llamada a 'life' (con WebCL) tardó: " + (t1 - t0).toFixed(2) + " milisegundos.");
+   // var t1 = performance.now();
+   // console.log("Llamada a 'life' (con WebCL) tardó: " + (t1 - t0).toFixed(2) + " milisegundos.");
 
-    /*
-    // Validate our results (to 6 figure accuracy)
-    var TOINT = function (x) { return Math.floor(1000000 * x); };
-    var correct = 0;
-    for (var i = 0; i < count; i++) {
-        if (TOINT(results[i]) == TOINT(data[i] * data[i]))
-            correct++;
-    }
-    // Print a brief summary detailing the results 
-    var msg = "Computed " + correct + "/" + count + " correct values";
-    */
     Walls.updateWalls();
 
 

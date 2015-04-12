@@ -352,7 +352,7 @@ Walls = function (game) {
 
     function AnimateWall(r, c) {
         var string1 = "animation " + r + " " + c;
-        var animationBox = new BABYLON.Animation(string1, "position.y", 75,
+        var animationBox = new BABYLON.Animation(string1, "position.y", 30,
             BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
         // An array with all animation keys
         var keys = [];
@@ -362,19 +362,19 @@ Walls = function (game) {
             value: floorHeight + wallHeight / 2
         });
         keys.push({
-            frame: 20,
+            frame: 8,
             value: floorHeight
         });
         keys.push({
-            frame: 100,
+            frame: 40,
             value: floorHeight - (wallHeight * margin) / 2
         });
         keys.push({
-            frame: 120,
+            frame: 48,
             value: floorHeight + wallHeight / 4
         });
         keys.push({
-            frame: 200,
+            frame: 80,
             value: floorHeight + wallHeight / 2
         });
         animationBox.setKeys(keys);
@@ -396,11 +396,11 @@ Walls = function (game) {
     }
 
     function HideAnimation(r, c) {
-        this.scene.beginAnimation(paintedWalls[r][c], 0, 100, false);
+        this.scene.beginAnimation(paintedWalls[r][c], 0, 40, false);
         numWalls--;
     }
     this.ShowAnimation = function (r, c) {
-        this.scene.beginAnimation(paintedWalls[r][c], 100, 200, false);
+        this.scene.beginAnimation(paintedWalls[r][c], 40, 80, false);
         binWalls[this.linealFromXY(r, c)] = 1;
         numWalls++;
     }
