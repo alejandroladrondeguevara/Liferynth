@@ -398,6 +398,10 @@
                     plane.checkCollisions = true;
 
                 // Shadows
+                    // Niebla
+                    scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
+                    scene.fogStart = 10.00;
+                    scene.fogEnd = 30.00;
                     /*var shadowGenerator = new BABYLON.ShadowGenerator(2048, flashlight);
                     shadowGenerator.useVarianceShadowMap = true;
                     */
