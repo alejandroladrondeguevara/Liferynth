@@ -26,10 +26,8 @@ Player = function (game) {
         this.entranceCol = game.entranceCol;
 
         this.Walls = game.Walls;
-        this.planeWidthSize = game.planeWidthSize;
+        this.planeWidthSize = game.planeWidthSize;      
         
-        var labelMissilesDisplay = document.getElementById("labelMissiles_display");
-
     jumpHeight = 1.5;              // Altura del salto del jugador
     jumpTime = 0.3;                // Tiempo de salto (vuelo) del jugador
 
@@ -215,6 +213,7 @@ Player = function (game) {
         var numMissiles = 0;
         var maxNumMissiles = 0;       
         var numMissilesDisplay = document.getElementById("numMissiles_display");
+        var labelMissilesDisplay = document.getElementById("labelMissiles_display");
 
         //Establece el número máximo e inicial de misiles
         function SetNumOfShoots()
