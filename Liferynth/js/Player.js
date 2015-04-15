@@ -202,7 +202,7 @@ Player = function (game) {
 
     //Disparar
         //Constantes
-        var MISSILE_SPEED = 200.0;              //Disminuye la velocidad si se aumenta el valor
+        var MISSILE_SPEED = 500.0;              //Disminuye la velocidad si se aumenta el valor
         var MISSILE_SIZE = 0.5;                 //Tamaño del misil
         var MISSILE_OFFSET = planeWidthSize*2;    //Distancia máxima a la que se puede llegar el misil
         //Variables
@@ -286,64 +286,67 @@ Player = function (game) {
                 var direction = new BABYLON.Vector3(meshPlayer.position.x - camera.position.x, 0, meshPlayer.position.z - camera.position.z);            
                 directions.push(direction);
 
-                this.scene.registerBeforeRender(function () {
-
-                    /// Misiles: Animación y detección de colisiones 
-                    for (var i = 0; i < missiles.length; i++) {
-
-                        //Movimiento del misil
-                        missiles[i].position.x += (directions[i].x / MISSILE_SPEED);
-                        missiles[i].position.z += (directions[i].z / MISSILE_SPEED);
-
-                        var foundIt = false;
-
-                        //Si el misil no impacta y se aleja una determinada distancia desaparece
-                        if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
-                            //Destruye la malla (objeto)
-                            var _missile = missiles[i];                            
-                            missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                            _missile.dispose();
-                            directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                            foundIt = true;
-                        }
-
-                        //Detección de colisiones
-                        var j = 0;  
-                        while (j < (rows - 1) && !foundIt) {
-                            var k = 0;
-                            while (k < cols && !foundIt) {
-                                // Si es una pared viva
-                                if ((walls[j][k] == Walls.WallState.Alive)){
-                                    if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
-                                        //Oculta la parede en la que ha impactado el misil
-                                        Walls.HideWall(j, k);
-                                        //Destruye la malla (objeto)
-                                        var _missile = missiles[i];
-                                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                        _missile.dispose();
-                                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                        foundIt = true;
-                                    }
-                                // Sino si es una pared permanente
-                                } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
-                                    if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
-                                        //Destruye la malla (objeto)
-                                        var _missile = missiles[i];
-                                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                        _missile.dispose();
-                                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                        foundIt = true;
-                                    }
-                                }
-                                k++;
-                            }
-                            j++;
-                        }
-                    }
-
-                });
+                
             }
-        });       
+        });
+
+        this.scene.registerBeforeRender(function () {
+
+            var deltaTime = engine.getDeltaTime();
+            /// Misiles: Animación y detección de colisiones 
+            for (var i = 0; i < missiles.length; i++) {
+
+                //Movimiento del misil
+                missiles[i].position.x += (directions[i].x * deltaTime / MISSILE_SPEED);
+                missiles[i].position.z += (directions[i].z * deltaTime / MISSILE_SPEED);
+
+                var foundIt = false;
+
+                //Si el misil no impacta y se aleja una determinada distancia desaparece
+                if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
+                    //Destruye la malla (objeto)
+                    var _missile = missiles[i];
+                    missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                    _missile.dispose();
+                    directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                    foundIt = true;
+                }
+
+                //Detección de colisiones
+                var j = 0;
+                while (j < (rows - 1) && !foundIt) {
+                    var k = 0;
+                    while (k < cols && !foundIt) {
+                        // Si es una pared viva
+                        if ((walls[j][k] == Walls.WallState.Alive)) {
+                            if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
+                                //Oculta la pared en la que ha impactado el misil
+                                Walls.HideWall(j, k);
+                                //Destruye la malla (objeto)
+                                var _missile = missiles[i];
+                                missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                _missile.dispose();
+                                directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                foundIt = true;
+                            }
+                            // Sino si es una pared permanente
+                        } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
+                            if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
+                                //Destruye la malla (objeto)
+                                var _missile = missiles[i];
+                                missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                _missile.dispose();
+                                directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                                foundIt = true;
+                            }
+                        }
+                        k++;
+                    }
+                    j++;
+                }
+            }
+
+        });
 
 
 }
