@@ -283,7 +283,10 @@ Player = function (game) {
                 missiles.push(missile);
 
                 //Dirección actual entre la cámara y el jugador
-                var direction = new BABYLON.Vector3(meshPlayer.position.x - camera.position.x, 0, meshPlayer.position.z - camera.position.z);            
+                var x, z;
+                if (activeCameraNum == 0) { x = camera.position.x; z = camera.position.z; }
+                else { x = topDownCamera.position.x; z = topDownCamera.position.z; }
+                var direction = new BABYLON.Vector3(meshPlayer.position.x - x, 0, meshPlayer.position.z - z);            
                 directions.push(direction);
 
                 

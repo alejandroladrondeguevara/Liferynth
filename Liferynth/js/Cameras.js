@@ -8,11 +8,10 @@ Cameras = function (game) {
     this.playerHeight = game.playerHeight;
     this.meshPlayer = game.meshPlayer;
 
-
-    topDownCameraHeight = 40;       // Altura de la cámara topdown
-    activeCamera = 0;               // 0 = FollowCam, 1 = TopDownCamera
+    topDownCameraHeight = 40;       // Altura de la cámara topdown              
     numCameras = 2;                 // Número de cámaras
-    distanceCamera = 3;            // Distancia de la cámara (FolowCam) al jugador
+    activeCameraNum = 0;            // 0 = FollowCam, 1 = TopDownCamera
+    distanceCamera = 3.5;             // Distancia de la cámara (FolowCam) al jugador
 
     //Creación de las cámaras
     camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(meshPlayer.position.x, floorHeight + (playerHeight / 2), meshPlayer.position.z - distanceCamera), scene);
@@ -29,7 +28,7 @@ Cameras = function (game) {
         camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
         camera.maxCameraSpeed = 20;
         camera.applyGravity = true;
-        camera.radius = -3.5;
+        camera.radius = - distanceCamera;
         camera.heightOffset = 0.5;
         camera.keysUp = [];
         camera.keysDown = [];
@@ -45,7 +44,7 @@ Cameras = function (game) {
         topDownCamera.position.y = topDownCameraHeight;
         topDownCamera.target = meshPlayer;
         topDownCamera.heightOffset = topDownCameraHeight;
-        topDownCamera.radius = -0.75;
+        topDownCamera.radius = - distanceCamera;
         topDownCamera.keysUp = [];
         topDownCamera.keysDown = [];
         topDownCamera.keysLeft = [];
@@ -53,10 +52,10 @@ Cameras = function (game) {
 
         //Se fija la cámara FollowCamera como principal
         scene.activeCameras[0] = camera;
-        scene.activeCameras[1] = topDownCamera;
+        //scene.activeCameras[1] = topDownCamera;
         //Se liga la vista completa a la cámara FollowCamera
         camera.viewport = completView;
-        topDownCamera.viewport = smallView;
+        //topDownCamera.viewport = smallView;
     }
     
     window.addEventListener("keydown", function (evt) {
@@ -64,16 +63,16 @@ Cameras = function (game) {
         if (!scene)
             return;
         if (evt.keyCode == 74) {
-            activeCamera = (activeCamera + 1) % numCameras;
-            switch (activeCamera) {
+            activeCameraNum = (activeCameraNum + 1) % numCameras;
+            switch (activeCameraNum) {
                 //Se activa la cámara FollowCamera como principal
                 case 0:
                     //Se fija la cámara FollowCamera como principal
                     scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
                     scene.activeCameras[0] = camera;
-                    scene.activeCameras[1] = topDownCamera;
+                    //scene.activeCameras[1] = topDownCamera;
                     //Se liga la vista complata a la cámara FollowCamera
-                    topDownCamera.viewport = smallView;
+                    //topDownCamera.viewport = smallView;
                     camera.viewport = completView;
                     break;
                 //Se activa la cámara TopDownCamera como principal
@@ -81,10 +80,10 @@ Cameras = function (game) {
                     //Se fija la cámara TopDownCamera como principal
                     scene.fogMode = BABYLON.Scene.FOGMODE_NONE;
                     scene.activeCameras[0] = topDownCamera;
-                    scene.activeCameras[1] = camera;
+                    //scene.activeCameras[1] = camera;
                     //Se liga la vista complata a la cámara TopDownCamera
                     topDownCamera.viewport = completView;
-                    camera.viewport = smallView;
+                    //camera.viewport = smallView;
                     break;
                 default:
                     break;
