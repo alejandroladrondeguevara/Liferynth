@@ -28,6 +28,7 @@ Player = function (game) {
         this.Walls = game.Walls;
         this.planeWidthSize = game.planeWidthSize;
         
+        var labelMissilesDisplay = document.getElementById("labelMissiles_display");
 
     jumpHeight = 1.5;              // Altura del salto del jugador
     jumpTime = 0.3;                // Tiempo de salto (vuelo) del jugador
@@ -66,8 +67,11 @@ Player = function (game) {
         Walls.ShowWall(entranceRow, entranceCol);
         Walls.SetPermaWall(entranceRow, entranceCol);
 
-        //Número de disparos
-        this.SetNumOfShoots();
+        //Número de disparos, se carga después de 5 segundos
+        setTimeout(function () {
+            DisplayLabelMissiles();
+            SetNumOfShoots();
+        },5000);
 
         //Animaciones
         this.AnimatePlayer();
@@ -84,7 +88,7 @@ Player = function (game) {
         meshPlayer.position.z = collidingBox.position.z
 
         //Número de disparos
-        this.SetNumOfShoots();
+        SetNumOfShoots();
     }
 
     this.AnimatePlayer = function () {
@@ -209,11 +213,11 @@ Player = function (game) {
         var missiles = [];                      //Array de misiles 
         var directions = [];                    //Array de direcciones de cada misil
         var numMissiles = 0;
-        var maxNumMissiles = 0;
+        var maxNumMissiles = 0;       
         var numMissilesDisplay = document.getElementById("numMissiles_display");
 
         //Establece el número máximo e inicial de misiles
-        this.SetNumOfShoots = function()
+        function SetNumOfShoots()
         {
             switch (this.rowsSettings)
             {
@@ -234,10 +238,17 @@ Player = function (game) {
             DisplayNumMissiles();
         }
 
+        //Muestra en pantalla el label 'Misiles: '
+        function DisplayLabelMissiles()
+        {
+
+            labelMissilesDisplay.innerHTML = "Misiles: ";
+        }
+
         //Muestra en pantalla el valor actual
         function DisplayNumMissiles()
         {
-            //Actualiza el valor que se muestra en la pantalla
+            //Actualiza el valor que se muestra en la pantalla            
             numMissilesDisplay.innerHTML = numMissiles;
         }
 

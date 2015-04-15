@@ -100,7 +100,7 @@
 </head>
 <body onload="loadSettings()">
     <div id="info">
-        <label style="color:white; font-weight:bold; text-align:right;">Misiles: </label>
+        <label style="color:white; font-weight:bold; text-align:right;" id="labelMissiles_display"></label>
         <label style="color: white; font-weight: bold; text-align: right;" id="numMissiles_display"></label>
     </div>
     <div>
@@ -279,7 +279,9 @@
             --------------------------
             */
                 var Enemies = new Enemies(_this);                
-                Enemies.CreateEnemy(((lastRow / 2) - 1)*2, Math.floor(cols / 2));                
+                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2));
+                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2) + 1);
+                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2) - 1);
                 Enemies.ManageEnemies();
 
             /*
@@ -537,14 +539,6 @@
                             // Se activa la bandera para que en la siguiente iteración
                             // el flujo no entre en el bloque 'IF'
                             back = true;
-                            
-                            setTimeout(function () {
-
-                                // Pone al jugador en la posición de partida
-                                Player.Reset();
-                                back = false;
-
-                            }, 2000);
 
                             setTimeout(function () {
 
@@ -554,6 +548,16 @@
                                 engine.hideLoadingUI();
 
                             }, 4000);
+
+                            setTimeout(function () {
+
+                                // Pone al jugador en la posición de partida
+                                Player.Reset();
+                                back = false;
+
+                            }, 2000);
+
+                            
                         }                        
                     }
                 });                

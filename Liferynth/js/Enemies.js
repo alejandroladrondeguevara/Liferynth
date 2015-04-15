@@ -14,10 +14,11 @@
         this.collidingBox = game.collidingBox;
         this.gravity = game.gravity;
 
-        this.enemies = game.enemies;
+        //this.enemies = game.enemies;
         this.numEnemies = game.numEnemies;
         this.Walls = game.Walls;
 
+        var enemies = [];
 
     this.CreateEnemy = function (row, col) {
         /*Crea un enemigo en la posición row,col de la matriz de celdas del laberinto
@@ -28,24 +29,26 @@
         */
         var e = new Enemy(game, row, col);
         e.Initialize();
-        enemies[numEnemies] = e;
-        numEnemies++;
+        enemies.push(e);
     }
 
 
-
+    
     this.ManageEnemies = function () {
         //PARALELO
         // No se modifica el mapa de muros, si un enemigo lo modificara, 
         // se llevaría a cabo al finalizar el bucle (Tareas pendientes)
         this.scene.registerBeforeRender(function () {
             
-            for (var i = 0; i < numEnemies; i++) {
+            for (var i = 0; i < enemies.length; i++) {
                 enemies[i].Move();
             }
             
         });
 
     }
+    
+
+    
 }
 
