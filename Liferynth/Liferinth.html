@@ -399,9 +399,12 @@
 
                 // Shadows
                     // Niebla
+                    var fogStart = 10.00;
+                    var fogEnd = 20.00;
+
                     scene.fogMode = BABYLON.Scene.FOGMODE_LINEAR;
-                    scene.fogStart = 10.00;
-                    scene.fogEnd = 30.00;
+                    scene.fogStart = fogStart;
+                    scene.fogEnd = fogEnd;
                     /*var shadowGenerator = new BABYLON.ShadowGenerator(2048, flashlight);
                     shadowGenerator.useVarianceShadowMap = true;
                     */

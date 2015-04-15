@@ -17,6 +17,7 @@ Walls = function (game) {
     this.meshPlayer = game.meshPlayer;
     this.collidingBox = game.collidingBox;
     this.totalWalls = game.totalWalls;
+    this.fogEnd = game.fogEnd;
 
     /*  Estado del muro: 
             0 : No hay muro creado
@@ -405,20 +406,50 @@ Walls = function (game) {
         numWalls++;
     }
 
+    function HideNoAnimation(r, c) {
+        paintedWalls[r][c].position.y = floorHeight - (wallHeight * margin) / 2;
+        numWalls--;
+    }
+
+    this.ShowNoAnimation = function(r, c) {
+        paintedWalls[r][c].position.y = floorHeight + wallHeight / 2;
+        binWalls[this.linealFromXY(r, c)] = 1;
+        numWalls++;
+    }
+
+    function PlayerTooFarFromWall(r, c) {
+        if (collidingBox == null) return true; //Si no hay jugador, los muros pueden salir instantáneamente
+
+        // La raíz cuadrada sería demasiado costosa, utilizamos una distancia más relativa
+        return (Math.abs(paintedWalls[r][c].position.x - collidingBox.position.x) > fogEnd) ||
+            (Math.abs(paintedWalls[r][c].position.z - collidingBox.position.z) > fogEnd);
+    }
 
     this.HideWall = function (row, col) {
         if (walls[row][col] == WallState.Alive) //Si está vivo, muere
             walls[row][col] = WallState.Dead;
         binWalls[this.linealFromXY(row, col)] = 0;
-        window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
-        HideAnimation(row, col);
+        //Si el jugador no está cerca del muro, bajarlo instantáneamente
+        if(PlayerTooFarFromWall(row,col)){
+            paintedWalls[row][col].checkCollisions = false;
+            HideNoAnimation(row, col);
+        } else {
+            window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
+            HideAnimation(row, col);
+        }
     }
 
     this.ShowWall = function (row, col) {
         if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
-            walls[row][col] = WallState.Alive; 
-        paintedWalls[row][col].checkCollisions = true;
-        this.ShowAnimation(row, col);
+            walls[row][col] = WallState.Alive;
+        //Si el jugador no está cerca del muro, subirlo instantáneamente
+        if (PlayerTooFarFromWall(row,col)){
+            paintedWalls[row][col].checkCollisions = true;
+            this.ShowNoAnimation(row, col);
+        } else {
+            paintedWalls[row][col].checkCollisions = true;
+            this.ShowAnimation(row, col);
+        }
 
     }
 
