@@ -32,7 +32,8 @@
     var collider = BABYLON.Mesh.CreateBox("colEnemy", 1, scene);
 
     var orientation = true; //{Horizotal:false, Vertical: true}
-    var direction = true; //{Positivo: true, Negativo: false}    
+    var direction = true; //{Positivo: true, Negativo: false}
+    var diagonal = false; //{}
 
     this.Initialize = function () {
         //this.mesh = BABYLON.Mesh.CreateBox("enemy", 1, scene);
@@ -56,6 +57,29 @@
         collider.material = material2;
     }
 
+    var act =   0;          //  Indica el estado actual
+    var offsetX = +1.0;
+    var offsetZ = +1.0;
+
+    /**************************************************************************
+                Diagrama de estados para las colisiones 
+
+                         ---------------------- 
+                                (**)
+                            (1) D=2 -> (3)                      (**) -> Indica la posición del jugador en la colisión con la pared
+                                D=0 -> (2)                      D -> random [0-2]
+                                D=1 -> (0)
+       |                                                          |
+       |         D=2 -> (1)                        D=2 -> (2)     |
+       |(**) (0) D=0 -> (3)                    (3) D=0 -> (0) (**)|
+       |         D=1 -> (2)                        D=1 -> (1)     |                                                          
+       |                    (2) D=2 -> (0)                        |
+                                D=0 -> (1)                   
+                                D=1 -> (3)
+                                (**)
+                        ------------------------
+
+    ******************************************************************************/
     this.Move = function () {
         /* 
             Mueve al enemigo en una dirección dentro del laberinto
@@ -69,24 +93,89 @@
                 if ((walls[j][k] == Walls.WallState.Alive) || (walls[j][k] == Walls.WallState.PermaWall)) {
                     if (paintedWalls[j][k].intersectsMesh(collider, true)) {
 
-                        /**var random = Math.floor((Math.random() * 10) + 1);
-                        if (random < 5) {
-                            if (orientation)
-                                orientation = false;
-                            else
-                                orientation = true;
-                        } else {
-                            if (direction)
-                                direction = false;
-                            else
-                                direction = true;
-                        }**/
+                        var random = Math.floor((Math.random() * 3));
 
-                        if (orientation && direction)
-                            direction = false;
-                        else
-                            direction = true;
-                        
+                        switch (random)
+                        {
+                            case 0: 
+
+                                switch (act)
+                                {
+                                    case 0:
+                                        act = 3;
+                                        offsetX = -0.1;
+                                        offsetZ = 0.0;
+                                        break;
+                                    case 1:
+                                        act = 2;
+                                        offsetX =  0.0;
+                                        offsetZ = -0.1;
+                                        break;
+                                    case 2:
+                                        act = 1;
+                                        offsetX = 0.0;
+                                        offsetZ = +0.1;
+                                        break;
+                                    case 3:
+                                        act = 0;
+                                        offsetX = +0.1;
+                                        offsetZ = 0.0;
+                                        break;
+                                }
+
+                                break;
+                            case 1: 
+                                switch (act) {
+                                    case 0:
+                                        act = 2;
+                                        offsetX = -0.1;
+                                        offsetZ = -0.1;
+                                        break;
+                                    case 1:
+                                        act = 0;
+                                        offsetX = +0.1;
+                                        offsetZ = -0.1;
+                                        break;
+                                    case 2:
+                                        act = 3;
+                                        offsetX = -0.1;
+                                        offsetZ = +0.1;
+                                        break;
+                                    case 3:
+                                        act = 1;
+                                        offsetX = +0.1;
+                                        offsetZ = +0.1;
+                                        break;
+                                }
+                            
+                                break;
+                            case 2: 
+                                switch (act) {
+                                    case 0:
+                                        act = 1;
+                                        offsetX = -0.1;
+                                        offsetZ = +0.1;
+                                        break;
+                                    case 1:
+                                        act = 3;
+                                        offsetX = -0.1;
+                                        offsetZ = -0.1;
+                                        break;
+                                    case 2:
+                                        act = 0;
+                                        offsetX = +0.1;
+                                        offsetZ = +0.1;
+                                        break;
+                                    case 3:
+                                        act = 2;
+                                        offsetX = +0.1;
+                                        offsetZ = -0.1;
+                                        break;
+                                }
+                            
+                                break;
+                        }                        
+
                         foundIt = true;
                     }
                 }
@@ -95,15 +184,8 @@
             j++;
         }
 
-
-        //Si (orientation == true) --> Eje x
-        if (orientation) {
-            if (direction) { position.x += 0.1;  }//game.wallWidth; }
-            else { position.x -= 0.1;  }//game.wallWidth; }         
-        } else {
-            if (direction) { position.z += 0.1;}//game.wallWidth; }
-            else { position.z -= 0.1;}//game.wallWidth; }
-        }
+        position.x += offsetX;
+        position.z += offsetZ;
 
         RefreshEnemy();
 
