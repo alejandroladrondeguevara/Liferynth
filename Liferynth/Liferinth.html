@@ -1,5 +1,4 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
     <title>Liferinth.js</title>
@@ -267,11 +266,12 @@
                 Walls.AnimateWalls();
                 Walls.HideWall(entranceRow, entranceCol);
                 Walls.HideWall(exitRow, exitCol); //Los hemos creado porque puede levantarse más adelante, pero está levantado, hay que bajarlo
+
                 // Frecuencia para el cambio de la salida (20 segundos)
-                    var changeExitFrecuenvy = 20000;
+                    var changeExitfrecuency = 20000;
 
                 //Cambia la salida de sitio
-                    window.setInterval(function () { Walls.ChangeExit(Math.round(Math.random()), Math.round(Math.random()), Math.floor((Math.random() * (10)) + 1)); }, changeExitFrecuenvy);
+                    window.setInterval(function () { Walls.ChangeExit(Math.round(Math.random()), Math.round(Math.random()), Math.floor((Math.random() * (10)) + 1)); }, changeExitfrecuency);
 
             /*
             --------------------------

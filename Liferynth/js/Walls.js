@@ -32,6 +32,7 @@ Walls = function (game) {
     var wallHeight = 4;
     var wallDepth = 0.75;
     this.wallScale = new BABYLON.Vector3(wallDepth, wallHeight, wallWidth);
+    var timeToNoCollisionOnHide = 1.1;
 
     binWalls = new Uint8Array(totalWalls); //Será el input del método kernel
 
@@ -114,7 +115,7 @@ Walls = function (game) {
         var box = BABYLON.Mesh.CreateBox("Box", 1.0, this.scene);
 
         var material = new BABYLON.StandardMaterial("wallFront", this.scene);
-        material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplica2.png", this.scene);
+        material.diffuseTexture = new BABYLON.Texture("images/MetalWallReplicaPeque.png", this.scene);
         material.diffuseTexture.wAng += Math.PI * 0.5;
 
         material.diffuseTexture.uScale = 1;
@@ -130,6 +131,7 @@ Walls = function (game) {
     this.CreateWall = function (i, j, even) { // i = fila, j = columna, even = par (si es horizontal o vertical)
         paintedWalls[i][j] = Walls.CreateDefaultWall();
         paintedWalls[i][j].position = posMatrix[i][j];
+        paintedWalls[i][j].hiding = false;
         walls[i][j] = WallState.Alive;
         AnimateWall(i, j);
         if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
@@ -201,6 +203,7 @@ Walls = function (game) {
                 if ((walls[i][j] == WallState.Alive) || (walls[i][j] == WallState.PermaWall) || entradaSalida) {
                     paintedWalls[i][j] = Walls.CreateDefaultWall();
                     paintedWalls[i][j].position = posMatrix[i][j];
+                    paintedWalls[i][j].hiding = false;
                     if (even) paintedWalls[i][j].rotation.y = 0.5 * Math.PI;
                 }
             }
@@ -434,21 +437,24 @@ Walls = function (game) {
             paintedWalls[row][col].checkCollisions = false;
             HideNoAnimation(row, col);
         } else {
-            window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; }, 1.1 * 1000);
+            paintedWalls[row][col].hiding = true;
+            window.setTimeout(function () { paintedWalls[row][col].checkCollisions = false; paintedWalls[row][col].hiding = false; }, timeToNoCollisionOnHide * 1000);
             HideAnimation(row, col);
         }
     }
 
     this.ShowWall = function (row, col) {
-        if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
-            walls[row][col] = WallState.Alive;
-        //Si el jugador no está cerca del muro, subirlo instantáneamente
-        if (PlayerTooFarFromWall(row,col)){
-            paintedWalls[row][col].checkCollisions = true;
-            this.ShowNoAnimation(row, col);
-        } else {
-            paintedWalls[row][col].checkCollisions = true;
-            this.ShowAnimation(row, col);
+        if (paintedWalls[row][col].hiding == false) {
+            if (walls[row][col] == WallState.Dead) //Si está muerto, resucitamos
+                walls[row][col] = WallState.Alive;
+            //Si el jugador no está cerca del muro, subirlo instantáneamente
+            if (PlayerTooFarFromWall(row, col)) {
+                paintedWalls[row][col].checkCollisions = true;
+                this.ShowNoAnimation(row, col);
+            } else {
+                paintedWalls[row][col].checkCollisions = true;
+                this.ShowAnimation(row, col);
+            }
         }
 
     }

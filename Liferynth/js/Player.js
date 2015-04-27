@@ -56,7 +56,7 @@ Player = function (game) {
 
         //Posición incial del jugador
         collidingBox.position.x = paintedWalls[entranceRow][entranceCol].position.x;
-        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 2;
+        collidingBox.position.z = paintedWalls[entranceRow][entranceCol].position.z + 3;
         meshPlayer.position.x = collidingBox.position.x
         meshPlayer.position.z = collidingBox.position.z
 
