@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\Style.css" />
+    <Content Include="images\MetalWallReplicaPeque.png" />
     <Content Include="js\Ammo.js" />
     <Content Include="js\Cameras.js" />
     <Content Include="js\LiferinthFunctions.js" />
