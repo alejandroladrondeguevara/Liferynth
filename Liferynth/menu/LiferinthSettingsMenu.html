@@ -228,6 +228,12 @@
 		/** Carga el estado de las opciones atendiendo al valor de las variables que se pasan como parámetros en la URL **/
 		function loadHardwareSettings()
 		{
+		    var _initialSound = document.getElementById('initialSound');
+		    _initialSound.volume = 1.0;
+		    setTimeout(function () {
+		        _initialSound.play();
+		    }, 1000);
+
 		    date = new Date();
 
 		    var cpu = document.querySelector("#cpu_settings");
@@ -440,10 +446,27 @@
 		    element = document.getElementById(typeOptions);
 		    element.style.display = 'none';
 		}
-        
+		//-----------------------------------------------Sonidos-----------------------
+		function ClickSound() {
+		    var _clickSound = document.getElementById('clickSound');
+		    _clickSound.volume = 1.0;
+		    _clickSound.play();
+		}
+        //----------------------------------------------------------------------------
         </script>
 </head>
 <body onload="loadHardwareSettings()">
+    <div style="display: none;">
+        <audio id="initialSound" controls="controls">
+            <source src="../sounds/GUISound3.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="clickSound" controls="controls">
+            <source src="../sounds/GUIClickSound.mp3" type="audio/mpeg" />
+        </audio>
+    </div>
     <div class="wrapper">
         <nav class="vertical">
             <ul>
@@ -451,10 +474,10 @@
                     <a>Hardware</a>
                     <div>
                         <ul>
-                            <li class="hardwareOptions" id="cpu_settings" onclick="change_cpu_settings()">
+                            <li class="hardwareOptions" id="cpu_settings" onclick="ClickSound(); change_cpu_settings()">
                                 <a>CPU</a>
                             </li>
-                            <li class="hardwareOptions" id="gpu_settings" onclick="change_gpu_settings()">
+                            <li class="hardwareOptions" id="gpu_settings" onclick="ClickSound(); change_gpu_settings()">
                                 <a>GPU</a>
                             </li>
                         </ul>
@@ -465,7 +488,7 @@
                     <div>
                         <ul>
                             <li>
-                                <label for="speed" onclick="enabledRadio('speedOptions')">Speed</label>
+                                <label for="speed" onclick="ClickSound(); enabledRadio('speedOptions')">Speed</label>
                                 <div id="speedOptions">
                                     <input id="radio_speed_low" type="radio" name="speed" />
                                     <label for="radio_low">Low</label>
@@ -478,7 +501,7 @@
                                 </div>
                             </li>
                             <li>
-                                <label for="rows" onclick="enabledRadio('rowsOptions')">Liferinth Rows</label>
+                                <label for="rows" onclick="ClickSound(); enabledRadio('rowsOptions')">Liferinth Rows</label>
                                 <div id="rowsOptions">
                                     <input id="radio_rows_few" type="radio" name="rows" />
                                     <label for="radio_few">Few</label>
@@ -491,7 +514,7 @@
                                 </div>
                             </li>
                             <li>
-                                <label for="columns" onclick="enabledRadio('columnsOptions')">Liferinth Columns</label>
+                                <label for="columns" onclick="ClickSound(); enabledRadio('columnsOptions')">Liferinth Columns</label>
                                 <div id="columnsOptions">
                                     <input id="radio_columns_few" type="radio" name="columns" />
                                     <label for="radio_few">Few</label>
@@ -511,7 +534,7 @@
                     <div>
                         <ul>
                             <li id="refBack">
-                                <label onclick="back()">Back</label>
+                                <label onclick="ClickSound(); back()">Back</label>
                             </li>
                         </ul>
                     </div>

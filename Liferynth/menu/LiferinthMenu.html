@@ -215,6 +215,12 @@
 		
 		// Example code to call it - you may modify this as required
 		function start() {
+		    var _initialSound = document.getElementById('initialSound');
+		    _initialSound.volume = 1.0;
+		    setTimeout(function () {
+		        _initialSound.play();
+		    }, 1000);
+
 		    //******************************************************************************************
 		    element = $('nav.vertical > ul > li > div > ul > li > a');
 
@@ -314,10 +320,27 @@
 			    }
 		    }, 1500);
 		}
-		//----------------------------------------------------------------------
+        //-----------------------------------------------Sonidos-----------------------
+		function ClickSound() {
+		    var _clickSound = document.getElementById('clickSound');
+		    _clickSound.volume = 1.0;
+		    _clickSound.play();
+		}
+        //------------------------------------------------------------------------
         </script>
 </head>
 <body onload="start()">
+    <div style="display: none;">
+        <audio id="initialSound" controls="controls">
+            <source src="../sounds/GUISound3.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="clickSound" controls="controls">
+            <source src="../sounds/GUIClickSound.mp3" type="audio/mpeg" />
+        </audio>
+    </div>
     <div class="wrapper">
         <nav class="vertical">
             <ul>
@@ -326,10 +349,10 @@
                     <div>
                         <ul>
                             <li id="refPlay">
-                                <a onclick="playGame()">Play</a>
+                                <a onclick="ClickSound(); playGame()">Play</a>
                             </li>
                             <li id="refSettings">
-                                <a onclick="page_settings_menu()">Settings</a>
+                                <a onclick="ClickSound(); page_settings_menu()">Settings</a>
                             </li>
                             <!--
                             <li>
@@ -352,10 +375,10 @@
                     <div>
                         <ul>
                             <li>
-                                <a href="http://www.babylonjs.com/" target="_blank">Page</a>
+                                <a onclick="ClickSound()" href="http://www.babylonjs.com/" target="_blank">Page</a>
                             </li>
                             <li>
-                                <a href="https://github.com/BabylonJS" target="_blank">GitHub</a>
+                                <a onclick="ClickSound()" href="https://github.com/BabylonJS" target="_blank">GitHub</a>
                             </li>
                         </ul>
                     </div>
@@ -365,13 +388,13 @@
                     <div>
                         <ul>
                             <li>
-                                <a href="http://es.wikipedia.org/wiki/WebCL" target="_blank">About</a>
+                                <a onclick="ClickSound()" href="http://es.wikipedia.org/wiki/WebCL" target="_blank">About</a>
                             </li>
                             <li>
-                                <a href="https://www.khronos.org/webcl/" target="_blank">Khronos</a>
+                                <a onclick="ClickSound()" href="https://www.khronos.org/webcl/" target="_blank">Khronos</a>
                             </li>
                             <li>
-                                <a href="http://webcl.nokiaresearch.com/" target="_blank">Nokia Standard</a>
+                                <a onclick="ClickSound()" href="http://webcl.nokiaresearch.com/" target="_blank">Nokia Standard</a>
                             </li>
                         </ul>
                     </div>

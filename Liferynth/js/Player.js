@@ -70,7 +70,7 @@ Player = function (game) {
             DisplayLabelInfo();
             SetNumOfShoots();
             SetNumOfLifes();
-        },4000);
+        },6000);
 
         //Animaciones
         this.AnimatePlayer();
