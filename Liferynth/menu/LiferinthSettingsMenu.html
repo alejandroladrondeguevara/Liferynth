@@ -141,25 +141,6 @@
                     font-size: 1.1rem;
                     cursor: pointer;
                 }
-                    /**
-				nav.vertical > ul > li > div > ul > li:hover > label + div
-				{
-					background-color: rgb(0,0,0);
-					color: rgb(255,255,255);
-					display: block;
-					font-size: 1.1rem;
-					cursor: pointer;
-				}	
-
-					nav.vertical > ul > li > div > ul > li:hover > label + div > input[type=radio]
-					{
-						cursor: pointer;
-					}	
-							
-					nav.vertical > ul > li > div > ul > li:hover > label + div > input[type=radio] + label
-					{
-						cursor: pointer;
-					}**/
 
         .enable-hover-hardwareOptions:hover {
             background-color: rgb(0,0,0);
@@ -228,12 +209,6 @@
 		/** Carga el estado de las opciones atendiendo al valor de las variables que se pasan como parámetros en la URL **/
 		function loadHardwareSettings()
 		{
-		    var _initialSound = document.getElementById('initialSound');
-		    _initialSound.volume = 1.0;
-		    setTimeout(function () {
-		        _initialSound.play();
-		    }, 1000);
-
 		    date = new Date();
 
 		    var cpu = document.querySelector("#cpu_settings");
@@ -290,10 +265,43 @@
 		    window.setTimeout(function () {
 		        element1.addClass('enable-hover-hardwareOptions');
 		        element2.addClass('enable-hover');
-		        elementImg.style.display = 'block'
+		        elementImg.style.display = 'block';
+
+		        element1.each(function (i) {
+		            if (i != 0) {
+		                $("#hoverSound")
+                          .clone()
+                          .attr("id", "hoverSound" + i)
+                          .appendTo($(this).parent());
+		            }
+		            $(this).data("sound", i);
+		        })
+                .mouseenter(function () {
+                    $("#hoverSound" + $(this).data("sound"))[0].play();
+                });
+		        $("#hoverSound").attr("id", "hoverSound0");
+
+		        element2.each(function (i) {
+		            if (i != 0) {
+		                $("#hoverSound")
+                          .clone()
+                          .attr("id", "hoverSound" + i)
+                          .appendTo($(this).parent());
+		            }
+		            $(this).data("sound", i);
+		        })
+                .mouseenter(function () {
+                    $("#hoverSound" + $(this).data("sound"))[0].play();
+                });
+		        $("#hoverSound").attr("id", "hoverSound0");
+
 		    }, 6000);
 
-		    
+		    var _initialSound = document.getElementById('initialSound');
+		    _initialSound.volume = 1.0;
+		    setTimeout(function () {
+		        _initialSound.play();
+		    }, 1000);
 		    //*********************************************************************************************
 		}
 		//----------------------------------------------------Funciones de animación-----------------
@@ -460,7 +468,22 @@
         <audio id="initialSound" controls="controls">
             <source src="../sounds/GUISound3.mp3" type="audio/mpeg" />
         </audio>
-        <audio id="hoverSound" controls="controls">
+        <audio id="hoverSound0" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound1" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound2" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound3" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound4" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound5" controls="controls">
             <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
         </audio>
         <audio id="clickSound" controls="controls">
@@ -490,39 +513,39 @@
                             <li>
                                 <label for="speed" onclick="ClickSound(); enabledRadio('speedOptions')">Speed</label>
                                 <div id="speedOptions">
-                                    <input id="radio_speed_low" type="radio" name="speed" />
+                                    <input onclick="ClickSound()" id="radio_speed_low" type="radio" name="speed" />
                                     <label for="radio_low">Low</label>
 
-                                    <input id="radio_speed_normal" type="radio" name="speed" />
+                                    <input onclick="ClickSound()" id="radio_speed_normal" type="radio" name="speed" />
                                     <label for="radio_normal">Normal</label>
 
-                                    <input id="radio_speed_high" type="radio" name="speed" />
+                                    <input onclick="ClickSound()" id="radio_speed_high" type="radio" name="speed" />
                                     <label for="radio_high">High</label>
                                 </div>
                             </li>
                             <li>
                                 <label for="rows" onclick="ClickSound(); enabledRadio('rowsOptions')">Liferinth Rows</label>
                                 <div id="rowsOptions">
-                                    <input id="radio_rows_few" type="radio" name="rows" />
+                                    <input onclick="ClickSound()" id="radio_rows_few" type="radio" name="rows" />
                                     <label for="radio_few">Few</label>
 
-                                    <input id="radio_rows_normal" type="radio" name="rows" />
+                                    <input onclick="ClickSound()" id="radio_rows_normal" type="radio" name="rows" />
                                     <label for="radio_normal">Normal</label>
 
-                                    <input id="radio_rows_many" type="radio" name="rows" />
+                                    <input onclick="ClickSound()" id="radio_rows_many" type="radio" name="rows" />
                                     <label for="radio_many">Many</label>
                                 </div>
                             </li>
                             <li>
                                 <label for="columns" onclick="ClickSound(); enabledRadio('columnsOptions')">Liferinth Columns</label>
                                 <div id="columnsOptions">
-                                    <input id="radio_columns_few" type="radio" name="columns" />
+                                    <input onclick="ClickSound()" id="radio_columns_few" type="radio" name="columns" />
                                     <label for="radio_few">Few</label>
 
-                                    <input id="radio_columns_normal" type="radio" name="columns" />
+                                    <input onclick="ClickSound()" id="radio_columns_normal" type="radio" name="columns" />
                                     <label for="radio_normal">Normal</label>
 
-                                    <input id="radio_columns_many" type="radio" name="columns" />
+                                    <input onclick="ClickSound()" id="radio_columns_many" type="radio" name="columns" />
                                     <label for="radio_many">Many</label>
                                 </div>
                             </li>

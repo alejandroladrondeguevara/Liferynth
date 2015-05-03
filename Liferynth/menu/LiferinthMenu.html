@@ -111,16 +111,6 @@
                 position: relative;
                 left: 0%;
         }
-		    
-            /**
-          nav.vertical > ul > li > a:hover 
-		  {
-             <!--background-color: rgb(255,255,255);-->
-             border-bottom: 1px solid rgba(0,0,0,0.1);
-             <!--color: rgb(0,0,0);-->
-			 color: rgb(0,0,0);
-             cursor: pointer;
-            }**/
 
             nav.vertical > ul > li > div > ul > li > input[type=checkbox] + label,
             nav.vertical > ul > li > div > ul > li > a {
@@ -136,16 +126,6 @@
                 left: 0%;
             }
 
-            /**
-            nav.vertical > ul > li > div > ul > li:hover > a  {
-                background-color: rgb(0,0,0);
-                color: rgb(255,255,255);
-                padding: 10px 0 10px 50px;
-                position: relative;
-                left: 0%;
-            }  **/
-
-
         .enable-hover:hover {
             background-color: rgb(0,0,0);
             color: rgb(255,255,255);
@@ -157,7 +137,7 @@
 
                          
     </style>   
-        <script>    
+        <script>                   
         var date;
         //-------------------------- El siguiente código detecta cuándo se ha hecho la primera visita a la página ---------------
 		var firstLoad;
@@ -215,11 +195,6 @@
 		
 		// Example code to call it - you may modify this as required
 		function start() {
-		    var _initialSound = document.getElementById('initialSound');
-		    _initialSound.volume = 1.0;
-		    setTimeout(function () {
-		        _initialSound.play();
-		    }, 1000);
 
 		    //******************************************************************************************
 		    element = $('nav.vertical > ul > li > div > ul > li > a');
@@ -229,8 +204,24 @@
 		    //wait for animation to finish before removing classes
 		    window.setTimeout(function () {
 		        element.addClass('enable-hover');
-		        elementImg.style.display = 'block'
+		        elementImg.style.display = 'block';
+		        //
+		        element.each(function (i) {
+                    if (i != 0) {
+                        $("#hoverSound")
+                          .clone()
+                          .attr("id", "hoverSound" + i)
+                          .appendTo($(this).parent());
+                    }
+                    $(this).data("sound", i);
+                })
+                .mouseenter(function () {
+                    $("#hoverSound" + $(this).data("sound"))[0].play();
+                });
+		        $("#hoverSound").attr("id", "hoverSound0");
+
 		    }, 6000);
+
 		    //*********************************************************************************************
 		    if (firstTime(thisPage())) {
 				// This code only runs for first visit
@@ -242,7 +233,13 @@
 				speed = getUrlVars()["S"];
 				rows = getUrlVars()["R"];
 				columns = getUrlVars()["Co"];				
-			}
+		    }
+
+		    var _initialSound = document.getElementById('initialSound');
+		    _initialSound.volume = 1.0;
+		    setTimeout(function () {
+		        _initialSound.play();
+		    }, 1000);
 		}
 
         //----------------------------------------------------Funciones de animación-----------------
@@ -326,6 +323,13 @@
 		    _clickSound.volume = 1.0;
 		    _clickSound.play();
 		}
+
+		function HoverSound() {
+		    var _hoverSound = document.getElementById('hoverSound');
+		    _hoverSound.volume = 1.0;
+		    _hoverSound.autoplay = true;
+		    //_hoverSound.play();
+		}
         //------------------------------------------------------------------------
         </script>
 </head>
@@ -334,7 +338,28 @@
         <audio id="initialSound" controls="controls">
             <source src="../sounds/GUISound3.mp3" type="audio/mpeg" />
         </audio>
-        <audio id="hoverSound" controls="controls">
+        <audio id="hoverSound0" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound1" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound2" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound3" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound4" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound5" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound6" controls="controls">
+            <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="hoverSound7" controls="controls">
             <source src="../sounds/GUIHoverSound.mp3" type="audio/mpeg" />
         </audio>
         <audio id="clickSound" controls="controls">
@@ -360,7 +385,7 @@
                             </li>
                             -->
                             <li>
-                                <a href="https://github.com/alejandroladrondeguevara/Liferynth" target="_blank">GitHub</a>
+                                <a onclick="ClickSound()" href="https://github.com/alejandroladrondeguevara/Liferynth" target="_blank">GitHub</a>
                             </li>
                             <!--
                             <li>

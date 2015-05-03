@@ -26,7 +26,9 @@ Player = function (game) {
         this.entranceCol = game.entranceCol;
 
         this.Walls = game.Walls;
-        this.planeWidthSize = game.planeWidthSize;      
+        this.planeWidthSize = game.planeWidthSize;
+
+        var displayInfo = false;
         
     jumpHeight = 1.5;              // Altura del salto del jugador
     jumpTime = 0.3;                // Tiempo de salto (vuelo) del jugador
@@ -67,6 +69,7 @@ Player = function (game) {
 
         //Número de disparos, se carga después de 6 segundos
         setTimeout(function () {
+            displayInfo = true;
             DisplayLabelInfo();
             SetNumOfShoots();
             SetNumOfLifes();
@@ -208,7 +211,6 @@ Player = function (game) {
         var maxNumLifes = 0;
         var numLifesDisplay = document.getElementById("numLifes_display");
         var labelLifesDisplay = document.getElementById("labelLifes_display");
-        var hideInfo = false;
 
         //Establece el número máximo e inicial de vidas
         function SetNumOfLifes() {
@@ -248,8 +250,7 @@ Player = function (game) {
                     engine.hideLoadingUI();
                 }, 4000);
             }
-
-            if (!hideInfo) DisplayInfo();
+            DisplayInfo();
         }
 
         // Devuelve el número actual de vidas
@@ -301,7 +302,7 @@ Player = function (game) {
         //Muestra en pantalla el valor actual
         this.DisplayInfo = function() {
             //Actualiza el valor que se muestra en la pantalla 
-            if (!hideInfo) {
+            if (displayInfo) {
                 numMissilesDisplay.innerHTML = numMissiles;
                 numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
             }
@@ -310,7 +311,7 @@ Player = function (game) {
         //Muestra en pantalla el valor actual
         this.HideInfo = function () {
             //Oculta la información que se muestra en la pantalla      
-            hideInfo = true;
+            displayInfo = false;
             numMissilesDisplay.innerHTML = "";
             numLifesDisplay.innerHTML = "";
             labelMissilesDisplay.innerHTML = "";
@@ -318,8 +319,8 @@ Player = function (game) {
         }
 
         function HideInfo() {
-            hideInfo = true;
-            //Oculta la información que se muestra en la pantalla            
+            //Oculta la información que se muestra en la pantalla 
+            displayInfo = false;
             numMissilesDisplay.innerHTML = "";
             numLifesDisplay.innerHTML = "";
             labelMissilesDisplay.innerHTML = "";
@@ -328,7 +329,7 @@ Player = function (game) {
 
         function DisplayInfo() {
             //Actualiza el valor que se muestra en la pantalla  
-            if (!hideInfo) {
+            if (displayInfo) {
                 numMissilesDisplay.innerHTML = numMissiles;
                 numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
             }
