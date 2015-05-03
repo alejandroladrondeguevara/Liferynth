@@ -15,7 +15,7 @@
     <script src="js/Cameras.js"></script>
     <script src="js/Ammo.js"></script>
     <link href="css/Style.css" rel="stylesheet" />
-
+    
     <!--Programa en WebCL -->
     <script id="life" type="x-kernel">
         __kernel void life(
@@ -102,6 +102,11 @@
     </script>
 </head>
 <body onload="loadSettings()">
+    <div style="display: none;">
+        <audio id="ambientSound" controls="controls">
+            <source src="sounds/Ambient.mp3" type="audio/mpeg" />
+        </audio>
+    </div>
     <div id="info">
         <label style="color:white; font-weight:bold; text-align:right;" id="labelMissiles_display"></label>
         <label style="color: white; font-weight: bold; text-align: right;" id="numMissiles_display"></label>
@@ -297,6 +302,20 @@
                 //window.setInterval(ChangeWallsLife, timeChange * 1000);
                 window.setInterval(runKernel, timeChange * 1000);
 
+            /*
+            --------------------------
+                Definición y creación del sonido ambiente
+            --------------------------
+            */            
+                var volume = 1.0;
+                var ambientSound = document.getElementById("ambientSound");
+                ambientSound.volume = volume;
+                ambientSound.loop = true;
+
+                setTimeout(function () {
+                    ambientSound.play();
+                }, 5000);
+                
             /*
             --------------------------
                 Definición y creación del jugador

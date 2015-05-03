@@ -232,7 +232,7 @@ Player = function (game) {
 
         //Decrementa el número de vidas
         this.DecrementLifes = function () {
-            if (Math.floor(numLifes / 10) > 0)
+            if (numLifes > 9)
                 numLifes--;
             
             // Muerte del jugador

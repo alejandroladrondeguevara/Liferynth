@@ -93,6 +93,7 @@
     <Content Include="Liferinth.html" />
     <Content Include="menu\LiferinthMenu.html" />
     <Content Include="menu\LiferinthSettingsMenu.html" />
+    <Content Include="sounds\Ambient.mp3" />
     <Content Include="sounds\GUIClickSound.mp3" />
     <Content Include="sounds\GUIHoverSound.mp3" />
     <Content Include="sounds\GUISound3.mp3" />
