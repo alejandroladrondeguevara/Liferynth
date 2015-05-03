@@ -27,8 +27,9 @@
     //var i = row * 2;
     var i = row;
     var j = col;
-    var p = new BABYLON.Vector3(posMatrix[i][j].x,posMatrix[i][j].y,posMatrix[i][j].z);
-    var position = new BABYLON.Vector3(p.x, floorHeight + this.height / 2, p.z - game.wallScale.z/2);
+    //var p = new BABYLON.Vector3(posMatrix[i][j].x,posMatrix[i][j].y,posMatrix[i][j].z);
+    //var position = new BABYLON.Vector3(p.x, floorHeight + this.height / 2, p.z - game.wallScale.z/2);
+    var position = new BABYLON.Vector3(i, floorHeight + this.height / 2, j);
 
     var mesh = BABYLON.Mesh.CreateBox("enemy", 1, scene);
     var collider = BABYLON.Mesh.CreateBox("colEnemy", 1, scene);
@@ -192,10 +193,13 @@
 
         RefreshEnemy();
 
+        // Colisión con el jugador
         if (meshPlayer.intersectsMesh(collider, true)) {
             Player.DecrementLifes();
             Player.DisplayInfo();
         }
+
+        // El enemigo se sale del laberinto
 
     };         
 
