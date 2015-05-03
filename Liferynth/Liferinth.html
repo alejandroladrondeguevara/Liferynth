@@ -1,4 +1,5 @@
 ﻿<!DOCTYPE html>
+<html>
 <head>
     <meta charset="utf-8">
     <title>Liferinth.js</title>
@@ -62,6 +63,9 @@
         //-----------------------------------------------------------------------------------------------------
         /** Carga las opciones que previamente han sido seleccionadas en el menú **/
         function loadSettings() {
+
+            window.document.title = "Liferinth";
+
             cpu = getUrlVars()["C"];
             gpu = getUrlVars()["G"];
             speedSetting = getUrlVars()["S"];
@@ -101,6 +105,9 @@
     <div id="info">
         <label style="color:white; font-weight:bold; text-align:right;" id="labelMissiles_display"></label>
         <label style="color: white; font-weight: bold; text-align: right;" id="numMissiles_display"></label>
+        </br>
+        <label style="color:white; font-weight:bold; text-align:right;" id="labelLifes_display"></label>
+        <label style="color: white; font-weight: bold; text-align: right;" id="numLifes_display"></label>
     </div>
     <div>
         <canvas id="renderCanvas"></canvas>
@@ -248,6 +255,16 @@
 
                 var enemies = []; // 0 enemigos inicialmente
                 var numEnemies = 0;
+
+                if (rowsSettings == "m" || columnsSettings == "m") {
+                    numEnemies = 30;
+                } else if (rowsSettings == "n" || columnsSettings == "n") {
+                    numEnemies = 20;
+                } else {
+                    numEnemies = 10;
+                }
+            
+                
                 
                 var stop = false;  // Bandera para pausar el juega 
                 var back = false; // Bandera para controlar la carga del menú principal
@@ -274,17 +291,6 @@
                     window.setInterval(function () { Walls.ChangeExit(Math.round(Math.random()), Math.round(Math.random()), Math.floor((Math.random() * (10)) + 1)); }, changeExitfrecuency);
 
             /*
-            --------------------------
-                Definición y creación de enemigos
-            --------------------------
-            */
-                var Enemies = new Enemies(_this);                
-                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2));
-                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2) + 1);
-                Enemies.CreateEnemy(((lastRow / 2) - 1) * 2, Math.floor(cols / 2) - 1);
-                Enemies.ManageEnemies();
-
-            /*
            --------------------------
                Ejecución WebCL
            --------------------------
@@ -302,6 +308,29 @@
                 Player.Initialize();
 
             /*
+           --------------------------
+               Definición y creación de enemigos
+           --------------------------
+           */
+                var Enemies = new Enemies(_this);
+
+                while (numEnemies > 0) {
+
+                    var x = Math.floor((Math.random() * 9) + 1); // Posición en el eje de las x's
+                    var z = Math.floor((Math.random() * 4) + 1);  // Posicion en el eje de las y's
+
+                    if (Math.floor((Math.random() * 10) + 1) > 5)// Puede ser negativo debido al punto que se toma como referencia
+                        x *= -1;
+
+                    Enemies.CreateEnemy(((lastRow / 2) - z) * 2, Math.floor(cols / 2) + x);
+
+                    numEnemies--;
+                }
+
+                Enemies.ManageEnemies();
+
+            /*
+
             --------------------------
                 Definición y creación de la munición
             --------------------------
@@ -441,6 +470,10 @@
                             stop = true;
                     }
 
+                    if (stop) {
+                        engine.stopRenderLoop();
+                    }
+
                     if (!scene)
                         return;
 
@@ -529,11 +562,8 @@
                         flashlight.position = collidingBox.position;
                         flashlight.direction = new BABYLON.Vector3(Math.sin(collidingBox.rotation.y), angFlashlight, Math.cos(collidingBox.rotation.y))               
                          
-                        // Control para la salida del jugador del laberinto
-                        if (meshPlayer.position.y < 0 && !back)
-                        {
-                            window.document.title = "He muerto";
-
+                        // Control para la salida del jugador del laberinto o la muerte del jugador
+                        if (meshPlayer.position.y < 0  && !back) {                        
                             // Muestra la pantalla de carga
                             engine.displayLoadingUI();
                             // Se activa la bandera para que en la siguiente iteración
@@ -555,9 +585,7 @@
                                 Player.Reset();
                                 back = false;
 
-                            }, 2000);
-
-                            
+                            }, 2000);                            
                         }                        
                     }
                 });                

@@ -65,11 +65,12 @@ Player = function (game) {
         Walls.ShowWall(entranceRow, entranceCol);
         Walls.SetPermaWall(entranceRow, entranceCol);
 
-        //Número de disparos, se carga después de 5 segundos
+        //Número de disparos, se carga después de 6 segundos
         setTimeout(function () {
-            DisplayLabelMissiles();
+            DisplayLabelInfo();
             SetNumOfShoots();
-        },5000);
+            SetNumOfLifes();
+        },4000);
 
         //Animaciones
         this.AnimatePlayer();
@@ -87,6 +88,7 @@ Player = function (game) {
 
         //Número de disparos
         SetNumOfShoots();
+        SetNumOfLifes();
     }
 
     this.AnimatePlayer = function () {
@@ -198,9 +200,64 @@ Player = function (game) {
         collidingBox.moveWithCollisions(vel);
     }
 
-    //-------------------------------------------- Habilidades del jugador ---------------------------------------------
-   
+    //-------------------------------------------- Características del jugador ---------------------------------------------
 
+    //--------------- Vidas
+
+        var numLifes = 0;
+        var maxNumLifes = 0;
+        var numLifesDisplay = document.getElementById("numLifes_display");
+        var labelLifesDisplay = document.getElementById("labelLifes_display");
+        var hideInfo = false;
+
+        //Establece el número máximo e inicial de vidas
+        function SetNumOfLifes() {
+            switch (this.rowsSettings) {
+                case "m":
+                    maxNumLifes = 70;
+                    break;
+                case "n":
+                    maxNumLifes = 50;
+                    break;
+                case "f":
+                    maxNumLifes = 30;
+                    break;
+                default:
+                    maxNumLifes = 50;
+                    break;
+            }
+            numLifes = maxNumLifes;
+            DisplayInfo();
+        }
+
+        //Decrementa el número de vidas
+        this.DecrementLifes = function () {
+            if (Math.floor(numLifes / 10) > 0)
+                numLifes--;
+            
+            // Muerte del jugador
+            if (numLifes == 9) {
+                HideInfo();
+                // Muestra la pantalla de carga
+                engine.displayLoadingUI();
+
+                setTimeout(function () {
+                    // Carga el menú principal
+                    backToMenu();
+                    // Quita la pantalla de carga
+                    engine.hideLoadingUI();
+                }, 4000);
+            }
+
+            if (!hideInfo) DisplayInfo();
+        }
+
+        // Devuelve el número actual de vidas
+        this.GetNumLifes = function () {
+            return numLifes;
+        }
+
+    //-------------------------------------------- Habilidades del jugador ---------------------------------------------
 
     //Disparar
         //Constantes
@@ -211,15 +268,13 @@ Player = function (game) {
         var missiles = [];                      //Array de misiles 
         var directions = [];                    //Array de direcciones de cada misil
         var numMissiles = 0;
-        var maxNumMissiles = 0;       
+        var maxNumMissiles = 0;
         var numMissilesDisplay = document.getElementById("numMissiles_display");
         var labelMissilesDisplay = document.getElementById("labelMissiles_display");
 
         //Establece el número máximo e inicial de misiles
-        function SetNumOfShoots()
-        {
-            switch (this.rowsSettings)
-            {
+        function SetNumOfShoots() {
+            switch (this.rowsSettings) {
                 case "m":
                     maxNumMissiles = 20;
                     break;
@@ -234,34 +289,60 @@ Player = function (game) {
                     break;
             }
             numMissiles = maxNumMissiles;
-            DisplayNumMissiles();
+            DisplayInfo();
         }
-
+        
         //Muestra en pantalla el label 'Misiles: '
-        function DisplayLabelMissiles()
-        {
-
+        function DisplayLabelInfo() {
             labelMissilesDisplay.innerHTML = "Misiles: ";
+            labelLifesDisplay.innerHTML = "Vidas: ";
         }
 
         //Muestra en pantalla el valor actual
-        function DisplayNumMissiles()
-        {
-            //Actualiza el valor que se muestra en la pantalla            
-            numMissilesDisplay.innerHTML = numMissiles;
+        this.DisplayInfo = function() {
+            //Actualiza el valor que se muestra en la pantalla 
+            if (!hideInfo) {
+                numMissilesDisplay.innerHTML = numMissiles;
+                numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
+            }
+        }
+
+        //Muestra en pantalla el valor actual
+        this.HideInfo = function () {
+            //Oculta la información que se muestra en la pantalla      
+            hideInfo = true;
+            numMissilesDisplay.innerHTML = "";
+            numLifesDisplay.innerHTML = "";
+            labelMissilesDisplay.innerHTML = "";
+            labelLifesDisplay.innerHTML = "";
+        }
+
+        function HideInfo() {
+            hideInfo = true;
+            //Oculta la información que se muestra en la pantalla            
+            numMissilesDisplay.innerHTML = "";
+            numLifesDisplay.innerHTML = "";
+            labelMissilesDisplay.innerHTML = "";
+            labelLifesDisplay.innerHTML = "";
+        }
+
+        function DisplayInfo() {
+            //Actualiza el valor que se muestra en la pantalla  
+            if (!hideInfo) {
+                numMissilesDisplay.innerHTML = numMissiles;
+                numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
+            }
         }
 
         //Incrementa el número de misiles
-        this.IncrementMissiles = function()// incrementMissiles()
-        {
+        this.IncrementMissiles = function() {
             if (numMissiles<maxNumMissiles)
                 numMissiles++;
-            DisplayNumMissiles();
+            DisplayInfo();
         }
 
         // Devuelve el número máximo de misiles
-        this.GetMaxMissiles = function ()
-        {
+        this.GetMaxMissiles = function () {
             return maxNumMissiles;
         }
 
@@ -270,13 +351,22 @@ Player = function (game) {
             return numMissiles;
         }
 
+        // Devuelve el array de misiles
+        this.GetMissiles = function () {
+            return missiles;
+        }
+
+        // Devuelve el array de direcciones
+        this.GetDirections = function () {
+            return directions;
+        }
+
         //Decrementa el número de misiles
-       function DecrementMissiles()
-        {
+       function DecrementMissiles() {
             if (numMissiles>0)
                 numMissiles--;
-            DisplayNumMissiles();
-        }
+            DisplayInfo();
+       }       
 
         window.addEventListener("keydown", function (evt) {
             //Tacla E para disparar

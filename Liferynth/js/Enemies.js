@@ -13,6 +13,7 @@
         this.meshPlayer = game.meshPlayer;
         this.collidingBox = game.collidingBox;
         this.gravity = game.gravity;
+        this.Player = game.Player;
 
         //this.enemies = game.enemies;
         this.numEnemies = game.numEnemies;
@@ -43,7 +44,7 @@
             for (var i = 0; i < enemies.length; i++) {
                 enemies[i].Move();
             }
-            
+
         });
 
     }

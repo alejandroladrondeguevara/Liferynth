@@ -14,6 +14,8 @@
         this.collidingBox = game.collidingBox;
         this.gravity = game.gravity;
         this.Walls = game.Walls;
+        this.meshPlayer = game.meshPlayer;
+        this.Player = game.Player;
 
 
     // Mismo tamaño que el jugador por ahora (diversos enemigos, diversos tamaños) //TODO
@@ -56,13 +58,14 @@
         mesh.material = material;
         collider.material = material2;
     }
-
+    
     var act =   0;          //  Indica el estado actual
     var offsetX = +1.0;
     var offsetZ = +1.0;
 
     /**************************************************************************
                 Diagrama de estados para las colisiones 
+                (0)(1)(2)(3) : Estados
 
                          ---------------------- 
                                 (**)
@@ -189,8 +192,12 @@
 
         RefreshEnemy();
 
-    };
-         
+        if (meshPlayer.intersectsMesh(collider, true)) {
+            Player.DecrementLifes();
+            Player.DisplayInfo();
+        }
+
+    };         
 
     function RefreshEnemy() {
         mesh.position = position;
