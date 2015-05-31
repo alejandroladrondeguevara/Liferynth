@@ -48,7 +48,8 @@
         collider.checkCollisions = true;
         collider.applyGravity = true;
         collider.ellipsoid = ellipsoid;
-        collider.showBoundingBox = true;
+
+        //collider.showBoundingBox = true;
 
         var material = new BABYLON.StandardMaterial("enemy", this.scene);
         material.diffuseColor = new BABYLON.Color3(1, 0, 0);
@@ -84,7 +85,7 @@
                         ------------------------
 
     ******************************************************************************/
-    this.Move = function () {
+    this.Move = function (Knock) {
         /* 
             Mueve al enemigo en una dirección dentro del laberinto
         */
@@ -197,6 +198,8 @@
         if (meshPlayer.intersectsMesh(collider, true)) {
             Player.DecrementLifes();
             Player.DisplayInfo();
+            // Sonido
+            Knock.play();
         }
 
         // El enemigo se sale del laberinto

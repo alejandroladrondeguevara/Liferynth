@@ -28,6 +28,10 @@ Player = function (game) {
         this.Walls = game.Walls;
         this.planeWidthSize = game.planeWidthSize;
 
+        this.Shoot = game.Shoot;
+        this.Explosion = game.Explosion;
+        this.WallSound = game.WallSound;
+
         var displayInfo = false;
         
     jumpHeight = 1.5;              // Altura del salto del jugador
@@ -373,6 +377,8 @@ Player = function (game) {
             //Tacla E para disparar
             if (evt.keyCode == 69 && numMissiles > 0) {
 
+                Shoot.play();
+
                 //Decrementa el número de disparos
                 DecrementMissiles();
 
@@ -426,13 +432,17 @@ Player = function (game) {
                             if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
                                 //Oculta la pared en la que ha impactado el misil
                                 Walls.HideWall(j, k);
+                                //Sonido
+                                WallSound.play();
                                 //Destruye la malla (objeto)
                                 var _missile = missiles[i];
                                 missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
                                 _missile.dispose();
                                 directions.splice(i, 1);//"Elimina" la posición i reordenando el array
                                 foundIt = true;
-                            }
+                                // Sonido
+                                Explosion.play();
+                            }                            
                             // Sino si es una pared permanente
                         } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
                             if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
@@ -442,8 +452,10 @@ Player = function (game) {
                                 _missile.dispose();
                                 directions.splice(i, 1);//"Elimina" la posición i reordenando el array
                                 foundIt = true;
+                                // Sonido
+                                Explosion.play();
                             }
-                        }
+                        }                        
                         k++;
                     }
                     j++;

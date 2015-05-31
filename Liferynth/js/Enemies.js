@@ -35,14 +35,14 @@
 
 
     
-    this.ManageEnemies = function () {
+    this.ManageEnemies = function (Knock) {
         //PARALELO
         // No se modifica el mapa de muros, si un enemigo lo modificara, 
         // se llevaría a cabo al finalizar el bucle (Tareas pendientes)
         this.scene.registerBeforeRender(function () {
             
             for (var i = 0; i < enemies.length; i++) {
-                enemies[i].Move();
+                enemies[i].Move(Knock);
             }
 
         });

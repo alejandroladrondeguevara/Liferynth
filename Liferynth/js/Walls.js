@@ -18,6 +18,7 @@ Walls = function (game) {
     this.collidingBox = game.collidingBox;
     this.totalWalls = game.totalWalls;
     this.fogEnd = game.fogEnd;
+    this.WallSound = game.WallSound;
 
     /*  Estado del muro: 
             0 : No hay muro creado
@@ -402,11 +403,15 @@ Walls = function (game) {
     function HideAnimation(r, c) {
         this.scene.beginAnimation(paintedWalls[r][c], 0, 40, false);
         numWalls--;
+        // Sonido
+        WallSound.play();
     }
     this.ShowAnimation = function (r, c) {
         this.scene.beginAnimation(paintedWalls[r][c], 40, 80, false);
         binWalls[this.linealFromXY(r, c)] = 1;
         numWalls++;
+        // Sonido
+        WallSound.play();
     }
 
     function HideNoAnimation(r, c) {
@@ -456,7 +461,6 @@ Walls = function (game) {
                 this.ShowAnimation(row, col);
             }
         }
-
     }
 
     this.SetPermaWall = function (row, col) {

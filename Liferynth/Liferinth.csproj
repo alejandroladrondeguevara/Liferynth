@@ -94,10 +94,15 @@
     <Content Include="menu\LiferinthMenu.html" />
     <Content Include="menu\LiferinthSettingsMenu.html" />
     <Content Include="sounds\Ambient.mp3" />
+    <Content Include="sounds\AmmoTaken.mp3" />
+    <Content Include="sounds\Explosion.mp3" />
     <Content Include="sounds\GUIClickSound.mp3" />
     <Content Include="sounds\GUIHoverSound.mp3" />
     <Content Include="sounds\GUISound3.mp3" />
     <Content Include="js\Walls.js" />
+    <Content Include="sounds\Knock.mp3" />
+    <Content Include="sounds\Shoot.mp3" />
+    <Content Include="sounds\Wall.mp3" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

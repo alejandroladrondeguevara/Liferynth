@@ -9,6 +9,7 @@
     this.planeWidthSize = game.planeWidthSize;
     this.planeDepthSize = game.planeDepthSize;
     this.Player = game.Player;
+    this.AmmoTaken = game.AmmoTaken;
 
     //Constantes
     var MISSILE_SIZE = 0.5;         //Tamaño del misil
@@ -45,7 +46,9 @@
                     ammo[j].position.x = Math.floor((Math.random() * planeWidthSize) + planePosXini);
                     ammo[j].position.z = Math.floor((Math.random() * (-planeDepthSize)) + planePosZini);
                     // Se incrementa la munición del jugador
-                    Player.IncrementMissiles();                    
+                    Player.IncrementMissiles();
+                    // Sonido
+                    AmmoTaken.play();
                 }
             }
         });

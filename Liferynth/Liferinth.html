@@ -99,12 +99,49 @@
             window.open(url, "_self");
         }
         //-----------------------------------------------------------------------------------------------------
+
+        var fps = {
+            startTime: 0,
+            frameNumber: 0,
+            getFPS: function () {
+                this.frameNumber++;
+                var d = new Date().getTime(),
+                    currentTime = (d - this.startTime) / 1000,
+                    result = Math.floor((this.frameNumber / currentTime));
+
+                if (currentTime > 1) {
+                    this.startTime = new Date().getTime();
+                    this.frameNumber = 0;
+                }
+                return result;
+
+            }
+        };
+
     </script>
 </head>
 <body onload="loadSettings()">
     <div style="display: none;">
         <audio id="ambientSound" controls="controls">
             <source src="sounds/Ambient.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="Shoot" controls="controls">
+            <source src="sounds/Shoot.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="AmmoTaken" controls="controls">
+            <source src="sounds/AmmoTaken.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="Explosion" controls="controls">
+            <source src="sounds/Explosion.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="Wall" controls="controls">
+            <source src="sounds/Wall.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="Knock" controls="controls">
+            <source src="sounds/Knock.mp3" type="audio/mpeg" />
+        </audio>
+        <audio id="Wall" controls="controls">
+            <source src="sounds/Wall.mp3" type="audio/mpeg" />
         </audio>
     </div>
     <div id="info">
@@ -118,6 +155,9 @@
         <canvas id="renderCanvas"></canvas>
     </div>
     <script>
+        // Deshabilitar sonido
+        document.getElementById('Wall').muted = true;
+
         /*
         --------------------------
             Variables de WebCL
@@ -254,6 +294,11 @@
                 var walls;
                 var binWalls;
                 var totalWalls = rows * cols;
+
+                var volume = 0.8;
+                var WallSound = document.getElementById("Wall");
+                WallSound.volume = volume;
+
                 var Walls = new Walls(_this);
                 var wallScale = Walls.wallScale;
                 var WallState = Walls.WallState;
@@ -320,7 +365,17 @@
             --------------------------
                 Definición y creación del jugador
             --------------------------
-            */                
+            */
+                var volume = 0.7;
+                var Shoot = document.getElementById("Shoot");
+                Shoot.volume = volume;
+
+                var Explosion = document.getElementById("Explosion");
+                Explosion.volume = volume;
+
+                var Shoot = document.getElementById("Shoot");
+                Shoot.volume = volume;
+
                 var Player = new Player(_this);
                 Player.Initialize();
 
@@ -329,6 +384,9 @@
                Definición y creación de enemigos
            --------------------------
            */
+                var Knock = document.getElementById("Knock");
+                Knock.volume = volume;
+
                 var Enemies = new Enemies(_this);
                 var wallWidth = 6;
                 var planePosXini = -wallWidth * (cols / 2);
@@ -348,7 +406,7 @@
                     numEnemies--;
                 }
 
-                Enemies.ManageEnemies();
+                Enemies.ManageEnemies(Knock);
 
             /*
 
@@ -356,6 +414,9 @@
                 Definición y creación de la munición
             --------------------------
             */
+                var AmmoTaken = document.getElementById("AmmoTaken");
+                AmmoTaken.volume = volume;
+
                 var numAmmo = 20;
                 var Ammo = new Ammo(_this);
                 var ammo = Ammo.Initialize(numAmmo);
@@ -615,6 +676,9 @@
                 
             // Realiza el renderizado después de 4 segundos
                 setTimeout(function () {
+                    // Habilitar sonido
+                    document.getElementById('Wall').muted = false;
+
                     // Render loop
                     var renderLoop = function () {
 
@@ -623,7 +687,9 @@
 
                             scene.render();
 
-                            //window.document.title = BABYLON.Engine.getFps();//.GetFps().toFixed() + " fps";
+                            window.document.title = fps.getFPS() + " fps";
+                           // window.document.title = BABYLON.Tools.GetFps().toFixed();//BABYLON.Engine.getFps();//.GetFps().toFixed() + " fps";
+
                             // Present
                             engine.endFrame();
 
@@ -637,7 +703,7 @@
                     // Quita la pantalla de carga 
                     engine.hideLoadingUI();
 
-                }, 4000);
+                }, 4000);                
 
         }
 
