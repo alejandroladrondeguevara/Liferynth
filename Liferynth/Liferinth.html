@@ -192,19 +192,17 @@
            --------------------------
         */
 
-        if (window.webcl == undefined) {
-            alert("Unfortunately your system does not support WebCL. " +
-                  "Make sure that you have both the OpenCL driver " +
-                  "and the WebCL browser extension installed.");
-        }
-        else if (BABYLON.Engine.isSupported()) {
+        if (BABYLON.Engine.isSupported()) {
+            if (window.webcl != undefined) {
+                try {
+                    platforms = webcl.getPlatforms();
+                    alert("Excellent! Your system does support WebCL.");
 
-            try {
-                platforms = webcl.getPlatforms();
-                alert("Excellent! Your system does support WebCL.");
-
-            } catch (e) {
-                alert("Unfortunately platform or device inquiry failed.");
+                } catch (e) {
+                    alert("Unfortunately platform or device inquiry failed.");
+                }
+            } else {
+                alert("Your browser doesn't support WebCL, but you can play anyway :)")
             }
 
             loadSettings();
@@ -343,9 +341,12 @@
                Ejecución WebCL
            --------------------------
            */
-                initWebCLKernel();
-                //window.setInterval(ChangeWallsLife, timeChange * 1000);
-                window.setInterval(runKernel, timeChange * 1000);
+                    if (window.webcl != undefined) {
+                        initWebCLKernel();
+                        window.setInterval(runKernel, timeChange * 1000);
+                    } else {
+                        window.setInterval(ChangeWallsLife, timeChange * 1000);
+                    }
 
             /*
             --------------------------
