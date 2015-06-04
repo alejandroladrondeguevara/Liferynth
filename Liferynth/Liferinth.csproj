@@ -89,7 +89,6 @@
     <Content Include="js\Enemies.js" />
     <Content Include="js\jQuery.js" />
     <Content Include="js\Player.js" />
-    <Content Include="js\WebCLFunctions.js" />
     <Content Include="Liferinth.html" />
     <Content Include="menu\LiferinthMenu.html" />
     <Content Include="menu\LiferinthSettingsMenu.html" />

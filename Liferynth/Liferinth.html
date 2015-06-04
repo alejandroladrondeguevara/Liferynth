@@ -14,38 +14,7 @@
     <script src="js/ExitArrow.js"></script>
     <script src="js/Cameras.js"></script>
     <script src="js/Ammo.js"></script>
-    <link href="css/Style.css" rel="stylesheet" />
-    
-    <!--Programa en WebCL -->
-    <script id="life" type="x-kernel">
-        __kernel void life(
-        __global uchar* input,
-        __global uchar* output,
-        const uint count,
-        const uint rows,
-        const uint cols,
-        const uint lastRow,
-        const uint lastCol) {
-            int i = get_global_id(0);
-            int n = 0;
-            if( i < count ) {
-                int x = floor((float) (i / cols));
-                int y = i % cols;
-                for ( int r = x - 1; r <= x + 1; r++)
-                    for ( int c = y - 1; c <= y + 1; c++)
-                        if ( r != x && c != y )
-                            if ( r >= 0 && r <= lastRow && c >= 0 && c < lastCol ) {
-                                int aux = c + r * cols;
-                                if ( input[aux] == 1) n++;
-                            }
-                if( n == 3 && input[i] == 1 ) output[i] = 1;
-                else if ( n > 3 && input[i] == 1 ) output[i] = 0;
-                else if ( n < 2 ) output[i] = 0;
-                else if ( n == 2 ) output[i] = 1;
-            }
-        }
-    </script>
-
+    <link href="css/Style.css" rel="stylesheet" /> 
 
     <script>
 
@@ -193,20 +162,8 @@
         */
 
         if (BABYLON.Engine.isSupported()) {
-            if (window.webcl != undefined) {
-                try {
-                    platforms = webcl.getPlatforms();
-                    alert("Excellent! Your system does support WebCL.");
 
-                } catch (e) {
-                    alert("Unfortunately platform or device inquiry failed.");
-                }
-            } else {
-                alert("Your browser doesn't support WebCL, but you can play anyway :)")
-            }
-
-            loadSettings();
-            //listDevices(platforms);            
+            loadSettings();          
 
             /*
             --------------------------
@@ -338,15 +295,11 @@
 
             /*
            --------------------------
-               Ejecución WebCL
+               Ejecución Juego de la vida
            --------------------------
            */
-                    if (window.webcl != undefined) {
-                        initWebCLKernel();
-                        window.setInterval(runKernel, timeChange * 1000);
-                    } else {
-                        window.setInterval(ChangeWallsLife, timeChange * 1000);
-                    }
+                   
+                window.setInterval(ChangeWallsLife, timeChange * 1000);
 
             /*
             --------------------------
