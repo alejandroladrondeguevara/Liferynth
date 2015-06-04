@@ -185,18 +185,21 @@ Player = function (game) {
     }
 
     this.TurnLeft = function () {
-        collidingBox.rotation.y -= 0.05;
+        var deltaTime = engine.getDeltaTime();
+        collidingBox.rotation.y -= 0.05 * (deltaTime / 40);
         meshPlayer.rotation.y = collidingBox.rotation.y;
     }
     this.TurnRight = function () {
-        collidingBox.rotation.y += 0.05;
+        var deltaTime = engine.getDeltaTime();
+        collidingBox.rotation.y += 0.05 * (deltaTime / 40);
         meshPlayer.rotation.y = collidingBox.rotation.y;
     }
 
     this.MoveForward = function () {
+        var deltaTime = engine.getDeltaTime();
         var vel, velZ, velX;
-        velZ = Math.cos(collidingBox.rotation.y) * speed;
-        velX = Math.sin(collidingBox.rotation.y) * speed;
+        velZ = Math.cos(collidingBox.rotation.y) * speed * (deltaTime/55);
+        velX = Math.sin(collidingBox.rotation.y) * speed * (deltaTime/55);
         vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
         collidingBox.moveWithCollisions(vel);
     }

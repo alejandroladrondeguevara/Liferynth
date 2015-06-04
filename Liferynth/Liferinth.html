@@ -255,7 +255,9 @@
                 var auxX = (20 * 20) / 120;
                 var auxY = (20 * 20) / 200;
                 var minWalls = Math.floor((cols * rows) / auxX);
-                var maxWalls = Math.floor((cols * rows) / auxY);
+                var maxWalls = Math.floor((cols * rows) / (1.25*auxY));
+                console.log("Máximo de muros: ", maxWalls);
+                console.log("Mínimo de muros: ", minWalls);
                 var exitRow = 0;
                 var exitCol = Math.floor(cols / 2);
                 var entranceRow = lastRow;

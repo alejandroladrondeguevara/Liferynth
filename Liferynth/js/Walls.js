@@ -83,15 +83,15 @@ Walls = function (game) {
             if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
             else c = cols;
             if (x <= lastRow && y < c) {
-                if (walls[x][y] == WallState.Alive) {
+                if (walls[x][y] == WallState.Alive && (numWalls > minWalls)) {
                     if (results[i] == 0) this.HideWall(x, y);
                 }
                 else
-                    if (!(this.UnderneathPlayer(x, y)) && (results[i] == 1)) {
+                    if (!(this.UnderneathPlayer(x, y)) && (results[i] == 1) && (numWalls < maxWalls)) {
                         if (walls[x][y] == WallState.Dead) {
                             this.ShowWall(x, y);
                         }
-                        else if (walls[x][y] == WallState.NonExisting) {
+                        else if ((walls[x][y] == WallState.NonExisting) && (numWalls < maxWalls)) {
                             this.CreateWall(x, y, even);
                             this.ShowAnimation(x, y);
                         }

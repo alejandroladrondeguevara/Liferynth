@@ -26,7 +26,7 @@ Cameras = function (game) {
 
         //Cámara que sigue al jugador
         camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
-        camera.maxCameraSpeed = 20;
+        camera.maxCameraSpeed = 200;
         camera.applyGravity = true;
         camera.radius = - distanceCamera;
         camera.heightOffset = 0.5;

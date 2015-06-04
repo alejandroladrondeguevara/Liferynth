@@ -106,7 +106,7 @@ function runKernel() {
     localWorkSize[0] = workGroupSize;
 
     //var t0 = performance.now();
-
+    console.log("Muros vivos: ", numWalls);
     // Ejecutamos el kernel usando el máximo número de "work group items" en este dispositivo
     queue.enqueueNDRangeKernel(kernel, globalWorkSize.length, null, globalWorkSize, localWorkSize);
     // Esperamos a que acaba para recopilar los resultados
