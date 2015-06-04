@@ -70,10 +70,8 @@ function ChangeWallsLife() {
                     //Muerte por aislamiento
                     Walls.HideWall(i, j);
                 }
-                else if (Math.floor(Math.random() * 100) <= 2) {//Con una probabilidad de 2% cambia
-                    if (state == WallState.Alive)
-                        Walls.HideWall(i, j);
-                    else if (state == WallState.Dead && !Walls.UnderneathPlayer(i, j))
+                else if (Math.floor(Math.random() * 100) <= 6) {//Con una probabilidad de 6% nace
+                    if (state == WallState.Dead && !Walls.UnderneathPlayer(i, j))
                         Walls.ShowWall(i, j);
                     else {
                         if (!Walls.UnderneathPlayer(i, j)) {

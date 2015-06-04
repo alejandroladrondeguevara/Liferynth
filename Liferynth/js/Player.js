@@ -3,39 +3,39 @@
 Player = function (game) {
 
     //Variables del juego que necesitamos aquí
-        this.game = game;
-        this.scene = game.scene;
-        this.walls = game.walls;
-        this.paintedWalls = game.paintedWalls;
-        this.posMatrix = game.posMatrix;
-        this.numWalls = game.numWalls;
-        this.rowsSettings = game.rowsSettings;
-        this.columnsSettings = game.columnsSettings;
-        this.rows = game.rows;
-        this.cols = game.cols;
-        this.floorHeight = game.floorHeight;
-        this.meshPlayer = game.meshPlayer;
-        this.collidingBox = game.collidingBox;
-        this.gravity = game.gravity;
-        this.camera = game.camera;
+    this.game = game;
+    this.scene = game.scene;
+    this.walls = game.walls;
+    this.paintedWalls = game.paintedWalls;
+    this.posMatrix = game.posMatrix;
+    this.numWalls = game.numWalls;
+    this.rowsSettings = game.rowsSettings;
+    this.columnsSettings = game.columnsSettings;
+    this.rows = game.rows;
+    this.cols = game.cols;
+    this.floorHeight = game.floorHeight;
+    this.meshPlayer = game.meshPlayer;
+    this.collidingBox = game.collidingBox;
+    this.gravity = game.gravity;
+    this.camera = game.camera;
 
-        this.jumping = game.jumping;
-        this.crouching = game.crouching;
+    this.jumping = game.jumping;
+    this.crouching = game.crouching;
 
-        this.entranceRow = game.entranceRow;
-        this.entranceCol = game.entranceCol;
+    this.entranceRow = game.entranceRow;
+    this.entranceCol = game.entranceCol;
 
-        this.Walls = game.Walls;
-        this.planeWidthSize = game.planeWidthSize;
+    this.Walls = game.Walls;
+    this.planeWidthSize = game.planeWidthSize;
 
-        this.Shoot = game.Shoot;
-        this.Explosion = game.Explosion;
-        this.WallSound = game.WallSound;
+    this.Shoot = game.Shoot;
+    this.Explosion = game.Explosion;
+    this.WallSound = game.WallSound;
 
-        this.enemies = game.enemies;
+    this.enemies = game.enemies;
 
-        var displayInfo = false;
-        
+    var displayInfo = false;
+
     jumpHeight = 1.5;              // Altura del salto del jugador
     jumpTime = 0.3;                // Tiempo de salto (vuelo) del jugador
 
@@ -49,7 +49,7 @@ Player = function (game) {
     playerLength = 0.5;             // Longitud del jugador
 
     ellipsoidPlayer = new BABYLON.Vector3(0.5, playerHeight / 4, 0.5); //Colisionador del jugador
-    
+
     this.Initialize = function () {
         meshPlayer = BABYLON.Mesh.CreateBox("player", 1, scene);
         collidingBox = BABYLON.Mesh.CreateBox("colPlayer", 1, scene);
@@ -79,7 +79,7 @@ Player = function (game) {
             DisplayLabelInfo();
             SetNumOfShoots();
             SetNumOfLifes();
-        },6000);
+        }, 6000);
 
         //Animaciones
         this.AnimatePlayer();
@@ -165,7 +165,7 @@ Player = function (game) {
         collidingBox.animations.push(animationCrouch);
     }
 
-    
+
     this.JumpAnimation = function () {
         scene.beginAnimation(collidingBox, 0, 100, false);
         window.setTimeout(Player.LandAnimation, jumpTime * 1000);
@@ -185,18 +185,21 @@ Player = function (game) {
     }
 
     this.TurnLeft = function () {
-        collidingBox.rotation.y -= 0.05;
+        var deltaTime = engine.getDeltaTime();
+        collidingBox.rotation.y -= 0.05 * (deltaTime / 40);
         meshPlayer.rotation.y = collidingBox.rotation.y;
     }
     this.TurnRight = function () {
-        collidingBox.rotation.y += 0.05;
+        var deltaTime = engine.getDeltaTime();
+        collidingBox.rotation.y += 0.05 * (deltaTime / 40);
         meshPlayer.rotation.y = collidingBox.rotation.y;
     }
 
     this.MoveForward = function () {
+        var deltaTime = engine.getDeltaTime();
         var vel, velZ, velX;
-        velZ = Math.cos(collidingBox.rotation.y) * speed;
-        velX = Math.sin(collidingBox.rotation.y) * speed;
+        velZ = Math.cos(collidingBox.rotation.y) * speed * (deltaTime / 55);
+        velX = Math.sin(collidingBox.rotation.y) * speed * (deltaTime / 55);
         vel = gravity.add(new BABYLON.Vector3(velX, 0, velZ));
         collidingBox.moveWithCollisions(vel);
     }
@@ -213,273 +216,273 @@ Player = function (game) {
 
     //--------------- Vidas
 
-        var numLifes = 0;
-        var maxNumLifes = 0;
-        var numLifesDisplay = document.getElementById("numLifes_display");
-        var labelLifesDisplay = document.getElementById("labelLifes_display");
+    var numLifes = 0;
+    var maxNumLifes = 0;
+    var numLifesDisplay = document.getElementById("numLifes_display");
+    var labelLifesDisplay = document.getElementById("labelLifes_display");
 
-        //Establece el número máximo e inicial de vidas
-        function SetNumOfLifes() {
-            switch (this.rowsSettings) {
-                case "m":
-                    maxNumLifes = 70;
-                    break;
-                case "n":
-                    maxNumLifes = 50;
-                    break;
-                case "f":
-                    maxNumLifes = 30;
-                    break;
-                default:
-                    maxNumLifes = 50;
-                    break;
-            }
-            numLifes = maxNumLifes;
-            DisplayInfo();
+    //Establece el número máximo e inicial de vidas
+    function SetNumOfLifes() {
+        switch (this.rowsSettings) {
+            case "m":
+                maxNumLifes = 70;
+                break;
+            case "n":
+                maxNumLifes = 50;
+                break;
+            case "f":
+                maxNumLifes = 30;
+                break;
+            default:
+                maxNumLifes = 50;
+                break;
         }
+        numLifes = maxNumLifes;
+        DisplayInfo();
+    }
 
-        //Decrementa el número de vidas
-        this.DecrementLifes = function () {
-            if (numLifes > 9)
-                numLifes--;
-            
-            // Muerte del jugador
-            if (numLifes == 9) {
-                HideInfo();
-                // Muestra la pantalla de carga
-                engine.displayLoadingUI();
+    //Decrementa el número de vidas
+    this.DecrementLifes = function () {
+        if (numLifes > 9)
+            numLifes--;
 
-                setTimeout(function () {
-                    // Carga el menú principal
-                    backToMenu();
-                    // Quita la pantalla de carga
-                    engine.hideLoadingUI();
-                }, 4000);
-            }
-            DisplayInfo();
+        // Muerte del jugador
+        if (numLifes == 9) {
+            HideInfo();
+            // Muestra la pantalla de carga
+            engine.displayLoadingUI();
+
+            setTimeout(function () {
+                // Carga el menú principal
+                backToMenu();
+                // Quita la pantalla de carga
+                engine.hideLoadingUI();
+            }, 4000);
         }
+        DisplayInfo();
+    }
 
-        // Devuelve el número actual de vidas
-        this.GetNumLifes = function () {
-            return numLifes;
-        }
+    // Devuelve el número actual de vidas
+    this.GetNumLifes = function () {
+        return numLifes;
+    }
 
     //-------------------------------------------- Habilidades del jugador ---------------------------------------------
 
     //Disparar
-        //Constantes
-        var MISSILE_SPEED = 500.0;              //Disminuye la velocidad si se aumenta el valor
-        var MISSILE_SIZE = 0.5;                 //Tamaño del misil
-        var MISSILE_OFFSET = planeWidthSize*2;    //Distancia máxima a la que se puede llegar el misil
-        //Variables
-        var missiles = [];                      //Array de misiles 
-        var directions = [];                    //Array de direcciones de cada misil
-        var numMissiles = 0;
-        var maxNumMissiles = 0;
-        var numMissilesDisplay = document.getElementById("numMissiles_display");
-        var labelMissilesDisplay = document.getElementById("labelMissiles_display");
+    //Constantes
+    var MISSILE_SPEED = 500.0;              //Disminuye la velocidad si se aumenta el valor
+    var MISSILE_SIZE = 0.5;                 //Tamaño del misil
+    var MISSILE_OFFSET = planeWidthSize * 2;    //Distancia máxima a la que se puede llegar el misil
+    //Variables
+    var missiles = [];                      //Array de misiles 
+    var directions = [];                    //Array de direcciones de cada misil
+    var numMissiles = 0;
+    var maxNumMissiles = 0;
+    var numMissilesDisplay = document.getElementById("numMissiles_display");
+    var labelMissilesDisplay = document.getElementById("labelMissiles_display");
 
-        //Establece el número máximo e inicial de misiles
-        function SetNumOfShoots() {
-            switch (this.rowsSettings) {
-                case "m":
-                    maxNumMissiles = 20;
-                    break;
-                case "n":
-                    maxNumMissiles = 10;
-                    break;
-                case "f":
-                    maxNumMissiles = 5;
-                    break;
-                default:
-                    maxNumMissiles = 10;
-                    break;
+    //Establece el número máximo e inicial de misiles
+    function SetNumOfShoots() {
+        switch (this.rowsSettings) {
+            case "m":
+                maxNumMissiles = 20;
+                break;
+            case "n":
+                maxNumMissiles = 10;
+                break;
+            case "f":
+                maxNumMissiles = 5;
+                break;
+            default:
+                maxNumMissiles = 10;
+                break;
+        }
+        numMissiles = maxNumMissiles;
+        DisplayInfo();
+    }
+
+    //Muestra en pantalla el label 'Misiles: '
+    function DisplayLabelInfo() {
+        labelMissilesDisplay.innerHTML = "Misiles: ";
+        labelLifesDisplay.innerHTML = "Vidas: ";
+    }
+
+    //Muestra en pantalla el valor actual
+    this.DisplayInfo = function () {
+        //Actualiza el valor que se muestra en la pantalla 
+        if (displayInfo) {
+            numMissilesDisplay.innerHTML = numMissiles;
+            numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
+        }
+    }
+
+    //Muestra en pantalla el valor actual
+    this.HideInfo = function () {
+        //Oculta la información que se muestra en la pantalla      
+        displayInfo = false;
+        numMissilesDisplay.innerHTML = "";
+        numLifesDisplay.innerHTML = "";
+        labelMissilesDisplay.innerHTML = "";
+        labelLifesDisplay.innerHTML = "";
+    }
+
+    function HideInfo() {
+        //Oculta la información que se muestra en la pantalla 
+        displayInfo = false;
+        numMissilesDisplay.innerHTML = "";
+        numLifesDisplay.innerHTML = "";
+        labelMissilesDisplay.innerHTML = "";
+        labelLifesDisplay.innerHTML = "";
+    }
+
+    function DisplayInfo() {
+        //Actualiza el valor que se muestra en la pantalla  
+        if (displayInfo) {
+            numMissilesDisplay.innerHTML = numMissiles;
+            numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
+        }
+    }
+
+    //Incrementa el número de misiles
+    this.IncrementMissiles = function () {
+        if (numMissiles < maxNumMissiles)
+            numMissiles++;
+        DisplayInfo();
+    }
+
+    // Devuelve el número máximo de misiles
+    this.GetMaxMissiles = function () {
+        return maxNumMissiles;
+    }
+
+    // Devuelve el número actual de misiles
+    this.GetNumMissiles = function () {
+        return numMissiles;
+    }
+
+    // Devuelve el array de misiles
+    this.GetMissiles = function () {
+        return missiles;
+    }
+
+    // Devuelve el array de direcciones
+    this.GetDirections = function () {
+        return directions;
+    }
+
+    //Decrementa el número de misiles
+    function DecrementMissiles() {
+        if (numMissiles > 0)
+            numMissiles--;
+        DisplayInfo();
+    }
+
+    window.addEventListener("keydown", function (evt) {
+        //Tacla E para disparar
+        if (evt.keyCode == 69 && numMissiles > 0) {
+
+            Shoot.play();
+
+            //Decrementa el número de disparos
+            DecrementMissiles();
+
+            //Instancia un nuevo misil
+            var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
+            missile.scaling = new BABYLON.Vector3(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
+            missile.position = new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y, meshPlayer.position.z);
+            missile.rotation = new BABYLON.Vector3(meshPlayer.rotation.x, meshPlayer.rotation.y, meshPlayer.rotation.z);
+            missiles.push(missile);
+
+            //Dirección actual entre la cámara y el jugador
+            var x, z;
+            if (activeCameraNum == 0) { x = camera.position.x; z = camera.position.z; }
+            else { x = topDownCamera.position.x; z = topDownCamera.position.z; }
+            var direction = new BABYLON.Vector3(meshPlayer.position.x - x, 0, meshPlayer.position.z - z);
+            directions.push(direction);
+
+
+        }
+    });
+
+    this.scene.registerBeforeRender(function () {
+
+        var deltaTime = engine.getDeltaTime();
+        /// Misiles: Animación y detección de colisiones 
+        for (var i = 0; i < missiles.length; i++) {
+
+            //Movimiento del misil
+            missiles[i].position.x += (directions[i].x * deltaTime / MISSILE_SPEED);
+            missiles[i].position.z += (directions[i].z * deltaTime / MISSILE_SPEED);
+
+            var foundIt = false;
+
+            //Si el misil no impacta y se aleja una determinada distancia desaparece
+            if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
+                //Destruye la malla (objeto)
+                var _missile = missiles[i];
+                missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                _missile.dispose();
+                directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                foundIt = true;
             }
-            numMissiles = maxNumMissiles;
-            DisplayInfo();
-        }
-        
-        //Muestra en pantalla el label 'Misiles: '
-        function DisplayLabelInfo() {
-            labelMissilesDisplay.innerHTML = "Misiles: ";
-            labelLifesDisplay.innerHTML = "Vidas: ";
-        }
 
-        //Muestra en pantalla el valor actual
-        this.DisplayInfo = function() {
-            //Actualiza el valor que se muestra en la pantalla 
-            if (displayInfo) {
-                numMissilesDisplay.innerHTML = numMissiles;
-                numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
+            //Detección de colisiones
+            var j = 0;
+            while (j < (rows - 1) && !foundIt) {
+                var k = 0;
+                while (k < cols && !foundIt) {
+                    // Si es una pared viva
+                    if ((walls[j][k] == Walls.WallState.Alive)) {
+                        if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
+                            //Oculta la pared en la que ha impactado el misil
+                            Walls.HideWall(j, k);
+                            //Sonido
+                            WallSound.play();
+                            //Destruye la malla (objeto)
+                            var _missile = missiles[i];
+                            missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            _missile.dispose();
+                            directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            foundIt = true;
+                            // Sonido
+                            Explosion.play();
+                        }
+                        // Sino si es una pared permanente
+                    } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
+                        if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
+                            //Destruye la malla (objeto)
+                            var _missile = missiles[i];
+                            missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            _missile.dispose();
+                            directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                            foundIt = true;
+                            // Sonido
+                            Explosion.play();
+                        }
+                    }
+                    k++;
+                }
+                j++;
             }
-        }
-
-        //Muestra en pantalla el valor actual
-        this.HideInfo = function () {
-            //Oculta la información que se muestra en la pantalla      
-            displayInfo = false;
-            numMissilesDisplay.innerHTML = "";
-            numLifesDisplay.innerHTML = "";
-            labelMissilesDisplay.innerHTML = "";
-            labelLifesDisplay.innerHTML = "";
-        }
-
-        function HideInfo() {
-            //Oculta la información que se muestra en la pantalla 
-            displayInfo = false;
-            numMissilesDisplay.innerHTML = "";
-            numLifesDisplay.innerHTML = "";
-            labelMissilesDisplay.innerHTML = "";
-            labelLifesDisplay.innerHTML = "";
-        }
-
-        function DisplayInfo() {
-            //Actualiza el valor que se muestra en la pantalla  
-            if (displayInfo) {
-                numMissilesDisplay.innerHTML = numMissiles;
-                numLifesDisplay.innerHTML = Math.floor(numLifes / 10);
-            }
-        }
-
-        //Incrementa el número de misiles
-        this.IncrementMissiles = function() {
-            if (numMissiles<maxNumMissiles)
-                numMissiles++;
-            DisplayInfo();
-        }
-
-        // Devuelve el número máximo de misiles
-        this.GetMaxMissiles = function () {
-            return maxNumMissiles;
-        }
-
-        // Devuelve el número actual de misiles
-        this.GetNumMissiles = function () {
-            return numMissiles;
-        }
-
-        // Devuelve el array de misiles
-        this.GetMissiles = function () {
-            return missiles;
-        }
-
-        // Devuelve el array de direcciones
-        this.GetDirections = function () {
-            return directions;
-        }
-
-        //Decrementa el número de misiles
-       function DecrementMissiles() {
-            if (numMissiles>0)
-                numMissiles--;
-            DisplayInfo();
-       }       
-
-        window.addEventListener("keydown", function (evt) {
-            //Tacla E para disparar
-            if (evt.keyCode == 69 && numMissiles > 0) {
-
-                Shoot.play();
-
-                //Decrementa el número de disparos
-                DecrementMissiles();
-
-                //Instancia un nuevo misil
-                var missile = BABYLON.Mesh.CreateSphere("Sphere", 20, 1, scene);
-                missile.scaling = new BABYLON.Vector3(MISSILE_SIZE, MISSILE_SIZE, MISSILE_SIZE);
-                missile.position = new BABYLON.Vector3(meshPlayer.position.x, meshPlayer.position.y, meshPlayer.position.z);
-                missile.rotation = new BABYLON.Vector3(meshPlayer.rotation.x, meshPlayer.rotation.y, meshPlayer.rotation.z);
-                missiles.push(missile);
-
-                //Dirección actual entre la cámara y el jugador
-                var x, z;
-                if (activeCameraNum == 0) { x = camera.position.x; z = camera.position.z; }
-                else { x = topDownCamera.position.x; z = topDownCamera.position.z; }
-                var direction = new BABYLON.Vector3(meshPlayer.position.x - x, 0, meshPlayer.position.z - z);            
-                directions.push(direction);
-
-                
-            }
-        });
-
-        this.scene.registerBeforeRender(function () {
-
-            var deltaTime = engine.getDeltaTime();
-            /// Misiles: Animación y detección de colisiones 
-            for (var i = 0; i < missiles.length; i++) {
-
-                //Movimiento del misil
-                missiles[i].position.x += (directions[i].x * deltaTime / MISSILE_SPEED);
-                missiles[i].position.z += (directions[i].z * deltaTime / MISSILE_SPEED);
-
-                var foundIt = false;
-
-                //Si el misil no impacta y se aleja una determinada distancia desaparece
-                if (BABYLON.Vector3.Distance(camera.position, missiles[i].position) > MISSILE_OFFSET) {
+            var l = 0;
+            while (l < (enemies.length) && !foundIt) {
+                if (Enemies.getCollider(l).intersectsMesh(missiles[i], true)) {
                     //Destruye la malla (objeto)
                     var _missile = missiles[i];
                     missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
                     _missile.dispose();
                     directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                    Enemies.killEnemy(l);
                     foundIt = true;
+                    // Sonido
+                    Explosion.play();
                 }
-
-                //Detección de colisiones
-                var j = 0;
-                while (j < (rows - 1) && !foundIt) {
-                    var k = 0;
-                    while (k < cols && !foundIt) {
-                        // Si es una pared viva
-                        if ((walls[j][k] == Walls.WallState.Alive)) {
-                            if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
-                                //Oculta la pared en la que ha impactado el misil
-                                Walls.HideWall(j, k);
-                                //Sonido
-                                WallSound.play();
-                                //Destruye la malla (objeto)
-                                var _missile = missiles[i];
-                                missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                _missile.dispose();
-                                directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                foundIt = true;
-                                // Sonido
-                                Explosion.play();
-                            }                            
-                            // Sino si es una pared permanente
-                        } else if ((walls[j][k] == Walls.WallState.PermaWall)) {
-                            if (paintedWalls[j][k].intersectsMesh(missiles[i], true)) {
-                                //Destruye la malla (objeto)
-                                var _missile = missiles[i];
-                                missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                _missile.dispose();
-                                directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                                foundIt = true;
-                                // Sonido
-                                Explosion.play();
-                            }
-                        }                        
-                        k++;
-                    }
-                    j++;
-                }
-                var l = 0;
-                while (l < (enemies.length) && !foundIt) {
-                    if (Enemies.getCollider(l).intersectsMesh(missiles[i], true)) {
-                        //Destruye la malla (objeto)
-                        var _missile = missiles[i];
-                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
-                        _missile.dispose();
-                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
-                        Enemies.killEnemy(l);
-                        foundIt = true;
-                        // Sonido
-                        Explosion.play();
-                    }
-                    l++;
-                }
+                l++;
             }
+        }
 
-        });
+    });
 
 
 }

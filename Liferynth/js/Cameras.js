@@ -3,7 +3,7 @@ Cameras = function (game) {
 
     //Variables del juego que necesitamos aquí
     this.game = game;
-    this.scene = game.scene;   
+    this.scene = game.scene;
     this.floorHeight = game.floorHeight;
     this.playerHeight = game.playerHeight;
     this.meshPlayer = game.meshPlayer;
@@ -26,9 +26,9 @@ Cameras = function (game) {
 
         //Cámara que sigue al jugador
         camera.target = meshPlayer; // target any mesh or object with a "position" Vector3
-        camera.maxCameraSpeed = 20;
+        camera.maxCameraSpeed = 200;
         camera.applyGravity = true;
-        camera.radius = - distanceCamera;
+        camera.radius = -distanceCamera;
         camera.heightOffset = 0.5;
         camera.keysUp = [];
         camera.keysDown = [];
@@ -44,7 +44,7 @@ Cameras = function (game) {
         topDownCamera.position.y = topDownCameraHeight;
         topDownCamera.target = meshPlayer;
         topDownCamera.heightOffset = topDownCameraHeight;
-        topDownCamera.radius = - distanceCamera;
+        topDownCamera.radius = -distanceCamera;
         topDownCamera.keysUp = [];
         topDownCamera.keysDown = [];
         topDownCamera.keysLeft = [];
@@ -57,7 +57,7 @@ Cameras = function (game) {
         camera.viewport = completView;
         //topDownCamera.viewport = smallView;
     }
-    
+
     window.addEventListener("keydown", function (evt) {
 
         if (!scene)
@@ -75,7 +75,7 @@ Cameras = function (game) {
                     //topDownCamera.viewport = smallView;
                     camera.viewport = completView;
                     break;
-                //Se activa la cámara TopDownCamera como principal
+                    //Se activa la cámara TopDownCamera como principal
                 case 1:
                     //Se fija la cámara TopDownCamera como principal
                     scene.fogMode = BABYLON.Scene.FOGMODE_NONE;

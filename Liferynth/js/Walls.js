@@ -73,7 +73,7 @@ Walls = function (game) {
         }
     }
 
-    this.updateWalls = function() {
+    this.updateWalls = function () {
         /*Actualiza la matriz walls en función de los resultados obtenidos por WebCL en el array results*/
         for (i in results) {
             var aux = linealToXY(i);
@@ -83,15 +83,15 @@ Walls = function (game) {
             if (even) c = cols - 1; //Las filas pares son muros horizontales, hay una columna menos
             else c = cols;
             if (x <= lastRow && y < c) {
-                if (walls[x][y] == WallState.Alive) {
+                if (walls[x][y] == WallState.Alive && (numWalls > minWalls)) {
                     if (results[i] == 0) this.HideWall(x, y);
                 }
                 else
-                    if (!(this.UnderneathPlayer(x, y)) && (results[i] == 1)) {
+                    if (!(this.UnderneathPlayer(x, y)) && (results[i] == 1) && (numWalls < maxWalls)) {
                         if (walls[x][y] == WallState.Dead) {
                             this.ShowWall(x, y);
                         }
-                        else if (walls[x][y] == WallState.NonExisting) {
+                        else if ((walls[x][y] == WallState.NonExisting) && (numWalls < maxWalls)) {
                             this.CreateWall(x, y, even);
                             this.ShowAnimation(x, y);
                         }
@@ -419,7 +419,7 @@ Walls = function (game) {
         numWalls--;
     }
 
-    this.ShowNoAnimation = function(r, c) {
+    this.ShowNoAnimation = function (r, c) {
         paintedWalls[r][c].position.y = floorHeight + wallHeight / 2;
         binWalls[this.linealFromXY(r, c)] = 1;
         numWalls++;
@@ -438,7 +438,7 @@ Walls = function (game) {
             walls[row][col] = WallState.Dead;
         binWalls[this.linealFromXY(row, col)] = 0;
         //Si el jugador no está cerca del muro, bajarlo instantáneamente
-        if(PlayerTooFarFromWall(row,col)){
+        if (PlayerTooFarFromWall(row, col)) {
             paintedWalls[row][col].checkCollisions = false;
             HideNoAnimation(row, col);
         } else {
@@ -476,7 +476,7 @@ Walls = function (game) {
         --------------------------------------------------------------------------------                            
     */
 
-    this.GetExitRow = function() {
+    this.GetExitRow = function () {
         return exitRow;
     }
 
