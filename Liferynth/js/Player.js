@@ -32,6 +32,8 @@ Player = function (game) {
         this.Explosion = game.Explosion;
         this.WallSound = game.WallSound;
 
+        this.enemies = game.enemies;
+
         var displayInfo = false;
         
     jumpHeight = 1.5;              // Altura del salto del jugador
@@ -459,6 +461,21 @@ Player = function (game) {
                         k++;
                     }
                     j++;
+                }
+                var l = 0;
+                while (l < (enemies.length) && !foundIt) {
+                    if (Enemies.getCollider(l).intersectsMesh(missiles[i], true)) {
+                        //Destruye la malla (objeto)
+                        var _missile = missiles[i];
+                        missiles.splice(i, 1);//"Elimina" la posición i reordenando el array
+                        _missile.dispose();
+                        directions.splice(i, 1);//"Elimina" la posición i reordenando el array
+                        Enemies.killEnemy(l);
+                        foundIt = true;
+                        // Sonido
+                        Explosion.play();
+                    }
+                    l++;
                 }
             }
 

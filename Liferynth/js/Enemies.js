@@ -15,11 +15,9 @@
         this.gravity = game.gravity;
         this.Player = game.Player;
 
-        //this.enemies = game.enemies;
+        this.enemies = game.enemies;
         this.numEnemies = game.numEnemies;
         this.Walls = game.Walls;
-
-        var enemies = [];
 
     this.CreateEnemy = function (row, col) {
         /*Crea un enemigo en la posición row,col de la matriz de celdas del laberinto
@@ -49,7 +47,15 @@
 
     }
     
+    this.getCollider = function (i) {
+        return enemies[i].getCollider();
+    }
 
+    this.killEnemy = function (i) {
+        var _enemy = enemies[i];
+        enemies.splice(i, 1);//"Elimina" la posición i reordenando el array
+        _enemy.dispose();
+    }
     
 }
 

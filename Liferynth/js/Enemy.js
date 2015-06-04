@@ -40,7 +40,7 @@
 
     this.Initialize = function () {
         //this.mesh = BABYLON.Mesh.CreateBox("enemy", 1, scene);
-        //this.collider = BABYLON.Mesh.CreateBox("colEnemy", 1, scene);
+        //collider = BABYLON.Mesh.CreateBox("colEnemy", 1, scene);
         mesh.scaling = new BABYLON.Vector3(this.width, this.height, this.length);
         collider.scaling = new BABYLON.Vector3(this.width, this.height, this.length);
         mesh.position = position;
@@ -209,6 +209,15 @@
     function RefreshEnemy() {
         mesh.position = position;
         collider.position = position;
+    }
+    
+    this.getCollider = function(){
+        return collider;
+    }
+    
+    this.dispose = function () {
+        collider.dispose();
+        mesh.dispose();
     }
 }
 
